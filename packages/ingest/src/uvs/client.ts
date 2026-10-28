@@ -25,8 +25,9 @@ export class UvsClient {
   requests = 0;
 
   constructor(opts: UvsClientOptions = {}) {
-    this.baseUrl = opts.baseUrl ?? UVS_BASE_URL;
-    this.minIntervalMs = opts.minIntervalMs ?? 1500;
+    // UVS_BASE_URL aponta para o simulador local (pnpm simulate) nos testes.
+    this.baseUrl = opts.baseUrl ?? process.env.UVS_BASE_URL ?? UVS_BASE_URL;
+    this.minIntervalMs = opts.minIntervalMs ?? (Number(process.env.UVS_MIN_INTERVAL_MS) || 1500);
     this.maxRetries = opts.maxRetries ?? 4;
     this.fetchImpl = opts.fetch ?? fetch;
     this.log = opts.log ?? (() => {});

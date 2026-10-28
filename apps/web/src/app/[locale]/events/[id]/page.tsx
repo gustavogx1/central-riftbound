@@ -2,12 +2,14 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { LegendAvatar } from "@/components/LegendAvatar";
+import { LiveRefresher } from "@/components/live/LiveRefresher";
+import { MyMatch } from "@/components/live/MyMatch";
+import { RoundTimer } from "@/components/live/RoundTimer";
 import { Pagination } from "@/components/Pagination";
 import { Link } from "@/i18n/navigation";
 import { makeFormat } from "@/lib/format";
-import { getEvent, getEventMeta, getLegendsBySlugs, getPairings, getStandings, type LegendInfo } from "@/lib/queries";
+import { getEvent, getEventMeta, getLegendsBySlugs, getPairings, getRoundPlayers, getStandings, type LegendInfo } from "@/lib/queries";
 
-export const revalidate = 300;
 const PAGE_SIZE = 50;
 
 function LegendCell({ slug, legends }: { slug: string | null; legends: Map<string, LegendInfo> }) {
@@ -34,6 +36,7 @@ export default async function EventPage({ params, searchParams }: PageProps<"/[l
   if (!ev) notFound();
   const sp = await searchParams;
   const t = await getTranslations("Event");
+  const tl = await getTranslations("Live");
   const tc = await getTranslations("Common");
   const te = await getTranslations("Events");
   const ts = await getTranslations("Sets");
@@ -47,19 +50,32 @@ export default async function EventPage({ params, searchParams }: PageProps<"/[l
   const lastStanding = [...standingRounds].reverse()[0];
   const roundId = Number(sp.round) || (view === "pairings" ? [...pairingRounds].reverse()[0]?.id : lastStanding?.id);
   const round = ev.rounds.find((r) => r.id === roundId);
+  const isLive = ev.live.on && ev.status !== "complete";
+  const currentRound = ev.rounds.at(-1);
+  const roundLabel = (r: { phaseName: string; roundNumber: number }) => `${r.phaseName} · ${t("round")} ${r.roundNumber}`;
 
-  const [metaRows, standings, pairings] = await Promise.all([
+  const [metaRows, standings, pairings, roundPlayers] = await Promise.all([
     getEventMeta(ev.id),
     view === "standings" && round ? getStandings(round.id, { q, page, pageSize: PAGE_SIZE }) : Promise.resolve({ rows: [], total: 0 }),
     view === "pairings" && round ? getPairings(round.id, { q, page, pageSize: PAGE_SIZE }) : Promise.resolve({ rows: [], total: 0 }),
+    isLive && currentRound ? getRoundPlayers(ev.id, currentRound.id, lastStanding?.id ?? null) : Promise.resolve([]),
   ]);
   const slugs = new Set<string>(metaRows.map((m) => m.legend));
   standings.rows.forEach((r) => r.s.legend && slugs.add(r.s.legend));
   pairings.rows.forEach((r) => { if (r.l1) slugs.add(r.l1); if (r.l2) slugs.add(r.l2); });
+  roundPlayers.forEach((r) => { if (r.legend) slugs.add(r.legend); });
   const legends = await getLegendsBySlugs([...slugs]);
+  const legendsLite = Object.fromEntries([...legends].map(([k, l]) => [k, { champion: l.champion, cardId: l.cardId, domains: l.domains }]));
+  const standingsUnofficial = round?.status !== "COMPLETE" && view === "standings";
   const totalPlayers = metaRows.reduce((a, m) => a + m.players, 0);
 
   const name = (n: string | null, hidden: boolean | null) => (hidden ? tc("hiddenPlayer") : (n ?? "—"));
+  const playerLink = (pid: number | null, n: string | null, hidden: boolean | null) =>
+    pid && !hidden && n ? (
+      <Link href={`/players/${pid}`} className="hover:text-accent">{n}</Link>
+    ) : (
+      name(n, hidden)
+    );
   const tab = (active: boolean) => `rounded-md px-3 py-1.5 text-sm ${active ? "bg-surface-2 text-text" : "text-muted hover:text-text"}`;
 
   return (
@@ -74,6 +90,25 @@ export default async function EventPage({ params, searchParams }: PageProps<"/[l
         <span>{f.num(ev.playerCount)} {tc("players").toLowerCase()}</span>
         {ev.address && <span>{ev.address}</span>}
       </p>
+
+      {isLive && (
+        <section className="mt-6 grid gap-4" aria-label={tl("badge")}>
+          <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-live/40 bg-surface p-4">
+            <div>
+              <LiveRefresher eventId={ev.id} version={ev.live.version} changedAt={ev.live.changedAt?.toISOString() ?? null} />
+              <p className="mt-1 font-display text-xl font-semibold">
+                {currentRound ? roundLabel(currentRound) : tl("notStarted")}
+                {currentRound && <span className="ml-2 text-sm font-normal text-muted">{currentRound.status === "COMPLETE" ? tl("roundDone") : tl("roundPlaying")}</span>}
+              </p>
+              <p className="mt-1 text-xs text-muted">{tl("howItWorks")}</p>
+            </div>
+            {currentRound?.status !== "COMPLETE" && (
+              <RoundTimer endsAt={ev.timerEndsAt?.toISOString() ?? null} pausedAt={ev.timerPausedAt?.toISOString() ?? null} running={ev.timerRunning} />
+            )}
+          </div>
+          {currentRound && roundPlayers.length > 0 && <MyMatch rows={roundPlayers} legends={legendsLite} round={roundLabel(currentRound)} />}
+        </section>
+      )}
 
       {metaRows.length > 0 && (
         <section className="mt-8" aria-labelledby="ev-meta">
@@ -110,7 +145,7 @@ export default async function EventPage({ params, searchParams }: PageProps<"/[l
                 <span className="text-muted">{t("round")}</span>
                 <select name="round" defaultValue={round?.id} className="rounded-md border border-border bg-surface px-2 py-1.5">
                   {(view === "pairings" ? pairingRounds : standingRounds).map((r) => (
-                    <option key={r.id} value={r.id}>{r.phaseName} · {r.roundNumber}</option>
+                    <option key={r.id} value={r.id}>{r.phaseName} · {r.roundNumber}{r.status !== "COMPLETE" ? ` (${tl("roundPlaying")})` : ""}</option>
                   ))}
                 </select>
               </label>
@@ -121,6 +156,7 @@ export default async function EventPage({ params, searchParams }: PageProps<"/[l
               <button className="rounded-md bg-accent px-4 py-1.5 text-sm font-semibold text-accent-ink">{tc("search")}</button>
             </form>
 
+            {standingsUnofficial && round && <p className="mt-3 text-sm text-muted">{tl("unofficial")}</p>}
             {view === "standings" ? (
               <div className="mt-4 overflow-x-auto rounded-xl border border-border">
                 <table className="w-full min-w-[620px] text-sm">
@@ -138,7 +174,7 @@ export default async function EventPage({ params, searchParams }: PageProps<"/[l
                     {standings.rows.map((r) => (
                       <tr key={r.s.playerId} className="border-t border-border">
                         <td className="px-3 py-2 tabular-nums text-muted">{r.s.rank}</td>
-                        <td className="px-3 py-2 font-medium">{name(r.name, r.hidden)}</td>
+                        <td className="px-3 py-2 font-medium">{playerLink(r.s.playerId, r.name, r.hidden)}</td>
                         <td className="px-3 py-2"><LegendCell slug={r.s.legend} legends={legends} /></td>
                         <td className="px-3 py-2 text-right tabular-nums">{r.s.wins}-{r.s.losses}-{r.s.draws}</td>
                         <td className="px-3 py-2 text-right tabular-nums">{r.s.points}</td>
@@ -167,14 +203,14 @@ export default async function EventPage({ params, searchParams }: PageProps<"/[l
                         <tr key={m.id} className="border-t border-border">
                           <td className="px-3 py-2 tabular-nums text-muted">{m.table ?? "—"}</td>
                           <td className={`px-3 py-2 ${won(m.p1Id) ? "font-semibold" : ""}`}>
-                            <span className="block">{name(m.p1Name, m.p1Hidden)}</span>
+                            <span className="block">{playerLink(m.p1Id, m.p1Name, m.p1Hidden)}</span>
                             <span className="mt-0.5 block text-xs"><LegendCell slug={m.l1} legends={legends} /></span>
                           </td>
                           <td className="px-3 py-2 text-center tabular-nums text-muted">{score}</td>
                           <td className={`px-3 py-2 ${won(m.p2Id) ? "font-semibold" : ""}`}>
                             {m.p2Id ? (
                               <>
-                                <span className="block">{name(m.p2Name, m.p2Hidden)}</span>
+                                <span className="block">{playerLink(m.p2Id, m.p2Name, m.p2Hidden)}</span>
                                 <span className="mt-0.5 block text-xs"><LegendCell slug={m.l2} legends={legends} /></span>
                               </>
                             ) : "—"}

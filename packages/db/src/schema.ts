@@ -86,10 +86,30 @@ export const event = pgTable(
     playerCount: integer("player_count").notNull(),
     status: text("status").notNull(),
     metagame: text("metagame"),
+    /** Relógio da rodada atual, como o organizador mostra na UVS. */
+    timerEndsAt: timestamp("timer_ends_at", { withTimezone: true }),
+    timerPausedAt: timestamp("timer_paused_at", { withTimezone: true }),
+    timerRunning: boolean("timer_running").notNull().default(false),
+    plannedRounds: integer("planned_rounds"),
+    topCutSize: integer("top_cut_size"),
     fetchedAt: timestamp("fetched_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [index("event_starts_idx").on(t.startsAt)],
 );
+
+/**
+ * Pulso dos eventos ao vivo: `version` sobe sempre que algo visível muda
+ * (rodada, resultado, standings, relógio). A página só recarrega quando muda.
+ */
+export const liveState = pgTable("live_state", {
+  eventId: integer("event_id")
+    .primaryKey()
+    .references(() => event.id, { onDelete: "cascade" }),
+  version: integer("version").notNull().default(0),
+  fingerprint: text("fingerprint").notNull().default(""),
+  checkedAt: timestamp("checked_at", { withTimezone: true }).notNull().defaultNow(),
+  changedAt: timestamp("changed_at", { withTimezone: true }).notNull().defaultNow(),
+});
 
 export const eventRound = pgTable(
   "event_round",

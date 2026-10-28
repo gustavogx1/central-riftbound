@@ -32,6 +32,9 @@ importers:
       '@cr/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@cr/ingest':
+        specifier: workspace:*
+        version: link:../../packages/ingest
       drizzle-orm:
         specifier: ^0.45.4
         version: 0.45.4(postgres@3.4.9)

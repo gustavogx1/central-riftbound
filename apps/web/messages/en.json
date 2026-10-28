@@ -14,7 +14,8 @@
     "builder": "Deckbuilder",
     "menu": "Menu",
     "skipToContent": "Skip to content",
-    "methodology": "How we calculate"
+    "methodology": "How we calculate",
+    "players": "Players"
   },
   "Locale": {
     "label": "Language",
@@ -157,7 +158,8 @@
     "winner": "Winner",
     "main": "Regional Qualifier",
     "side": "Side event",
-    "community": "Community"
+    "community": "Community",
+    "live": "Live"
   },
   "Event": {
     "standings": "Standings",
@@ -212,5 +214,60 @@
     "VEN": "Vendetta",
     "RAD": "Radiance",
     "all": "All sets"
+  },
+  "Live": {
+    "badge": "Live",
+    "updated": "Updated at {time}",
+    "notStarted": "Waiting for the first round",
+    "roundPlaying": "in progress",
+    "roundDone": "finished, waiting for the next pairings",
+    "howItWorks": "This page updates by itself every few minutes while the event is live.",
+    "timeLeft": "Time left in the round",
+    "paused": "Round clock paused",
+    "timeUp": "Time is up",
+    "findMe": "Find my table",
+    "findMeHint": "Type your name as it appears in the event",
+    "yourName": "Your name",
+    "tableN": "Table {n}",
+    "bye": "Bye",
+    "opponent": "Opponent",
+    "result": "Result",
+    "win": "Win",
+    "loss": "Loss",
+    "draw": "Draw",
+    "playing": "Playing",
+    "standing": "Standing",
+    "notMe": "Not me? Search again",
+    "notInRound": "We did not find you in this round. Search your name again.",
+    "noOne": "No player with that name in this round.",
+    "unofficial": "Unofficial: these standings change as results are reported. They become final when the round closes."
+  },
+  "Players": {
+    "title": "Players",
+    "lead": "Search a player by the name shown in official events to see their results, legends and head-to-head records.",
+    "pickOpponent": "Choose the opponent",
+    "none": "No player found with that name.",
+    "eventsCount": "{n} events",
+    "privacy": "Names come from the public results of official events. Any player can ask to have their name hidden from this site."
+  },
+  "Player": {
+    "event": "Event",
+    "opponent": "Opponent",
+    "opponentLegend": "Opponent legend",
+    "result": "Result",
+    "win": "Win",
+    "loss": "Loss",
+    "draw": "Draw",
+    "playing": "Playing",
+    "bye": "Bye",
+    "bestFinish": "Best finish",
+    "rankOf": "#{rank} of {players}",
+    "recordNote": "Record and win rate count every tracked match except byes; draws are shown apart.",
+    "legends": "Legends played",
+    "headToHead": "Head-to-head",
+    "compareWith": "Compare with another player",
+    "recentMatches": "Recent matches",
+    "h2hSummary": "{matches, plural, one {# match} other {# matches}} in tracked events, {draws, plural, one {# draw} other {# draws}}",
+    "neverMet": "These players have not faced each other in the tracked events."
   }
 }

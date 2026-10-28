@@ -14,7 +14,8 @@
     "builder": "Deckbuilder",
     "menu": "Menu",
     "skipToContent": "Pular para o conteúdo",
-    "methodology": "Como calculamos"
+    "methodology": "Como calculamos",
+    "players": "Jogadores"
   },
   "Locale": {
     "label": "Idioma",
@@ -157,7 +158,8 @@
     "winner": "Campeão",
     "main": "Regional Qualifier",
     "side": "Evento paralelo",
-    "community": "Comunidade"
+    "community": "Comunidade",
+    "live": "Ao vivo"
   },
   "Event": {
     "standings": "Classificação",
@@ -212,5 +214,60 @@
     "VEN": "Vendetta",
     "RAD": "Radiance",
     "all": "Todos os sets"
+  },
+  "Live": {
+    "badge": "Ao vivo",
+    "updated": "Atualizado às {time}",
+    "notStarted": "Aguardando a primeira rodada",
+    "roundPlaying": "em andamento",
+    "roundDone": "terminada, aguardando os próximos pairings",
+    "howItWorks": "Esta página se atualiza sozinha a cada poucos minutos enquanto o evento estiver ao vivo.",
+    "timeLeft": "Tempo restante da rodada",
+    "paused": "Relógio da rodada pausado",
+    "timeUp": "Tempo esgotado",
+    "findMe": "Achar minha mesa",
+    "findMeHint": "Digite seu nome como aparece no evento",
+    "yourName": "Seu nome",
+    "tableN": "Mesa {n}",
+    "bye": "Bye",
+    "opponent": "Adversário",
+    "result": "Resultado",
+    "win": "Vitória",
+    "loss": "Derrota",
+    "draw": "Empate",
+    "playing": "Jogando",
+    "standing": "Classificação",
+    "notMe": "Não é você? Buscar de novo",
+    "notInRound": "Não encontramos você nesta rodada. Busque seu nome de novo.",
+    "noOne": "Nenhum jogador com esse nome nesta rodada.",
+    "unofficial": "Não oficial: esta classificação muda conforme os resultados são reportados. Fica final quando a rodada fecha."
+  },
+  "Players": {
+    "title": "Jogadores",
+    "lead": "Busque um jogador pelo nome que aparece nos eventos oficiais para ver resultados, lendas e confrontos diretos.",
+    "pickOpponent": "Escolha o adversário",
+    "none": "Nenhum jogador encontrado com esse nome.",
+    "eventsCount": "{n} eventos",
+    "privacy": "Os nomes vêm dos resultados públicos dos eventos oficiais. Qualquer jogador pode pedir para esconder o nome neste site."
+  },
+  "Player": {
+    "event": "Evento",
+    "opponent": "Adversário",
+    "opponentLegend": "Lenda do adversário",
+    "result": "Resultado",
+    "win": "Vitória",
+    "loss": "Derrota",
+    "draw": "Empate",
+    "playing": "Jogando",
+    "bye": "Bye",
+    "bestFinish": "Melhor colocação",
+    "rankOf": "{rank}º de {players}",
+    "recordNote": "Campanha e win rate contam todas as partidas acompanhadas, menos byes; empates aparecem à parte.",
+    "legends": "Lendas jogadas",
+    "headToHead": "Confronto direto",
+    "compareWith": "Comparar com outro jogador",
+    "recentMatches": "Partidas recentes",
+    "h2hSummary": "{matches, plural, one {# partida} other {# partidas}} nos eventos acompanhados, {draws, plural, one {# empate} other {# empates}}",
+    "neverMet": "Esses jogadores ainda não se enfrentaram nos eventos acompanhados."
   }
 }

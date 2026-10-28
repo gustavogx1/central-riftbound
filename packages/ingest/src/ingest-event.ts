@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { eq, sql } from "drizzle-orm";
 import { type Db, schema } from "@cr/db";
 import {
@@ -66,12 +67,18 @@ export async function ingestEvent(db: Db, client: UvsClient, uvsEventId: number,
   };
 
   const rounds = roundRows(ev);
+  // Resumo de tudo o que a tela mostra; se mudar, o pulso ao vivo sobe de versão.
+  const fp = createHash("sha1");
+  fp.update(JSON.stringify([ev.display_status, ev.timer_end_datetime, ev.timer_paused_at_datetime, ev.timer_is_running]));
+  for (const r of rounds) fp.update(`|r${r.id}:${r.status}:${r.pairingsReady}:${r.standingsReady}`);
   await db
     .insert(schema.event)
     .values(eventRow(ev, opts.kind, null))
     .onConflictDoUpdate({
       target: schema.event.id,
-      set: { name: ex("name"), kind: ex("kind"), startsAt: ex("starts_at"), playerCount: ex("player_count"), status: ex("status"), fetchedAt: ex("fetched_at") },
+      set: { name: ex("name"), kind: ex("kind"), startsAt: ex("starts_at"), playerCount: ex("player_count"), status: ex("status"),
+        timerEndsAt: ex("timer_ends_at"), timerPausedAt: ex("timer_paused_at"), timerRunning: ex("timer_running"),
+        plannedRounds: ex("planned_rounds"), topCutSize: ex("top_cut_size"), fetchedAt: ex("fetched_at") },
     });
 
   const existing = new Map(
@@ -103,6 +110,8 @@ export async function ingestEvent(db: Db, client: UvsClient, uvsEventId: number,
         await db.insert(schema.player).values(rows).onConflictDoUpdate({ target: schema.player.id, set: { name: ex("name"), countryCode: ex("country_code") } });
       }
       const rows = matches.map((m) => matchRow(m, r.id, ev.id, resolveTracking));
+      // Rodada fechada já entra no resumo pelo status; só a aberta precisa dos detalhes.
+      if (r.status !== "COMPLETE") for (const m of rows) fp.update(`|m${m.id}:${m.status}:${m.winnerId}:${m.gamesWinner}:${m.gamesLoser}:${m.isDraw}:${m.tableNumber}`);
       for (const batch of chunks(rows)) {
         await db
           .insert(schema.match)
@@ -127,6 +136,7 @@ export async function ingestEvent(db: Db, client: UvsClient, uvsEventId: number,
         await db.insert(schema.player).values(rows).onConflictDoUpdate({ target: schema.player.id, set: { name: ex("name") } });
       }
       const rows = standings.map((s) => standingRow(s, r.id, ev.id, resolveTracking));
+      if (r.status !== "COMPLETE") for (const s of rows) fp.update(`|s${s.playerId}:${s.rank}:${s.points}`);
       for (const batch of chunks(rows)) {
         await db
           .insert(schema.standing)
@@ -161,5 +171,5 @@ export async function ingestEvent(db: Db, client: UvsClient, uvsEventId: number,
       .onConflictDoUpdate({ target: schema.unknownLegendName.name, set: { seen: sql`${schema.unknownLegendName.seen} + ${seen}` } });
   }
 
-  return { event: ev.name, metagame, matches: matchCount, standings: standingCount, unknownLegends: [...unknown.keys()] };
+  return { event: ev.name, status: ev.display_status, startsAt: new Date(ev.start_datetime), fingerprint: fp.digest("hex"), metagame, matches: matchCount, standings: standingCount, unknownLegends: [...unknown.keys()] };
 }

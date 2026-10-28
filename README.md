@@ -60,6 +60,38 @@ pnpm stats                         # só recalcula
 - As fórmulas estão em `packages/core/src/stats` e explicadas em `/about/methodology`.
 - O workflow `Importar torneios` roda uma vez por dia quando o segredo `DATABASE_URL` existe.
 
+## Ao vivo
+
+Durante um evento marcado como ao vivo, o site busca a rodada atual a cada 2 minutos (pairings, resultados, standings parciais e o relógio da rodada). A página do evento consulta um "pulso" guardado 15 s no cache da CDN e só recarrega quando algo muda, então mil pessoas olhando custam o mesmo que uma.
+
+```bash
+pnpm track add 857452 --kind main --live   # acompanha e já liga o ao vivo
+pnpm track live 857452 on|off              # liga ou desliga à mão
+pnpm live                                  # uma passada (o que o agendamento chama)
+pnpm live --watch                          # repete a cada 60 s até o evento acabar (rodar do seu PC)
+pnpm live --arm                            # liga o ao vivo dos acompanhados que começam em até 36 h
+```
+
+- O ao vivo desliga sozinho quando a UVS marca o evento como terminado (e aí as estatísticas são recalculadas), ou 3 dias depois do início. Antes de faltar 30 min para o início, nenhuma requisição é feita.
+- Agendamento gratuito: na Vercel, defina `CRON_SECRET`; no Supabase, rode `supabase/live-cron.sql` uma vez. O pg_cron chama `/api/cron/live-tick` a cada 2 min só enquanto houver evento ao vivo. O workflow diário roda `pnpm live --arm`.
+- Standings de rodada em andamento aparecem como não oficiais; ficam finais quando a rodada fecha.
+
+### Simulador
+
+Para testar sem esperar um campeonato, grave um evento terminado e reproduza-o como se fosse ao vivo:
+
+```bash
+pnpm record 1233873                                        # grava em data/recordings/ (fora do git)
+pnpm simulate data/recordings/1233873.json --step 30       # API falsa em localhost:8787; 4 passos por rodada
+UVS_BASE_URL=http://localhost:8787 UVS_MIN_INTERVAL_MS=0 pnpm live --watch --every 10
+```
+
+Cada rodada passa por quatro passos: pairings saem, metade dos resultados, todos os resultados, rodada fechada.
+
+## Jogadores
+
+`/players` busca pelo nome público dos eventos oficiais; `/players/[id]` mostra eventos, lendas, partidas recentes e adversários mais enfrentados; `/players/[id]/vs/[outro]` é o confronto direto. Jogador com `hidden = true` não aparece em lugar nenhum.
+
 ## Idiomas
 
 Todo texto de interface fica em `apps/web/messages/en.json` e `pt-BR.json`. O teste `messages.test.ts` falha se faltar uma chave ou um placeholder em qualquer idioma.
@@ -73,6 +105,8 @@ Todo texto de interface fica em `apps/web/messages/en.json` e `pt-BR.json`. O te
 | `pnpm test` | Vitest em todos os pacotes |
 | `pnpm build` | Build de produção do site |
 | `pnpm db:generate` | Gera migração a partir do esquema |
+| `pnpm live` | Atualiza os eventos ao vivo |
+| `pnpm record` / `pnpm simulate` | Grava um evento e o reproduz como ao vivo |
 
 ## Custo
 
