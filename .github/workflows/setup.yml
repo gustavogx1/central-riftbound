@@ -1,0 +1,65 @@
+name: Montar o banco e as imagens
+
+# Rodar à mão uma vez (e de novo quando sair set novo): baixa as cartas da galeria
+# oficial, cria as tabelas no Supabase, envia as imagens para o Storage e importa
+# os eventos acompanhados. Os dados das cartas só passam pelo runner; nada entra no git.
+on:
+  workflow_dispatch:
+    inputs:
+      images:
+        description: "Baixar e enviar as imagens das cartas"
+        type: boolean
+        default: true
+      events:
+        description: "Importar os eventos acompanhados"
+        type: boolean
+        default: true
+
+concurrency:
+  group: ingest
+  cancel-in-progress: false
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      CARDS_SOURCE: data/source/cards.json
+      IMAGES_SOURCE: data/source/images
+    steps:
+      - name: Confere os segredos
+        run: |
+          [ -n "$DATABASE_URL" ] || { echo "Falta o segredo DATABASE_URL"; exit 1; }
+          if [ "${{ inputs.images }}" = "true" ] && { [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_SERVICE_ROLE_KEY" ]; }; then
+            echo "Falta SUPABASE_URL ou SUPABASE_SERVICE_ROLE_KEY para enviar as imagens"; exit 1
+          fi
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      # As PNG ficam no cache do Actions (privado) para não baixar tudo de novo.
+      - uses: actions/cache@v4
+        if: inputs.images
+        with:
+          path: data/source/images
+          key: card-png-${{ github.run_id }}
+          restore-keys: card-png-
+      - name: Cartas da galeria oficial
+        run: python3 scripts/scrape_cards.py --refresh --out data/source ${{ inputs.images && '--images' || '' }}
+      - run: pnpm import:cards
+      - run: pnpm db:migrate
+      - run: pnpm db:seed
+      - run: pnpm build:images
+        if: inputs.images
+      - run: pnpm upload:images
+        if: inputs.images
+      - run: pnpm track seed
+        if: inputs.events
+      - run: pnpm ingest
+        if: inputs.events
