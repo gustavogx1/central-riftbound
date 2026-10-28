@@ -14,6 +14,11 @@ export const uvsEvent = z.object({
   full_address: z.string().nullable().optional(),
   starting_player_count: z.number().nullable(),
   display_status: z.string(),
+  timer_end_datetime: z.string().nullable().optional(),
+  timer_paused_at_datetime: z.string().nullable().optional(),
+  timer_is_running: z.boolean().nullable().optional(),
+  number_of_rounds: z.number().nullable().optional(),
+  top_cut_size: z.number().nullable().optional(),
   tournament_phases: z.array(
     z.object({
       id: z.number(),

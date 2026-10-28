@@ -52,6 +52,11 @@ export function eventRow(e: UvsEvent, kind: "main" | "side" | "community", metag
     playerCount: e.starting_player_count ?? 0,
     status: e.display_status,
     metagame,
+    timerEndsAt: e.timer_end_datetime ? new Date(e.timer_end_datetime) : null,
+    timerPausedAt: e.timer_paused_at_datetime ? new Date(e.timer_paused_at_datetime) : null,
+    timerRunning: e.timer_is_running ?? false,
+    plannedRounds: e.number_of_rounds ?? null,
+    topCutSize: e.top_cut_size ?? null,
     fetchedAt: new Date(),
   };
 }

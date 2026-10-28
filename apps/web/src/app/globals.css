@@ -32,6 +32,11 @@
   --tier-c: #5ad19a;
   --tier-d: #6aa9ff;
 
+  /* Ao vivo e resultados (sempre com texto junto, nunca só a cor) */
+  --live: #ff4d6d;
+  --good: #5ad19a;
+  --bad: #ff7a8a;
+
   color-scheme: dark;
 }
 
@@ -45,6 +50,9 @@
   --color-accent: var(--accent);
   --color-accent-ink: var(--accent-ink);
   --color-accent-2: var(--accent-2);
+  --color-live: var(--live);
+  --color-good: var(--good);
+  --color-bad: var(--bad);
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-display), var(--font-inter), ui-sans-serif, sans-serif;
 }

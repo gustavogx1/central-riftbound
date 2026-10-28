@@ -3,7 +3,9 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "exports": { ".": "./src/index.ts" },
+  "exports": {
+    ".": "./src/index.ts"
+  },
   "scripts": {
     "typecheck": "tsc --noEmit",
     "lint": "tsc --noEmit",
@@ -11,7 +13,10 @@
     "track": "tsx src/cli/track.ts",
     "suggest": "tsx src/cli/suggest.ts",
     "ingest": "tsx src/cli/ingest.ts",
-    "stats": "tsx src/cli/stats.ts"
+    "stats": "tsx src/cli/stats.ts",
+    "live": "tsx src/cli/live.ts",
+    "record": "tsx src/cli/record.ts",
+    "simulate": "tsx src/cli/simulate.ts"
   },
   "dependencies": {
     "@cr/core": "workspace:*",

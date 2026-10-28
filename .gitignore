@@ -12,6 +12,7 @@ coverage/
 data/source/
 data/generated/
 data/images/
+data/recordings/
 test-results/
 playwright-report/
 next-env.d.ts

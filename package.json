@@ -19,7 +19,10 @@
     "track": "pnpm --filter @cr/ingest track",
     "suggest": "pnpm --filter @cr/ingest suggest",
     "ingest": "pnpm --filter @cr/ingest ingest",
-    "stats": "pnpm --filter @cr/ingest stats"
+    "stats": "pnpm --filter @cr/ingest stats",
+    "live": "pnpm --filter @cr/ingest live",
+    "record": "pnpm --filter @cr/ingest record",
+    "simulate": "pnpm --filter @cr/ingest simulate"
   },
   "devDependencies": {
     "@types/node": "^22.15.0",

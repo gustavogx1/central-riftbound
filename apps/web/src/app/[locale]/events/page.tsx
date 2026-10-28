@@ -5,7 +5,7 @@ import { Link } from "@/i18n/navigation";
 import { makeFormat } from "@/lib/format";
 import { getEvents, getLegendsBySlugs } from "@/lib/queries";
 
-export const revalidate = 600;
+export const revalidate = 120;
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/events">): Promise<Metadata> {
   const { locale } = await params;
@@ -32,7 +32,8 @@ export default async function EventsPage({ params }: PageProps<"/[locale]/events
       ) : (
         <ul className="mt-8 divide-y divide-border overflow-hidden rounded-xl border border-border">
           {events.map((e) => {
-            const w = e.winnerLegend ? legends.get(e.winnerLegend) : undefined;
+            const live = e.live && e.status !== "complete";
+            const w = e.status === "complete" && e.winnerLegend ? legends.get(e.winnerLegend) : undefined;
             return (
               <li key={e.id}>
                 <Link href={`/events/${e.id}`} className="flex flex-wrap items-center gap-x-4 gap-y-2 bg-surface px-4 py-3 transition hover:bg-surface-2">
@@ -40,6 +41,7 @@ export default async function EventsPage({ params }: PageProps<"/[locale]/events
                   <span className="min-w-0 flex-1">
                     <span className="block font-semibold">{e.name}</span>
                     <span className="mt-0.5 flex flex-wrap gap-2 text-xs text-muted">
+                      {live && <span className="rounded bg-live px-1.5 py-px font-semibold text-bg">{t("live")}</span>}
                       <span className={`rounded px-1.5 py-px ${e.kind === "main" ? "bg-accent text-accent-ink" : "bg-surface-2"}`}>{t(e.kind as "main")}</span>
                       {e.metagame && <span>{ts(e.metagame as "all")}</span>}
                       <span>{f.num(e.playerCount)} {tc("players").toLowerCase()}</span>

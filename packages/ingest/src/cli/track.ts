@@ -1,6 +1,6 @@
 /**
  * Gerencia a lista de eventos acompanhados.
- *   pnpm track add 857452 [--kind main|side|community] [--name "RQ Barcelona"] [--metagame VEN]
+ *   pnpm track add 857452 [--kind main|side|community] [--name "RQ Barcelona"] [--metagame VEN] [--live]
  *   pnpm track live 857452 on|off
  *   pnpm track list
  */
@@ -11,7 +11,7 @@ import { createDb, schema } from "@cr/db";
 
 const { positionals, values } = parseArgs({
   allowPositionals: true,
-  options: { kind: { type: "string", default: "main" }, name: { type: "string" }, metagame: { type: "string" } },
+  options: { kind: { type: "string", default: "main" }, name: { type: "string" }, metagame: { type: "string" }, live: { type: "boolean", default: false } },
 });
 const [cmd, id, flag] = positionals;
 const db = createDb();
@@ -21,9 +21,9 @@ if (cmd === "add" && id) {
     const uvsEventId = Number(raw);
     await db
       .insert(schema.trackedEvent)
-      .values({ uvsEventId, kind: values.kind as "main", displayName: values.name ?? null, metagameOverride: values.metagame ?? null })
-      .onConflictDoUpdate({ target: schema.trackedEvent.uvsEventId, set: { kind: values.kind as "main" } });
-    console.log(`Acompanhando ${uvsEventId} (${values.kind})`);
+      .values({ uvsEventId, kind: values.kind as "main", displayName: values.name ?? null, metagameOverride: values.metagame ?? null, live: values.live })
+      .onConflictDoUpdate({ target: schema.trackedEvent.uvsEventId, set: { kind: values.kind as "main", ...(values.live ? { live: true } : {}) } });
+    console.log(`Acompanhando ${uvsEventId} (${values.kind}${values.live ? ", ao vivo" : ""})`);
   }
 } else if (cmd === "live" && id) {
   await db.update(schema.trackedEvent).set({ live: flag === "on" }).where(eq(schema.trackedEvent.uvsEventId, Number(id)));
