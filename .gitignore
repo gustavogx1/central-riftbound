@@ -1,0 +1,17 @@
+node_modules/
+.next/
+out/
+dist/
+coverage/
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
+.DS_Store
+# Dados de cartas e imagens geradas: nunca vão para o repositório (termos da Riot)
+data/source/
+data/generated/
+data/images/
+test-results/
+playwright-report/
+next-env.d.ts
