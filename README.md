@@ -92,6 +92,15 @@ Cada rodada passa por quatro passos: pairings saem, metade dos resultados, todos
 
 `/players` busca pelo nome público dos eventos oficiais; `/players/[id]` mostra eventos, lendas, partidas recentes e adversários mais enfrentados; `/players/[id]/vs/[outro]` é o confronto direto. Jogador com `hidden = true` não aparece em lugar nenhum.
 
+## Colocar no ar
+
+Tudo em plano grátis e sem cartão: Supabase (banco e Storage das imagens) e Vercel Hobby (site).
+
+1. Segredos do GitHub Actions: `DATABASE_URL` (Session pooler do Supabase), `SUPABASE_URL` e `SUPABASE_SERVICE_ROLE_KEY`.
+2. Rode o workflow **Montar o banco e as imagens** (`setup.yml`): baixa as cartas da galeria oficial com `scripts/scrape_cards.py`, cria as tabelas, envia as WebP para o bucket público `cards` (`pnpm upload:images`), cadastra os eventos de `packages/ingest/tracked-events.json` (`pnpm track seed`) e importa tudo. Os dados só passam pelo runner; nada entra no git.
+3. Vercel com Root Directory `apps/web` e as variáveis `DATABASE_URL` (Transaction pooler), `NEXT_PUBLIC_IMAGE_BASE_URL` (`<SUPABASE_URL>/storage/v1/object/public/cards`) e `CRON_SECRET`.
+4. No SQL Editor do Supabase, rode `supabase/live-cron.sql` uma vez.
+
 ## Idiomas
 
 Todo texto de interface fica em `apps/web/messages/en.json` e `pt-BR.json`. O teste `messages.test.ts` falha se faltar uma chave ou um placeholder em qualquer idioma.
@@ -110,4 +119,4 @@ Todo texto de interface fica em `apps/web/messages/en.json` e `pt-BR.json`. O te
 
 ## Custo
 
-Tudo foi pensado para os planos gratuitos: Vercel Hobby, Supabase Free, GitHub Actions e Cloudflare R2. Ver o plano completo do projeto para os limites.
+Tudo foi pensado para os planos gratuitos: Vercel Hobby, Supabase Free (banco e Storage) e GitHub Actions. O Cloudflare R2 ficou de fora porque pede cartão para ativar. Ver o plano completo do projeto para os limites.

@@ -1,8 +1,10 @@
 /**
  * Converte as imagens PNG das cartas em WebP (372px e 744px) e gera um
- * avatar redondo (256px) para cada Legend. Opcionalmente envia ao Cloudflare R2.
+ * avatar redondo (256px) para cada Legend. O envio fica em scripts/upload-images.ts.
  *
  *   pnpm build:images [pasta/imagens]
+ * A pasta pode ter um manifest.json (id → arquivo) ou ser a pasta images/ do
+ * scrape_cards.py --images, com um PNG por código público (OGN-001_298.png).
  */
 import { existsSync } from "node:fs";
 import { mkdir, readFile } from "node:fs/promises";
@@ -15,8 +17,10 @@ interface ManifestRow { id: string; file: string }
 const source = resolve(process.argv[2] ?? process.env.IMAGES_SOURCE ?? "data/source/imagens");
 const out = resolve("data/images");
 const catalog = JSON.parse(await readFile(resolve("data/generated/catalog.json"), "utf8")) as Catalog;
-const manifest = JSON.parse(await readFile(join(source, "manifest.json"), "utf8")) as ManifestRow[];
-const fileById = new Map(manifest.map((m) => [m.id, m.file]));
+const manifestPath = join(source, "manifest.json");
+const fileById = existsSync(manifestPath)
+  ? new Map((JSON.parse(await readFile(manifestPath, "utf8")) as ManifestRow[]).map((m) => [m.id, m.file]))
+  : new Map(catalog.prints.map((p) => [p.id, `${p.publicCode.replace(/[^\w.-]/g, "_")}.png`]));
 const legendCards = new Set(catalog.legends.map((l) => l.cardId));
 
 for (const size of [372, 744]) await mkdir(join(out, String(size)), { recursive: true });
@@ -60,4 +64,4 @@ for (const print of catalog.prints) {
 
 console.log(`WebP: ${done} gerados, ${skipped} já existiam, ${missing.length} sem arquivo de origem`);
 if (missing.length) console.log(`Sem imagem: ${missing.slice(0, 10).join(", ")}${missing.length > 10 ? "…" : ""}`);
-console.log(`Saída em ${out}. Para o R2: pnpm dlx wrangler r2 object put … (ver README).`);
+console.log(`Saída em ${out}. Para enviar ao Storage do Supabase: pnpm upload:images`);

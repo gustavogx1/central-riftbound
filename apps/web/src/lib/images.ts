@@ -1,4 +1,4 @@
-/** Base pública das imagens WebP (R2 em produção). Vazia = mostrar só texto. */
+/** Base pública das imagens WebP (Storage do Supabase em produção). Vazia = mostrar só texto. */
 const BASE = (process.env.NEXT_PUBLIC_IMAGE_BASE_URL ?? "").replace(/\/$/, "");
 
 export const hasImages = BASE !== "";

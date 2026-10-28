@@ -22,7 +22,8 @@
     "stats": "pnpm --filter @cr/ingest stats",
     "live": "pnpm --filter @cr/ingest live",
     "record": "pnpm --filter @cr/ingest record",
-    "simulate": "pnpm --filter @cr/ingest simulate"
+    "simulate": "pnpm --filter @cr/ingest simulate",
+    "upload:images": "tsx scripts/upload-images.ts"
   },
   "devDependencies": {
     "@types/node": "^22.15.0",

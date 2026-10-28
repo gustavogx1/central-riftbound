@@ -3,8 +3,10 @@
  *   pnpm track add 857452 [--kind main|side|community] [--name "RQ Barcelona"] [--metagame VEN] [--live]
  *   pnpm track live 857452 on|off
  *   pnpm track list
+ *   pnpm track seed            # cadastra a lista inicial de tracked-events.json (não mexe nos já cadastrados)
  */
 import "./env";
+import { readFileSync } from "node:fs";
 import { parseArgs } from "node:util";
 import { eq } from "drizzle-orm";
 import { createDb, schema } from "@cr/db";
@@ -25,6 +27,10 @@ if (cmd === "add" && id) {
       .onConflictDoUpdate({ target: schema.trackedEvent.uvsEventId, set: { kind: values.kind as "main", ...(values.live ? { live: true } : {}) } });
     console.log(`Acompanhando ${uvsEventId} (${values.kind}${values.live ? ", ao vivo" : ""})`);
   }
+} else if (cmd === "seed") {
+  const rows = JSON.parse(readFileSync(new URL("../../tracked-events.json", import.meta.url), "utf8")) as { uvsEventId: number; kind: "main" | "side" }[];
+  const added = await db.insert(schema.trackedEvent).values(rows).onConflictDoNothing().returning({ id: schema.trackedEvent.uvsEventId });
+  console.log(`${added.length} eventos novos (${rows.length} na lista)`);
 } else if (cmd === "live" && id) {
   await db.update(schema.trackedEvent).set({ live: flag === "on" }).where(eq(schema.trackedEvent.uvsEventId, Number(id)));
   console.log(`${id}: ao vivo ${flag === "on" ? "ligado" : "desligado"}`);
