@@ -14,7 +14,8 @@ if (!url || !key) {
   console.log("Defina SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY.");
   process.exit(1);
 }
-const headers = { Authorization: `Bearer ${key}`, apikey: key };
+// Chave nova (sb_secret_…) vai só no apikey; a antiga service_role (JWT) vai também como Bearer.
+const headers: Record<string, string> = key.startsWith("sb_") ? { apikey: key } : { Authorization: `Bearer ${key}`, apikey: key };
 const root = resolve("data/images");
 
 // Bucket público (só leitura para visitantes; escrita só com a chave de serviço).
