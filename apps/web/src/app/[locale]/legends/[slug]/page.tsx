@@ -55,7 +55,9 @@ export default async function LegendPage({ params, searchParams }: PageProps<"/[
   const tc = await getTranslations("Common");
   const f = makeFormat(locale);
   const sp = await searchParams;
-  let { metagames, meta, kind, scope } = await resolveScope(sp);
+  const resolved = await resolveScope(sp);
+  const { metagames, kind } = resolved;
+  let { meta, scope } = resolved;
   let all = await getLegendStats(scope);
   // Sem set escolhido e sem dados no set padrão: usa o set mais novo em que a lenda tem resultados.
   if (!sp.set && !all.some((x) => x.slug === slug)) {
