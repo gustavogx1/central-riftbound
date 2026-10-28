@@ -1,11 +1,7 @@
 @import "tailwindcss";
 
-/*
- * Tokens de cor. Duas paletas em avaliação: A (padrão) e B, trocadas pelo
- * atributo data-palette no <html>. Depois da escolha, a outra sai daqui.
- */
-:root,
-[data-palette="a"] {
+/* Tokens de cor: paleta "Noite Hextech". */
+:root {
   --bg: #0c0a14;
   --surface: #151225;
   --surface-2: #1e1a33;
@@ -19,19 +15,6 @@
   --glow: rgb(139 108 255 / 0.25);
 }
 
-[data-palette="b"] {
-  --bg: #08110e;
-  --surface: #0f1d18;
-  --surface-2: #162a23;
-  --border: #23402f;
-  --text: #e7f3ed;
-  --muted: #94b5a6;
-  --accent: #3ddc97;
-  --accent-ink: #06120d;
-  --accent-2: #ff8fb1;
-  --focus: #ff8fb1;
-  --glow: rgb(61 220 151 / 0.22);
-}
 
 :root {
   /* Domínios (cores próprias, legíveis nas duas paletas) */

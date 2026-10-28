@@ -1,52 +1,24 @@
-"use client";
-
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
 import { Logo } from "./Logo";
 
 const TOKENS = ["bg", "surface", "surface-2", "border", "text", "muted", "accent", "accent-2"] as const;
 const DOMAINS = ["fury", "calm", "mind", "body", "chaos", "order"] as const;
 const TIERS = ["s", "a", "b", "c", "d"] as const;
 
-export function DesignPreview() {
+export function StyleGuide() {
   const t = useTranslations("Design");
-  const [palette, setPalette] = useState<"a" | "b">("a");
-
-  useEffect(() => {
-    document.documentElement.dataset.palette = palette;
-    return () => {
-      document.documentElement.dataset.palette = "a";
-    };
-  }, [palette]);
 
   return (
     <div className="space-y-10">
-      <div role="radiogroup" aria-label={t("palette")} className="flex flex-wrap gap-3">
-        {(["a", "b"] as const).map((p) => (
-          <button
-            key={p}
-            role="radio"
-            aria-checked={palette === p}
-            onClick={() => setPalette(p)}
-            className={`flex items-center gap-3 rounded-xl border px-4 py-3 text-left transition ${
-              palette === p ? "border-accent bg-surface-2" : "border-border bg-surface hover:bg-surface-2"
-            }`}
-          >
-            <Logo variant={p} className="size-10" />
-            <span className="font-display font-semibold">{t(p === "a" ? "optionA" : "optionB")}</span>
-          </button>
-        ))}
-      </div>
-
       <section aria-labelledby="logo-h">
         <h2 id="logo-h" className="font-display text-xl font-semibold">{t("logo")}</h2>
         <div className="mt-4 flex flex-wrap items-center gap-8 rounded-xl border border-border bg-surface p-6">
-          <Logo variant={palette} className="size-24" />
+          <Logo className="size-24" />
           <div className="flex items-center gap-3">
-            <Logo variant={palette} className="size-10" />
+            <Logo className="size-10" />
             <span className="font-display text-2xl font-bold tracking-wide">Central Riftbound</span>
           </div>
-          <Logo variant={palette} className="size-6" />
+          <Logo className="size-6" />
         </div>
       </section>
 

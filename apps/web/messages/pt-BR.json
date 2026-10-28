@@ -45,12 +45,9 @@
     "back": "Voltar ao início"
   },
   "Design": {
-    "title": "Escolha o visual",
-    "lead": "Duas opções de paleta e logo para a Central Riftbound. Alterne entre elas para comparar e diga qual fica.",
-    "palette": "Paleta",
+    "title": "Guia de estilo",
+    "lead": "Cores, logo e componentes da Central Riftbound (paleta Noite Hextech).",
     "logo": "Logo",
-    "optionA": "A · Noite Hextech",
-    "optionB": "B · Jade Ioniano",
     "tokens": "Tokens de cor",
     "domains": "Cores dos domínios",
     "tiers": "Cores dos tiers",

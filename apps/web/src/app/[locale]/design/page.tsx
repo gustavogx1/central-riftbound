@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { DesignPreview } from "@/components/DesignPreview";
+import { StyleGuide } from "@/components/StyleGuide";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/design">): Promise<Metadata> {
   const { locale } = await params;
@@ -17,7 +17,7 @@ export default async function DesignPage({ params }: PageProps<"/[locale]/design
       <h1 className="font-display text-3xl font-bold">{t("title")}</h1>
       <p className="mt-3 max-w-2xl text-muted">{t("lead")}</p>
       <div className="mt-10">
-        <DesignPreview />
+        <StyleGuide />
       </div>
     </div>
   );

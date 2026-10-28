@@ -32,7 +32,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
   setRequestLocale(locale);
 
   return (
-    <html lang={locale} data-palette="a" className={`${inter.variable} ${display.variable}`}>
+    <html lang={locale} className={`${inter.variable} ${display.variable}`}>
       <body className="font-sans antialiased">
         <NextIntlClientProvider>
           <Header />
