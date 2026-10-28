@@ -1,16 +1,105 @@
 import type { Metadata } from "next";
+import { CARD_TYPES, DOMAINS } from "@cr/core";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { ComingSoon } from "@/components/ComingSoon";
+import { DomainDots } from "@/components/DomainDots";
+import { Pagination } from "@/components/Pagination";
+import { RulesText } from "@/components/RulesText";
+import { makeFormat } from "@/lib/format";
+import { cardImage } from "@/lib/images";
+import { getSets, searchCards } from "@/lib/queries";
+
+export const revalidate = 3600;
+const PAGE_SIZE = 36;
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/cards">): Promise<Metadata> {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: "Nav" });
-  return { title: t("cards") };
+  const t = await getTranslations({ locale, namespace: "Cards" });
+  return { title: t("title"), description: t("lead") };
 }
 
-export default async function Page({ params }: PageProps<"/[locale]/cards">) {
+const str = (v: string | string[] | undefined) => (typeof v === "string" && v.trim() ? v.trim().slice(0, 80) : undefined);
+
+export default async function CardsPage({ params, searchParams }: PageProps<"/[locale]/cards">) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const t = await getTranslations("Nav");
-  return <ComingSoon section={t("cards")} phase={1} />;
+  const sp = await searchParams;
+  const t = await getTranslations("Cards");
+  const tt = await getTranslations("Types");
+  const td = await getTranslations("Domains");
+  const ts = await getTranslations("Sets");
+  const tc = await getTranslations("Common");
+  const f = makeFormat(locale);
+
+  const q = str(sp.q);
+  const type = (CARD_TYPES as readonly string[]).includes(str(sp.type) ?? "") ? str(sp.type) : undefined;
+  const domain = (DOMAINS as readonly string[]).includes(str(sp.domain) ?? "") ? str(sp.domain) : undefined;
+  const sets = await getSets();
+  const set = sets.some((s) => s.id === str(sp.set)) ? str(sp.set) : undefined;
+  const page = Math.max(1, Number(sp.page) || 1);
+  const { rows, total } = await searchCards({ q, type, domain, set, page, pageSize: PAGE_SIZE });
+
+  return (
+    <div className="mx-auto max-w-6xl px-4 py-10">
+      <h1 className="font-display text-3xl font-bold md:text-4xl">{t("title")}</h1>
+      <p className="mt-3 text-muted">{t("lead")}</p>
+
+      <form method="get" className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr_auto]">
+        <label className="text-sm">
+          <span className="sr-only">{tc("search")}</span>
+          <input name="q" defaultValue={q} placeholder={t("placeholder")} className="w-full rounded-md border border-border bg-surface px-3 py-2" />
+        </label>
+        {[
+          ["type", t("type"), CARD_TYPES.map((v) => [v, tt(v)]), type],
+          ["domain", t("domain"), DOMAINS.map((v) => [v, td(v)]), domain],
+          ["set", tc("set"), sets.map((s) => [s.id, ts(s.id as "all")]), set],
+        ].map(([name, label, options, value]) => (
+          <label key={name as string} className="text-sm">
+            <span className="sr-only">{label as string}</span>
+            <select name={name as string} defaultValue={(value as string) ?? ""} className="w-full rounded-md border border-border bg-surface px-2 py-2">
+              <option value="">{label as string}: {t("any")}</option>
+              {(options as string[][]).map(([v, l]) => (
+                <option key={v} value={v}>{l}</option>
+              ))}
+            </select>
+          </label>
+        ))}
+        <button className="rounded-md bg-accent px-4 py-2 text-sm font-semibold text-accent-ink">{tc("search")}</button>
+      </form>
+
+      <p className="mt-4 text-sm text-muted">{t("results", { count: total })}</p>
+
+      {rows.length === 0 ? (
+        <p className="mt-8 rounded-xl border border-border bg-surface p-6 text-muted">{total === 0 && !q && !type && !domain && !set ? tc("noData") : t("noResults")}</p>
+      ) : (
+        <ul className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+          {rows.map(({ card, print }) => {
+            const img = cardImage(print.id);
+            return (
+              <li key={card.id} className="overflow-hidden rounded-xl border border-border bg-surface">
+                {img ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={img} alt={`${card.name}${card.rulesText ? `: ${card.rulesText}` : ""}`} width={372} height={519} loading="lazy" className="w-full" />
+                ) : (
+                  <div className="p-3">
+                    <p className="flex items-start justify-between gap-2">
+                      <span className="font-semibold">{card.name}</span>
+                      {card.energyCost !== null && <span className="grid size-6 shrink-0 place-items-center rounded-full bg-text text-xs font-bold text-bg">{card.energyCost}</span>}
+                    </p>
+                    <p className="mt-1 flex items-center gap-2 text-xs text-muted">
+                      <DomainDots domains={card.domains} />
+                      {card.type ? tt(card.type) : "—"}
+                      {card.might !== null && <> · {card.might} {t("might")}</>}
+                    </p>
+                    {card.rulesText && <p className="mt-2 text-xs leading-relaxed"><RulesText text={card.rulesText} /></p>}
+                  </div>
+                )}
+                <p className="border-t border-border px-3 py-1.5 text-[11px] text-muted">{print.publicCode} · {f.num(print.collectorNumber)}</p>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+      <Pagination pathname="/cards" query={{ q, type, domain, set }} page={page} total={total} pageSize={PAGE_SIZE} />
+    </div>
+  );
 }

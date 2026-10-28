@@ -1,0 +1,186 @@
+{
+ "page_size": 3,
+ "count": 815,
+ "total": 815,
+ "current_page_number": 1,
+ "next_page_number": 2,
+ "next": 2,
+ "previous": null,
+ "previous_page_number": null,
+ "results": [
+  {
+   "id": 7169106,
+   "player_match_relationships": [
+    {
+     "id": 13786433,
+     "player_order": 1,
+     "is_starting_player": false,
+     "player": {
+      "id": 111167,
+      "pronouns": null,
+      "country_code": null,
+      "best_identifier": "Player A"
+     },
+     "user_event_status": {
+      "id": 4949806,
+      "best_identifier": "Player B",
+      "is_guest": false,
+      "registration_status": "COMPLETE",
+      "matches_won": 5,
+      "matches_lost": 0,
+      "matches_drawn": 0,
+      "total_match_points": 15,
+      "user": {
+       "id": 111167,
+       "pronouns": null,
+       "country_code": null,
+       "best_identifier": "Player A"
+      },
+      "deck_defining_card": {
+       "id": "5ba81d15-fb3a-4ede-a5bb-9d240e9952e8",
+       "name": "Nasus, Curator of the Sands"
+      },
+      "special_user_identifier": null
+     }
+    },
+    {
+     "id": 13786434,
+     "player_order": 2,
+     "is_starting_player": false,
+     "player": {
+      "id": 94622,
+      "pronouns": null,
+      "country_code": null,
+      "best_identifier": "Player E"
+     },
+     "user_event_status": {
+      "id": 4950064,
+      "best_identifier": "Player F",
+      "is_guest": false,
+      "registration_status": "COMPLETE",
+      "matches_won": 4,
+      "matches_lost": 1,
+      "matches_drawn": 0,
+      "total_match_points": 12,
+      "user": {
+       "id": 94622,
+       "pronouns": null,
+       "country_code": null,
+       "best_identifier": "Player E"
+      },
+      "deck_defining_card": {
+       "id": "d7d6cfea-8d86-439e-848e-6a18935fa77f",
+       "name": "Kennen, Heart of the Tempest"
+      },
+      "special_user_identifier": null
+     }
+    }
+   ],
+   "created_at": "2026-08-21T17:13:35+00:00",
+   "updated_at": "2026-08-21T17:23:58+00:00",
+   "team_event_match": null,
+   "table_label": "1",
+   "public_table_tags": [],
+   "table_range_label": "",
+   "table_number": 1,
+   "table_section_label": "",
+   "table_seat_label": "",
+   "order": 0,
+   "status": "COMPLETE",
+   "pod_number": null,
+   "match_type": "PLAYER_VS_PLAYER",
+   "match_is_intentional_draw": false,
+   "match_is_unintentional_draw": false,
+   "match_is_bye": false,
+   "match_is_loss": false,
+   "reports_are_in_conflict": false,
+   "games_drawn": 0,
+   "games_won_by_winner": 2,
+   "games_won_by_loser": 1,
+   "is_ghost_match": false,
+   "is_feature_match": false,
+   "deck_check_started": false,
+   "deck_check_completed": false,
+   "time_extension_seconds": 0,
+   "tournament_round": 1261992,
+   "reporting_player": null,
+   "winning_player": 111167,
+   "assigned_judge": null,
+   "players": [
+    111167,
+    94622
+   ]
+  },
+  {
+   "id": 1,
+   "player_match_relationships": [
+    {
+     "id": 13786433,
+     "player_order": 1,
+     "is_starting_player": false,
+     "player": {
+      "id": 111167,
+      "pronouns": null,
+      "country_code": null,
+      "best_identifier": "Player A"
+     },
+     "user_event_status": {
+      "id": 4949806,
+      "best_identifier": "Player B",
+      "is_guest": false,
+      "registration_status": "COMPLETE",
+      "matches_won": 5,
+      "matches_lost": 0,
+      "matches_drawn": 0,
+      "total_match_points": 15,
+      "user": {
+       "id": 111167,
+       "pronouns": null,
+       "country_code": null,
+       "best_identifier": "Player A"
+      },
+      "deck_defining_card": {
+       "id": "5ba81d15-fb3a-4ede-a5bb-9d240e9952e8",
+       "name": "Nasus, Curator of the Sands"
+      },
+      "special_user_identifier": null
+     }
+    }
+   ],
+   "created_at": "2026-08-21T17:13:35+00:00",
+   "updated_at": "2026-08-21T17:23:58+00:00",
+   "team_event_match": null,
+   "table_label": "1",
+   "public_table_tags": [],
+   "table_range_label": "",
+   "table_number": 1,
+   "table_section_label": "",
+   "table_seat_label": "",
+   "order": 0,
+   "status": "COMPLETE",
+   "pod_number": null,
+   "match_type": "PLAYER_VS_PLAYER",
+   "match_is_intentional_draw": false,
+   "match_is_unintentional_draw": false,
+   "match_is_bye": true,
+   "match_is_loss": false,
+   "reports_are_in_conflict": false,
+   "games_drawn": 0,
+   "games_won_by_winner": 0,
+   "games_won_by_loser": 0,
+   "is_ghost_match": false,
+   "is_feature_match": false,
+   "deck_check_started": false,
+   "deck_check_completed": false,
+   "time_extension_seconds": 0,
+   "tournament_round": 1261992,
+   "reporting_player": null,
+   "winning_player": 111167,
+   "assigned_judge": null,
+   "players": [
+    111167,
+    94622
+   ]
+  }
+ ]
+}

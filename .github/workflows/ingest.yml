@@ -1,0 +1,38 @@
+name: Importar torneios
+
+# Uma vez por dia: busca rodadas novas dos eventos acompanhados e recalcula as estatísticas.
+# Rodadas já completas e gravadas são puladas, então o job leva poucos minutos.
+on:
+  schedule:
+    - cron: "17 6 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: ingest
+  cancel-in-progress: false
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+    steps:
+      - name: Sem banco configurado, nada a fazer
+        if: env.DATABASE_URL == ''
+        run: echo "Defina o segredo DATABASE_URL (Supabase) para ativar a importação." && exit 0
+      - uses: actions/checkout@v4
+        if: env.DATABASE_URL != ''
+      - uses: pnpm/action-setup@v4
+        if: env.DATABASE_URL != ''
+      - uses: actions/setup-node@v4
+        if: env.DATABASE_URL != ''
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+        if: env.DATABASE_URL != ''
+      - run: pnpm db:migrate
+        if: env.DATABASE_URL != ''
+      - run: pnpm ingest
+        if: env.DATABASE_URL != ''

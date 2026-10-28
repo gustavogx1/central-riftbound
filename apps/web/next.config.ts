@@ -4,7 +4,8 @@ import createNextIntlPlugin from "next-intl/plugin";
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 const nextConfig: NextConfig = {
-  transpilePackages: ["@cr/core"],
+  transpilePackages: ["@cr/core", "@cr/db"],
+  serverExternalPackages: ["postgres"],
   poweredByHeader: false,
 };
 

@@ -1,0 +1,70 @@
+{
+ "id": 857745,
+ "name": "Pre-Regional Challenge - RQ Barcelona Friday 1pm",
+ "start_datetime": "2026-08-21T11:00:00+00:00",
+ "timezone": "Europe/Paris",
+ "full_address": "Av. de la Reina Maria Cristina, s/n, Sants-Montjuïc, 08004 Barcelona, Spain",
+ "starting_player_count": 2058,
+ "display_status": "complete",
+ "tournament_phases": [
+  {
+   "id": 793878,
+   "phase_name": "Pre-RQ Swiss",
+   "phase_description": "",
+   "first_round_type": "PLAY_VS_OPPONENT",
+   "status": "COMPLETE",
+   "order_in_phases": 1,
+   "number_of_rounds": 5,
+   "round_type": "SWISS",
+   "rank_required_to_enter_phase": null,
+   "effective_maximum_number_of_game_wins_per_match": 2,
+   "rounds": [
+    {
+     "id": 1261988,
+     "round_number": 1,
+     "final_round_in_event": false,
+     "pairings_status": "GENERATED",
+     "standings_status": "GENERATED",
+     "round_type": "PLAY_VS_OPPONENT",
+     "status": "COMPLETE"
+    },
+    {
+     "id": 1261989,
+     "round_number": 2,
+     "final_round_in_event": false,
+     "pairings_status": "GENERATED",
+     "standings_status": "GENERATED",
+     "round_type": "PLAY_VS_OPPONENT",
+     "status": "COMPLETE"
+    },
+    {
+     "id": 1261990,
+     "round_number": 3,
+     "final_round_in_event": false,
+     "pairings_status": "GENERATED",
+     "standings_status": "GENERATED",
+     "round_type": "PLAY_VS_OPPONENT",
+     "status": "COMPLETE"
+    },
+    {
+     "id": 1261991,
+     "round_number": 4,
+     "final_round_in_event": false,
+     "pairings_status": "GENERATED",
+     "standings_status": "GENERATED",
+     "round_type": "PLAY_VS_OPPONENT",
+     "status": "COMPLETE"
+    },
+    {
+     "id": 1261992,
+     "round_number": 5,
+     "final_round_in_event": false,
+     "pairings_status": "GENERATED",
+     "standings_status": "GENERATED",
+     "round_type": "PLAY_VS_OPPONENT",
+     "status": "COMPLETE"
+    }
+   ]
+  }
+ ]
+}
