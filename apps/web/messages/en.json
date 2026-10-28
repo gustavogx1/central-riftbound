@@ -1,0 +1,72 @@
+{
+  "Metadata": {
+    "title": "Central Riftbound",
+    "titleTemplate": "%s · Central Riftbound",
+    "description": "Riftbound meta computed from tournament results, decklists, legends, players and deckbuilding tools."
+  },
+  "Nav": {
+    "home": "Home",
+    "meta": "Meta",
+    "events": "Events",
+    "legends": "Legends",
+    "decks": "Decks",
+    "cards": "Cards",
+    "builder": "Deckbuilder",
+    "menu": "Menu",
+    "skipToContent": "Skip to content"
+  },
+  "Locale": {
+    "label": "Language",
+    "en": "English",
+    "pt-BR": "Português (Brasil)"
+  },
+  "Home": {
+    "eyebrow": "Fan-made Riftbound hub",
+    "title": "The meta, straight from tournament results",
+    "lead": "Power rankings that update themselves after every event, decklists, the best pilot of each legend and tools to build your own deck.",
+    "ctaMeta": "See the meta",
+    "ctaCards": "Search cards",
+    "statsCards": "{count, plural, one {# card} other {# cards}}",
+    "statsLegends": "{count, plural, one {# legend} other {# legends}}",
+    "statsSets": "{count, plural, one {# set} other {# sets}}",
+    "featuresTitle": "What is coming",
+    "featureMetaTitle": "Computed meta chart",
+    "featureMetaBody": "Every legend placed by power and popularity or community-voted complexity, recalculated from real matches.",
+    "featureLiveTitle": "Live events",
+    "featureLiveBody": "Pairings and standings of Regional Qualifiers that refresh on their own while the event runs.",
+    "featureLegendsTitle": "Legends and pilots",
+    "featureLegendsBody": "Win rate, conversion, matchups and the best players of each legend, with confidence intervals.",
+    "featureToolsTitle": "Deckbuilder",
+    "featureToolsBody": "Card search, deck validation, deck codes and exports compatible with the tools you already use."
+  },
+  "ComingSoon": {
+    "title": "{section} is on the way",
+    "body": "This area arrives in phase {phase} of the project.",
+    "back": "Back to home"
+  },
+  "Design": {
+    "title": "Pick a look",
+    "lead": "Two palette and logo options for Central Riftbound. Switch between them to compare, then tell us which one to keep.",
+    "palette": "Palette",
+    "logo": "Logo",
+    "optionA": "A · Hextech Night",
+    "optionB": "B · Ionian Jade",
+    "tokens": "Color tokens",
+    "domains": "Domain colors",
+    "tiers": "Tier colors",
+    "sample": "Sample card",
+    "sampleLegend": "Kai'Sa, Daughter of the Void",
+    "sampleWinrate": "Win rate",
+    "samplePlays": "Matches",
+    "sampleTrend": "Trend"
+  },
+  "Footer": {
+    "disclaimer": "Central Riftbound is an unofficial fan project and is not endorsed by Riot Games. Riftbound and all related names and images are trademarks of Riot Games.",
+    "methodology": "How we calculate",
+    "privacy": "Privacy"
+  },
+  "NotFound": {
+    "title": "Page not found",
+    "back": "Back to home"
+  }
+}

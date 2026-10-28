@@ -1,0 +1,72 @@
+{
+  "Metadata": {
+    "title": "Central Riftbound",
+    "titleTemplate": "%s · Central Riftbound",
+    "description": "Meta de Riftbound calculado a partir de resultados de torneios, decklists, lendas, jogadores e ferramentas de deckbuilding."
+  },
+  "Nav": {
+    "home": "Início",
+    "meta": "Meta",
+    "events": "Eventos",
+    "legends": "Lendas",
+    "decks": "Decks",
+    "cards": "Cartas",
+    "builder": "Deckbuilder",
+    "menu": "Menu",
+    "skipToContent": "Pular para o conteúdo"
+  },
+  "Locale": {
+    "label": "Idioma",
+    "en": "English",
+    "pt-BR": "Português (Brasil)"
+  },
+  "Home": {
+    "eyebrow": "Central de Riftbound feita por fãs",
+    "title": "O meta direto dos resultados de torneio",
+    "lead": "Rankings de poder que se atualizam sozinhos a cada evento, decklists, o melhor piloto de cada lenda e ferramentas para montar o seu deck.",
+    "ctaMeta": "Ver o meta",
+    "ctaCards": "Buscar cartas",
+    "statsCards": "{count, plural, one {# carta} other {# cartas}}",
+    "statsLegends": "{count, plural, one {# lenda} other {# lendas}}",
+    "statsSets": "{count, plural, one {# set} other {# sets}}",
+    "featuresTitle": "O que vem por aí",
+    "featureMetaTitle": "Gráfico do meta calculado",
+    "featureMetaBody": "Cada lenda posicionada por poder e popularidade ou complexidade votada pela comunidade, recalculada com partidas reais.",
+    "featureLiveTitle": "Eventos ao vivo",
+    "featureLiveBody": "Pairings e standings dos Regional Qualifiers que se atualizam sozinhos enquanto o evento acontece.",
+    "featureLegendsTitle": "Lendas e pilotos",
+    "featureLegendsBody": "Win rate, conversão, matchups e os melhores jogadores de cada lenda, com intervalo de confiança.",
+    "featureToolsTitle": "Deckbuilder",
+    "featureToolsBody": "Busca de cartas, validação de deck, códigos de deck e exportações compatíveis com as ferramentas que você já usa."
+  },
+  "ComingSoon": {
+    "title": "{section} está a caminho",
+    "body": "Esta área chega na fase {phase} do projeto.",
+    "back": "Voltar ao início"
+  },
+  "Design": {
+    "title": "Escolha o visual",
+    "lead": "Duas opções de paleta e logo para a Central Riftbound. Alterne entre elas para comparar e diga qual fica.",
+    "palette": "Paleta",
+    "logo": "Logo",
+    "optionA": "A · Noite Hextech",
+    "optionB": "B · Jade Ioniano",
+    "tokens": "Tokens de cor",
+    "domains": "Cores dos domínios",
+    "tiers": "Cores dos tiers",
+    "sample": "Cartão de exemplo",
+    "sampleLegend": "Kai'Sa, Daughter of the Void",
+    "sampleWinrate": "Win rate",
+    "samplePlays": "Partidas",
+    "sampleTrend": "Tendência"
+  },
+  "Footer": {
+    "disclaimer": "A Central Riftbound é um projeto de fã não oficial e não é endossada pela Riot Games. Riftbound e todos os nomes e imagens relacionados são marcas da Riot Games.",
+    "methodology": "Como calculamos",
+    "privacy": "Privacidade"
+  },
+  "NotFound": {
+    "title": "Página não encontrada",
+    "back": "Voltar ao início"
+  }
+}

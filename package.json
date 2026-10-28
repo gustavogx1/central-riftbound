@@ -1,0 +1,28 @@
+{
+  "name": "central-riftbound",
+  "private": true,
+  "packageManager": "pnpm@10.34.9",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @cr/web dev",
+    "build": "pnpm --filter @cr/web build",
+    "typecheck": "pnpm -r typecheck",
+    "lint": "pnpm -r lint",
+    "test": "pnpm -r test",
+    "import:cards": "tsx scripts/import-cards.ts",
+    "build:images": "tsx scripts/build-images.ts",
+    "db:generate": "pnpm --filter @cr/db generate",
+    "db:migrate": "pnpm --filter @cr/db migrate",
+    "db:seed": "pnpm --filter @cr/db seed"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.0",
+    "tsx": "^4.20.0",
+    "typescript": "~5.9.3",
+    "@cr/core": "workspace:*",
+    "sharp": "^0.34.0"
+  },
+  "type": "module"
+}

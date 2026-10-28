@@ -1,0 +1,94 @@
+@import "tailwindcss";
+
+/*
+ * Tokens de cor. Duas paletas em avaliação: A (padrão) e B, trocadas pelo
+ * atributo data-palette no <html>. Depois da escolha, a outra sai daqui.
+ */
+:root,
+[data-palette="a"] {
+  --bg: #0c0a14;
+  --surface: #151225;
+  --surface-2: #1e1a33;
+  --border: #2d2848;
+  --text: #ece9f6;
+  --muted: #a39cc0;
+  --accent: #8b6cff;
+  --accent-ink: #0c0a14;
+  --accent-2: #2fe0c5;
+  --focus: #2fe0c5;
+  --glow: rgb(139 108 255 / 0.25);
+}
+
+[data-palette="b"] {
+  --bg: #08110e;
+  --surface: #0f1d18;
+  --surface-2: #162a23;
+  --border: #23402f;
+  --text: #e7f3ed;
+  --muted: #94b5a6;
+  --accent: #3ddc97;
+  --accent-ink: #06120d;
+  --accent-2: #ff8fb1;
+  --focus: #ff8fb1;
+  --glow: rgb(61 220 151 / 0.22);
+}
+
+:root {
+  /* Domínios (cores próprias, legíveis nas duas paletas) */
+  --domain-fury: #e5484d;
+  --domain-calm: #46a758;
+  --domain-mind: #3e8ee0;
+  --domain-body: #f08c32;
+  --domain-chaos: #9b6fd6;
+  --domain-order: #e0c14a;
+
+  /* Tiers: sempre acompanhados da letra, nunca só a cor */
+  --tier-s: #ff5c7a;
+  --tier-a: #ff9f43;
+  --tier-b: #f7d154;
+  --tier-c: #5ad19a;
+  --tier-d: #6aa9ff;
+
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-border: var(--border);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-2: var(--accent-2);
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-display), var(--font-inter), ui-sans-serif, sans-serif;
+}
+
+html {
+  background: var(--bg);
+  color: var(--text);
+}
+
+body {
+  background:
+    radial-gradient(60rem 30rem at 85% -10%, var(--glow), transparent 70%),
+    var(--bg);
+  min-height: 100dvh;
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
