@@ -15,7 +15,11 @@
     "build:images": "tsx scripts/build-images.ts",
     "db:generate": "pnpm --filter @cr/db generate",
     "db:migrate": "pnpm --filter @cr/db migrate",
-    "db:seed": "pnpm --filter @cr/db seed"
+    "db:seed": "pnpm --filter @cr/db seed",
+    "track": "pnpm --filter @cr/ingest track",
+    "suggest": "pnpm --filter @cr/ingest suggest",
+    "ingest": "pnpm --filter @cr/ingest ingest",
+    "stats": "pnpm --filter @cr/ingest stats"
   },
   "devDependencies": {
     "@types/node": "^22.15.0",

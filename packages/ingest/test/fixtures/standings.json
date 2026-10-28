@@ -1,0 +1,84 @@
+{
+ "page_size": 3,
+ "count": 2058,
+ "total": 2058,
+ "current_page_number": 1,
+ "next_page_number": 2,
+ "next": 2,
+ "previous": null,
+ "previous_page_number": null,
+ "results": [
+  {
+   "player": {
+    "id": 111167,
+    "best_identifier": "Player A"
+   },
+   "user_event_status": {
+    "id": 4949806,
+    "matches_won": 5,
+    "matches_drawn": 0,
+    "matches_lost": 0,
+    "total_match_points": 15,
+    "registration_status": "COMPLETE",
+    "best_identifier": "Player B",
+    "player_team_name": null,
+    "is_guest": false,
+    "user": {
+     "id": 111167,
+     "pronouns": null,
+     "country_code": null
+    },
+    "deck_defining_card": {
+     "id": "5ba81d15-fb3a-4ede-a5bb-9d240e9952e8",
+     "name": "Nasus, Curator of the Sands"
+    }
+   },
+   "round_number": 5,
+   "id": 111167,
+   "rank": 1,
+   "record": "5-0-0",
+   "match_record": "5-0-0",
+   "match_points": 15,
+   "opponent_match_win_percentage": 0.72,
+   "game_win_percentage": 0.83333333,
+   "opponent_game_win_percentage": 0.65444556,
+   "points": 15
+  },
+  {
+   "player": {
+    "id": 94207,
+    "best_identifier": "Player C"
+   },
+   "user_event_status": {
+    "id": 4950187,
+    "matches_won": 5,
+    "matches_drawn": 0,
+    "matches_lost": 0,
+    "total_match_points": 15,
+    "registration_status": "COMPLETE",
+    "best_identifier": "Player D",
+    "player_team_name": null,
+    "is_guest": false,
+    "user": {
+     "id": 94207,
+     "pronouns": null,
+     "country_code": null
+    },
+    "deck_defining_card": {
+     "id": "11e7dcfa-2748-47de-8b59-9fc9083b356d",
+     "name": "Jayce, Defender of Tomorrow"
+    }
+   },
+   "round_number": 5,
+   "id": 94207,
+   "rank": 2,
+   "record": "5-0-0",
+   "match_record": "5-0-0",
+   "match_points": 15,
+   "opponent_match_win_percentage": 0.72,
+   "game_win_percentage": 0.83333333,
+   "opponent_game_win_percentage": 0.61558442,
+   "points": 15
+  }
+ ]
+}

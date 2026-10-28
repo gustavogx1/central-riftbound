@@ -1,8 +1,12 @@
+import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import type { Catalog } from "@cr/core";
 import { sql } from "drizzle-orm";
 import { createDb, schema } from "./index";
+
+const ENV_FILE = resolve(import.meta.dirname, "../../../.env");
+if (existsSync(ENV_FILE)) process.loadEnvFile(ENV_FILE);
 
 const CATALOG = resolve(import.meta.dirname, "../../../data/generated/catalog.json");
 const CHUNK = 500;
