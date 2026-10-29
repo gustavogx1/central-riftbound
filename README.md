@@ -104,7 +104,7 @@ Cada rodada passa por quatro passos: pairings saem, metade dos resultados, todos
 - Login pelo Supabase Auth (Discord e/ou Google, em `NEXT_PUBLIC_AUTH_PROVIDERS`). Sem `NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` o site roda igual, sem o botão de entrar.
 - As páginas continuam estáticas: o cabeçalho pergunta quem está logado em `/api/me`. O `proxy.ts` só renova a sessão de quem já tem cookie do Supabase.
 - Tabelas `profile`, `user_deck` e `complexity_vote`. O site grava nelas só pelo servidor, que relê o código do deck e confere dono, limites (200 decks por conta) e validade.
-- **RLS ligado em todas as tabelas** (migração 0003), sem políticas: a API pública do Supabase não lê nem grava nada. Tabela nova precisa de `ENABLE ROW LEVEL SECURITY` na migração.
+- **RLS ligado em todas as tabelas** (migração 0005), sem políticas: a API pública do Supabase não lê nem grava nada. Tabela nova precisa de `ENABLE ROW LEVEL SECURITY` na migração.
 - `/decks` lista decks públicos e válidos; `/decks/[id]` mostra o deck (privado só para o dono, não listado só com o link); `/account` tem os decks e o nome de exibição.
 - Complexidade: voto 1–5 por lenda e por set na página da lenda. No gráfico do meta, a lenda aparece no eixo de complexidade com 10+ votos (média puxada para 3 com poucos votos).
 
@@ -116,6 +116,7 @@ Tudo em plano grátis e sem cartão: Supabase (banco e Storage das imagens) e Ve
 2. Rode o workflow **Montar o banco e as imagens** (`setup.yml`): baixa as cartas da galeria oficial com `scripts/scrape_cards.py`, cria as tabelas, envia as WebP para o bucket público `cards` (`pnpm upload:images`), cadastra os eventos de `packages/ingest/tracked-events.json` (`pnpm track seed`) e importa tudo. Os dados só passam pelo runner; nada entra no git.
 3. Vercel com Root Directory `apps/web` e as variáveis `DATABASE_URL` (Transaction pooler), `NEXT_PUBLIC_IMAGE_BASE_URL` (`<SUPABASE_URL>/storage/v1/object/public/cards`) e `CRON_SECRET`.
 4. No SQL Editor do Supabase, rode `supabase/live-cron.sql` uma vez.
+5. Login (opcional): crie os apps OAuth do Discord e do Google com o callback `https://<ref>.supabase.co/auth/v1/callback`, ligue os provedores em Authentication → Sign In / Providers, ponha o endereço do site em URL Configuration (Site URL e Redirect URL `https://<site>/api/auth/callback`) e adicione na Vercel `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` e `NEXT_PUBLIC_AUTH_PROVIDERS=discord,google`.
 
 ## Idiomas
 
