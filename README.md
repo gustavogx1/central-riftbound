@@ -127,6 +127,14 @@ pnpm topdeck <tid>               # um torneio específico
 - `/decks` lista decks públicos e válidos; `/decks/[id]` mostra o deck (privado só para o dono, não listado só com o link); `/account` tem os decks e o nome de exibição.
 - Complexidade: voto 1–5 por lenda e por set na página da lenda. No gráfico do meta, a lenda aparece no eixo de complexidade com 10+ votos (média puxada para 3 com poucos votos).
 
+## Decklists da comunidade e estatísticas por carta
+
+- `/events/[id]/submit` (evento terminado, usuário logado): a pessoa acha o jogador na classificação final, cola a lista (código de deck ou texto, ou escolhe um deck salvo) e pode pôr o link de onde a lista foi publicada. O servidor confere: jogador na classificação, lista válida para torneio (banidas depois do evento não barram), **lenda igual à registrada na UVS** e jogador sem lista publicada.
+- O envio entra como pendente (tabela `deck_submission`, migração 0007; até 20 pendentes por conta). Quem enviou vê a prévia e acompanha em `/account`.
+- Moderação em `/admin` para os e-mails em `ADMIN_EMAILS` (variável na Vercel): aprovar, recusar com motivo ou tirar do ar. Envio de moderador já entra aprovado (listas publicadas por organizadores, com o link da fonte). Uma lista aprovada por jogador e evento; se o TopDeck trouxer a lista do mesmo jogador, vale a do TopDeck.
+- Listas aprovadas aparecem junto com as do TopDeck: aba Decklists do evento, `/events/[id]/decks/cr-<id>` e "Decklists de torneio" da lenda.
+- **Estatísticas por carta** na página da lenda (set escolhido): em quantas listas a carta está, cópias médias, staples (75%+) e win rate de quem jogou com ela (30+ partidas). **Tempero** (0–100) nas páginas de deck: quanto a lista foge das outras listas de torneio da lenda (mínimo de 5). Fórmulas em `packages/core/src/stats/cards.ts`.
+
 ## Colocar no ar
 
 Tudo em plano grátis e sem cartão: Supabase (banco e Storage das imagens) e Vercel Hobby (site).

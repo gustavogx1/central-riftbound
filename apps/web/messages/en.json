@@ -140,7 +140,7 @@
     "title": "Privacy policy",
     "intro": "Central Riftbound is an unofficial, non-commercial fan site about the Riftbound trading card game. This page explains what we keep about you and why.",
     "signIn": "Browsing the site needs no account. If you sign in with Discord or Google, that service sends us your account ID, e-mail address, name and avatar. We use them only to identify your account and never send you e-mails.",
-    "stored": "With an account, we store your display name, the decks you save and your complexity votes.",
+    "stored": "With an account, we store your display name, the decks you save, your complexity votes and the tournament decklists you submit (with you as the sender).",
     "public": "Decks you mark as public or unlisted can be seen by others, together with your display name. Private decks are visible only to you.",
     "players": "Player names and results come from the public results of official events. Any player can ask to have their name hidden from this site.",
     "cookies": "We don't show ads, sell or share your data, or use tracking cookies. We only use cookies to keep you signed in and to remember your language.",
@@ -179,7 +179,7 @@
     "publicDecks": "Public decks with this legend",
     "buildDeck": "Build a deck",
     "eventDecksTitle": "Tournament decklists",
-    "eventDecksLead": "Top-finishing lists from Showdowns, Regionals and other big events, published on <link>TopDeck.gg</link>.",
+    "eventDecksLead": "Top-finishing lists from Showdowns, Regionals and other big events, published on <link>TopDeck.gg</link> or sent by the community and moderated.",
     "eventDeckPlace": "#{rank} · {event}"
   },
   "Events": {
@@ -218,7 +218,11 @@
     "noDecks": "No decklists published for this event.",
     "sourceTopdeck": "Source: public results and decklists from TopDeck.gg.",
     "creditTopdeck": "Decklists: <link>TopDeck.gg</link>.",
-    "creditTopdeckOwn": "<link>See the event on TopDeck.gg</link>."
+    "creditTopdeckOwn": "<link>See the event on TopDeck.gg</link>.",
+    "submitDeck": "Submit a decklist",
+    "submitYours": "Played it? Submit your list.",
+    "community": "Community",
+    "communityHint": "Sent by the community and checked by moderators"
   },
   "Cards": {
     "title": "Cards",
@@ -489,7 +493,9 @@
     "save": "Save",
     "myDecks": "My decks",
     "deckLimit": "{count} of {max}",
-    "noDecks": "No saved decks yet. Build one in the <link>deckbuilder</link>."
+    "noDecks": "No saved decks yet. Build one in the <link>deckbuilder</link>.",
+    "moderation": "Decklist moderation ({count} pending)",
+    "noSubmissions": "You have not submitted any tournament decklist. Open an <link>event</link> you played and use \"Submit a decklist\"."
   },
   "Decks": {
     "title": "Decks",
@@ -498,7 +504,7 @@
     "allLegends": "All legends",
     "count": "{count, plural, one {# deck} other {# decks}}",
     "empty": "No public decks yet. Be the first: build a deck and save it as public.",
-    "tournamentNote": "Tournament decklists (linked to official standings) arrive in the next phase.",
+    "tournamentNote": "Tournament decklists (linked to official standings) are on each event's Decklists tab and on the legend pages.",
     "noLegend": "No legend",
     "by": "by {author}",
     "legal": "Legal",
@@ -542,7 +548,11 @@
     "placed": "#{rank} of {players}",
     "copyToBuilder": "Open in deckbuilder",
     "onTopdeck": "View on TopDeck.gg",
-    "credit": "Decklist published on <link>TopDeck.gg</link>."
+    "credit": "Decklist published on <link>TopDeck.gg</link>.",
+    "pending": "This list is awaiting moderation. Only you and the moderators can see it.",
+    "rejected": "This list was rejected by the moderators and is not public.",
+    "creditCommunity": "Decklist sent by the community and checked by the moderators against the official results.",
+    "creditCommunitySource": "Decklist sent by the community and checked by the moderators. <link>Original source</link>."
   },
   "DeckView": {
     "view": "Deck view",
@@ -563,5 +573,109 @@
     "power": "Power",
     "domains": "Domains",
     "types": "Types"
+  },
+  "Submit": {
+    "title": "Submit a decklist",
+    "lead": "Played this event? Find your name in the final standings and paste your list. It goes to a moderation queue and, once approved, appears on the event, the legend page and the card stats.",
+    "notComplete": "Decklists can be submitted once the event is over and the final standings are in.",
+    "step1": "1. Find the player",
+    "step2": "2. Paste the list",
+    "noEntrants": "No player found with that name in this event.",
+    "pick": "Choose",
+    "hiddenNote": "Players who asked us to hide their name do not appear here.",
+    "notEntrant": "This player is not in this event's standings.",
+    "changePlayer": "Choose another player",
+    "entrantLine": "Finished #{rank} of {players} · registered legend: {legend}",
+    "rankShort": "#{rank}",
+    "alreadyPublished": "This player already has a published decklist for this event.",
+    "seeDecks": "See the decklists",
+    "fromMyDecks": "Use one of my saved decks",
+    "pickDeck": "Choose a deck…",
+    "listLabel": "Decklist (text or deck code)",
+    "listPlaceholder": "Legend:\n1 Jinx, Loose Cannon\n\nChampion:\n1 Jinx, Rebel\n\nMain Deck:\n3 …",
+    "listHelp": "Same format as the deckbuilder import: Piltover Archive deck code or a text list with sections. The list must be tournament legal and use the legend registered for the player.",
+    "sourceLabel": "Where was this list published? (optional)",
+    "sourceHelp": "If you are not the player, add the link where the list was made public (organizer, Riot, social media).",
+    "noteLabel": "Note for the moderators (optional)",
+    "moderationNote": "A moderator checks every list before it goes live. We store your display name as the sender.",
+    "adminNote": "You are a moderator: this list is published right away.",
+    "send": "Submit",
+    "sending": "Submitting…",
+    "donePending": "Thanks! Your list is in the moderation queue.",
+    "doneApproved": "List published.",
+    "openSubmission": "View the list",
+    "mySubmissions": "My submitted decklists",
+    "delete": "Delete",
+    "status": {
+      "pending": "Awaiting review",
+      "approved": "Approved",
+      "rejected": "Rejected"
+    },
+    "reasons": {
+      "wrongPlayer": "Not this player's list",
+      "wrongList": "List doesn't match what was played",
+      "duplicate": "Duplicate",
+      "spam": "Spam",
+      "other": "Other reason"
+    },
+    "errors": {
+      "login": "Sign in to submit.",
+      "unavailable": "Submissions are not available right now. Try again later.",
+      "notComplete": "This event is not over yet.",
+      "notEntrant": "This player is not in this event's standings.",
+      "empty": "Paste a decklist or a deck code.",
+      "alreadyPublished": "This player already has a published decklist for this event.",
+      "limit": "You have too many lists waiting for review. Wait for the moderators before sending more.",
+      "badUrl": "The link must start with https:// or http://.",
+      "unknownCards": "We could not read these lines: {lines}",
+      "invalid": "The list is not tournament legal: {issue}",
+      "legendMismatch": "The list uses {list}, but the official results registered {registered} for this player."
+    }
+  },
+  "Admin": {
+    "title": "Decklist moderation",
+    "lead": "Lists sent by the community. Check that the list matches the player and the legend registered in the official results before approving.",
+    "empty": "Nothing here.",
+    "rank": "#{rank}",
+    "registered": "registered: {legend}",
+    "notRegistered": "no legend registered in the results",
+    "sentBy": "Sent by {author} on {date}",
+    "deletedUser": "deleted account",
+    "source": "Source",
+    "preview": "Preview",
+    "showList": "Show list",
+    "approve": "Approve",
+    "reject": "Reject",
+    "unpublish": "Take down",
+    "reason": "Reason",
+    "errors": {
+      "notFound": "Submission not found.",
+      "duplicate": "This player already has a published list for this event."
+    },
+    "tabs": {
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected"
+    }
+  },
+  "CardStats": {
+    "title": "Card stats",
+    "lead": "Based on {count, plural, one {# tournament decklist} other {# tournament decklists}} ({set}). Win rate = record of the players who ran the card at that event; the number beside it is the difference from the legend's average.",
+    "none": "No tournament decklists for this legend in this set yet.",
+    "zones": {
+      "main": "Main deck",
+      "battlefields": "Battlefields",
+      "side": "Sideboard"
+    },
+    "card": "Card",
+    "inclusion": "In lists",
+    "copies": "Avg. copies",
+    "winRate": "Win rate",
+    "winRateHint": "Shown with {min}+ matches",
+    "staple": "Staple",
+    "stapleHint": "In at least {pct} of the lists",
+    "ofDecks": "{count}/{total}",
+    "spice": "Spice {value}/100",
+    "spiceHint": "How much this list strays from {count, plural, one {# other tournament list} other {# other tournament lists}} of the same legend: 0 = only staples, 100 = nothing in common"
   }
 }

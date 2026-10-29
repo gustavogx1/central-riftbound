@@ -25,6 +25,8 @@ export async function supabaseServer() {
 export interface SessionUser {
   id: string;
   name: string;
+  /** Pode moderar as decklists enviadas (e-mail em ADMIN_EMAILS). */
+  admin: boolean;
 }
 
 /** Usuário logado (conferido no servidor do Supabase, não só pelo cookie), ou null. */
@@ -37,7 +39,14 @@ export async function getSessionUser(): Promise<SessionUser | null> {
   if (!data.user) return null;
   const db = getDb();
   const row = db ? (await db.select({ name: schema.profile.displayName }).from(schema.profile).where(eq(schema.profile.userId, data.user.id)).limit(1))[0] : undefined;
-  return { id: data.user.id, name: row?.name ?? displayNameOf(data.user.user_metadata) };
+  return { id: data.user.id, name: row?.name ?? displayNameOf(data.user.user_metadata), admin: isAdminEmail(data.user.email) };
+}
+
+/** Moderadores: e-mails da conta (Discord ou Google) em ADMIN_EMAILS, separados por vírgula. */
+export function isAdminEmail(email: string | null | undefined): boolean {
+  if (!email) return false;
+  const list = (process.env.ADMIN_EMAILS ?? "").split(",").map((e) => e.trim().toLowerCase()).filter(Boolean);
+  return list.includes(email.trim().toLowerCase());
 }
 
 export function displayNameOf(meta: Record<string, unknown> | undefined): string {

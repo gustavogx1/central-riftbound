@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { MIN_COMPLEXITY_VOTES, MIN_PILOT_MATCHES } from "@cr/core";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { ComplexityVote } from "@/components/ComplexityVote";
+import { CardStatsTable } from "@/components/deck/CardStatsTable";
 import { DomainDots } from "@/components/DomainDots";
 import { LegendAvatar } from "@/components/LegendAvatar";
 import { RulesText } from "@/components/RulesText";
@@ -11,6 +12,8 @@ import { TierBadge } from "@/components/TierBadge";
 import { Link } from "@/i18n/navigation";
 import { makeFormat } from "@/lib/format";
 import { cardImage } from "@/lib/images";
+import { getLegendCardStats } from "@/lib/card-stats";
+import { poolMap } from "@/lib/decks";
 import { getLegendDecks } from "@/lib/event-decks";
 import { type LegendInfo, getLegend, getLegendCard, getLegendsBySlugs, getLegendStats, getMatchups, getTopPilots, METAGAMES } from "@/lib/queries";
 import { resolveScope } from "@/lib/scope";
@@ -74,7 +77,15 @@ export default async function LegendPage({ params, searchParams }: PageProps<"/[
       }
     }
   }
-  const [card, matchups, pilots, eventDecks] = await Promise.all([getLegendCard(legend.cardId), getMatchups(scope, slug), getTopPilots(scope, slug), getLegendDecks(slug)]);
+  const [card, matchups, pilots, eventDecks, cardStats, pool] = await Promise.all([
+    getLegendCard(legend.cardId),
+    getMatchups(scope, slug),
+    getTopPilots(scope, slug),
+    getLegendDecks(slug),
+    getLegendCardStats(slug, meta === "all" ? null : meta),
+    poolMap(),
+  ]);
+  const tcs = await getTranslations("CardStats");
   const s = all.find((x) => x.slug === slug);
   const opponents = await getLegendsBySlugs(matchups.map((m) => m.opponent));
   const rated = matchups
@@ -192,6 +203,16 @@ export default async function LegendPage({ params, searchParams }: PageProps<"/[
         </>
       )}
 
+      <section className="mt-10" aria-labelledby="card-stats-h">
+        <h2 id="card-stats-h" className="font-display text-2xl font-semibold">{tcs("title")}</h2>
+        <p className="mt-2 max-w-3xl text-sm text-muted">
+          {cardStats.total > 0 ? tcs("lead", { count: cardStats.total, set: meta === "all" ? tc("allSets") : meta }) : tcs("none")}
+        </p>
+        {cardStats.total > 0 && (
+          <CardStatsTable usage={cardStats.usage} pool={pool} total={cardStats.total} baseWinRate={cardStats.matches ? cardStats.wins / cardStats.matches : null} locale={locale} />
+        )}
+      </section>
+
       {eventDecks.length > 0 && (
         <section className="mt-10" aria-labelledby="event-decks-h">
           <h2 id="event-decks-h" className="font-display text-2xl font-semibold">{t("eventDecksTitle")}</h2>
@@ -200,8 +221,8 @@ export default async function LegendPage({ params, searchParams }: PageProps<"/[
           </p>
           <ul className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
             {eventDecks.map((d) => (
-              <li key={`${d.eventId}-${d.topdeckPlayerId}`}>
-                <Link href={`/events/${d.eventId}/decks/${encodeURIComponent(d.topdeckPlayerId)}`} className="block rounded-lg border border-border bg-surface p-3 text-sm hover:border-accent">
+              <li key={`${d.eventId}-${d.key}`}>
+                <Link href={`/events/${d.eventId}/decks/${encodeURIComponent(d.key)}`} className="block rounded-lg border border-border bg-surface p-3 text-sm hover:border-accent">
                   <span className="block font-semibold">{d.hidden ? tc("hiddenPlayer") : d.name}</span>
                   <span className="mt-0.5 block truncate text-muted">{t("eventDeckPlace", { rank: d.rank ?? 0, event: d.eventName })}</span>
                   <span className="mt-0.5 block text-xs text-muted">{f.date(new Date(d.startsAt))}</span>
