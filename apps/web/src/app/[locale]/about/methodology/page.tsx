@@ -12,7 +12,7 @@ export default async function MethodologyPage({ params }: PageProps<"/[locale]/a
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("Methodology");
-  const keys = ["winRate", "adjusted", "conversion", "power", "pilots", "minimum", "source"] as const;
+  const keys = ["winRate", "adjusted", "conversion", "power", "pilots", "minimum", "ranking", "source"] as const;
   return (
     <div className="mx-auto max-w-3xl px-4 py-10">
       <h1 className="font-display text-3xl font-bold">{t("title")}</h1>

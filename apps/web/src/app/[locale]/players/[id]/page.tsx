@@ -8,6 +8,7 @@ import { PlayerMatches, recordOf } from "@/components/PlayerMatches";
 import { getPathname, Link } from "@/i18n/navigation";
 import { eventTag } from "@/lib/event-tag";
 import { makeFormat } from "@/lib/format";
+import { getPlayerRanking } from "@/lib/ranking";
 import { getLegendsBySlugs, getPlayer, getPlayerEvents, getPlayerHonors, getPlayerLegends, getPlayerMatches, getTopOpponents } from "@/lib/queries";
 
 export const revalidate = 600;
@@ -29,12 +30,13 @@ export default async function PlayerPage({ params }: PageProps<"/[locale]/player
   const te = await getTranslations("Events");
   const f = makeFormat(locale);
 
-  const [events, byLegend, matches, opponents, honors] = await Promise.all([
+  const [events, byLegend, matches, opponents, honors, ranking] = await Promise.all([
     getPlayerEvents(player.id),
     getPlayerLegends(player.id),
     getPlayerMatches(player.id, { limit: 30 }),
     getTopOpponents(player.id),
     getPlayerHonors(player.id),
+    getPlayerRanking(player.id),
   ]);
   const slugs = new Set<string>(byLegend.map((l) => l.legend));
   events.forEach((e) => e.legend && slugs.add(e.legend));
@@ -53,6 +55,13 @@ export default async function PlayerPage({ params }: PageProps<"/[locale]/player
       <p className="text-sm text-muted"><Link href="/players" className="hover:text-text">{tp("title")}</Link></p>
       <h1 className="mt-2 font-display text-3xl font-bold md:text-4xl">{player.name}</h1>
       {player.nick && <p className="mt-1 text-sm text-muted">{t("realName", { name: player.realName })}</p>}
+      {ranking && (
+        <p className="mt-1 text-sm text-muted">
+          <Link href="/players#ranking" className="hover:text-text">
+            {t("rankingLine", { position: ranking.position, total: f.num(ranking.of), points: f.num(ranking.points) })}
+          </Link>
+        </p>
+      )}
 
       <dl className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
         {[

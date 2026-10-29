@@ -133,7 +133,8 @@
     "power": "Power is the percentile (0 to 100) of 60% adjusted win rate plus 40% top 25% rate, both standardized. Tiers: S from 90, A from 70, B from 40, C from 15, D below.",
     "pilots": "Best pilots are ranked by the lower bound of the 95% Wilson interval, with the sample size reduced by Kish's design effect, because matches from the same event are not fully independent.",
     "minimum": "A legend needs at least {min} pilots in the selected set to enter the chart.",
-    "source": "Data comes from the public pages of official events on the organized play platform (UVS). The legend of each player is the one registered there; full decklists are not public."
+    "source": "Data comes from the public pages of official events on the organized play platform (UVS). The legend of each player is the one registered there; full decklists are not public.",
+    "ranking": "The player ranking adds up points for final placement in each finished event. Each event is worth a base by level: Regional Championship 1000, Regional Qualifier 500, Showdown 300 (512+ players), 200 (256+) or 120 (smaller), side events 60 and community events 40. The player earns a share of that base: 1st 100%, 2nd 70%, top 4 50%, top 8 35%, top 16 22%, top 32 14%, top 64 9%, top 128 5% and top 256 3%. Only the top quarter of each event scores (at least the top 8). Ties are broken by titles and then best finish. Results imported from TopDeck.gg appear as separate players when they could not be matched to the official platform."
   },
   "Legal": {
     "updated": "Last updated: October 29, 2026."
@@ -317,7 +318,23 @@
     "pickOpponent": "Choose the opponent",
     "none": "No player found with that nickname or name.",
     "eventsCount": "{n} events",
-    "privacy": "Names come from the public results of official events. Any player can ask to have their name hidden from this site."
+    "privacy": "Names come from the public results of official events. Any player can ask to have their name hidden from this site.",
+    "ranking": "Ranking",
+    "rankingLead": "Points for final placement at each finished event, weighted by event level: Regional Championship, Regional Qualifier, Showdown, side and community events.",
+    "rankingHow": "How the points work",
+    "period": "Period",
+    "last12m": "Last 12 months",
+    "allTime": "All time",
+    "country": "Country",
+    "allCountries": "All countries",
+    "apply": "Apply",
+    "points": "Points",
+    "scoringEvents": "Events",
+    "titles": "Titles",
+    "bestFinish": "Best finish",
+    "place": "#{rank}",
+    "rankingBasedOn": "{players} players with points in {events} events",
+    "rankingEmpty": "No player has points in this period yet."
   },
   "Player": {
     "event": "Event",
@@ -342,7 +359,8 @@
     "honors": "Titles",
     "won": "Champion",
     "bestOf": "Best of {champion}",
-    "honorsNote": "Champion = 1st in the final standings. Best of = best finish with a legend at that event, among at least {min} players on it."
+    "honorsNote": "Champion = 1st in the final standings. Best of = best finish with a legend at that event, among at least {min} players on it.",
+    "rankingLine": "Ranking, last 12 months: #{position} of {total} · {points} pts"
   },
   "Builder": {
     "title": "Deckbuilder",
