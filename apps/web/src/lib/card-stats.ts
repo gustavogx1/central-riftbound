@@ -1,7 +1,7 @@
 import "server-only";
-import { cardUsage, decodeDeck, spiciness, type CardUsage, type DeckList, type StatDeck } from "@cr/core";
+import { cardUsage, decodeDeck, spiciness, zoneCounts, type CardUsage, type CardZone, type DeckList, type StatDeck } from "@cr/core";
 import { poolMap } from "./decks";
-import { getLegendDeckPool } from "./event-decks";
+import { getAllDecks, getLegendDeckPool, type AnyDeck } from "./event-decks";
 
 export interface LegendCardStats {
   /** Listas usadas na conta. */
@@ -41,4 +41,57 @@ export async function getDeckSpice(deck: DeckList, legend: string | null, metaga
   const includesSelf = self ? stats.keys.has(`${self.eventId}|${self.key}`) : false;
   const value = spiciness(deck, stats.usage, stats.total, includesSelf);
   return value === null ? null : { value, compared: stats.total - (includesSelf ? 1 : 0) };
+}
+
+export interface CardLegendUse {
+  legend: string;
+  /** Listas da lenda (no recorte) e quantas usam a carta. */
+  total: number;
+  decks: number;
+  avgCopies: number;
+}
+
+export interface CardTournamentUse {
+  /** Listas que usam a carta em qualquer zona. */
+  decks: number;
+  /** Listas olhadas (todas as lendas). */
+  total: number;
+  byLegend: CardLegendUse[];
+  /** Listas mais recentes com a carta, com a zona e as cópias. */
+  recent: (AnyDeck & { zone: CardZone; copies: number })[];
+}
+
+/** Uso de uma carta em todas as decklists de torneio: por lenda e as listas mais recentes. */
+export async function getCardTournamentUse(cardId: string, recentLimit = 12): Promise<CardTournamentUse> {
+  const [rows, pool] = await Promise.all([getAllDecks(), poolMap()]);
+  const perLegend = new Map<string, { total: number; decks: number; copies: number }>();
+  const recent: CardTournamentUse["recent"] = [];
+  let decks = 0;
+  let total = 0;
+  for (const r of rows) {
+    let deck: DeckList;
+    try {
+      deck = decodeDeck(r.code, pool).deck;
+    } catch {
+      continue;
+    }
+    total++;
+    const zones = zoneCounts(deck);
+    const zone = (["main", "battlefields", "side"] as const).find((z) => zones[z].has(cardId));
+    const legend = r.legend ?? "";
+    const l = perLegend.get(legend) ?? { total: 0, decks: 0, copies: 0 };
+    l.total++;
+    if (zone) {
+      decks++;
+      l.decks++;
+      l.copies += zones[zone].get(cardId)!;
+      if (recent.length < recentLimit) recent.push({ ...r, zone, copies: zones[zone].get(cardId)! });
+    }
+    perLegend.set(legend, l);
+  }
+  const byLegend = [...perLegend.entries()]
+    .filter(([legend, l]) => legend && l.decks > 0)
+    .map(([legend, l]) => ({ legend, total: l.total, decks: l.decks, avgCopies: l.copies / l.decks }))
+    .sort((a, b) => b.decks - a.decks || b.decks / b.total - a.decks / a.total);
+  return { decks, total, byLegend, recent };
 }

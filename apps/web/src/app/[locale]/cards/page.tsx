@@ -95,7 +95,8 @@ export default async function CardsPage({ params, searchParams }: PageProps<"/[l
           {rows.map(({ card, print }) => {
             const img = cardImage(print.id);
             return (
-              <li key={print.id} className="overflow-hidden rounded-xl border border-border bg-surface">
+              <li key={print.id} className="overflow-hidden rounded-xl border border-border bg-surface hover:border-accent">
+                <Link href={`/cards/${print.code}`} className="block">
                 {img ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={img} alt={`${card.name}${card.rulesText ? `: ${card.rulesText}` : ""}`} width={372} height={519} loading="lazy" className="w-full" />
@@ -117,6 +118,7 @@ export default async function CardsPage({ params, searchParams }: PageProps<"/[l
                   {print.publicCode} · {f.num(print.collectorNumber)}
                   {print.variant && <> · {print.variant.split(",").map((v) => tv(variantKey(v.trim()))).join(", ")}</>}
                 </p>
+                </Link>
               </li>
             );
           })}

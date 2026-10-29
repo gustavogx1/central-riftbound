@@ -1,6 +1,7 @@
 import { MIN_CARD_MATCHES, STAPLE_INCLUSION, type CardUsage, type CardZone, type PoolCard } from "@cr/core";
 import { getTranslations } from "next-intl/server";
 import { DomainDots } from "@/components/DomainDots";
+import { Link } from "@/i18n/navigation";
 import { makeFormat } from "@/lib/format";
 import { cardImage } from "@/lib/images";
 import { CardHover } from "./CardHover";
@@ -43,7 +44,7 @@ export async function CardStatsTable({ usage, pool, total, baseWinRate, locale }
                           <span className="w-4 text-center text-xs text-muted">{c.energyCost ?? ""}</span>
                           <DomainDots domains={c.domains} />
                           <CardHover src={cardImage(c.id, 744)} lowSrc={cardImage(c.id)} landscape={c.type === "Battlefield"} className="truncate">
-                            {cardName(c)}
+                            <Link href={`/cards/${c.code}`} className="hover:text-accent">{cardName(c)}</Link>
                           </CardHover>
                           {zone === "main" && u.inclusion >= STAPLE_INCLUSION && (
                             <span className="rounded bg-accent/15 px-1.5 py-0.5 text-xs text-accent" title={t("stapleHint", { pct: f.pct(STAPLE_INCLUSION, 0) })}>{t("staple")}</span>
