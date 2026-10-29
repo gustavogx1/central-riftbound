@@ -1,5 +1,11 @@
 import { z } from "zod";
 
+/** Alguns torneios mandam números como texto ("8"); texto que não é número vira null. */
+const looseInt = z
+  .union([z.number(), z.string()])
+  .nullish()
+  .transform((v) => (typeof v === "string" ? Number.parseInt(v, 10) || null : v));
+
 /** Só os campos que usamos; o resto da resposta é ignorado. */
 export const tdBulkTournament = z.object({
   TID: z.string(),
@@ -7,8 +13,8 @@ export const tdBulkTournament = z.object({
   startDate: z.number(),
   game: z.string().optional(),
   format: z.string().optional(),
-  swissNum: z.number().nullish(),
-  topCut: z.number().nullish(),
+  swissNum: looseInt,
+  topCut: looseInt,
   eventData: z.object({ city: z.string().nullish(), state: z.string().nullish(), address: z.string().nullish() }).partial().nullish(),
   standings: z.array(z.unknown()).default([]),
 });

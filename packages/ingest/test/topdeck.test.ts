@@ -1,7 +1,7 @@
 import { decodeDeck, type PoolCard } from "@cr/core";
 import { describe, expect, it } from "vitest";
 import { classifyTopdeck, convertDeck, deckObjToText, matchPlayers, matchUvsEvent, ownKeys, ownRows, shortName } from "../src/topdeck/normalize";
-import type { TdRound, TdStanding } from "../src/topdeck/schemas";
+import { tdBulk, type TdRound, type TdStanding } from "../src/topdeck/schemas";
 
 describe("classifyTopdeck", () => {
   it("aceita Showdowns, Regionals e majors com 128+ jogadores", () => {
@@ -135,5 +135,21 @@ describe("ownRows", () => {
   it("classificação na última rodada do suíço, com a campanha do suíço", () => {
     expect(rows.standingRows.every((s) => s.roundId === ref("r:t1:2"))).toBe(true);
     expect(rows.standingRows.map((s) => [s.rank, s.wins, s.losses, s.draws])).toEqual([[1, 1, 0, 0], [2, 0, 1, 1], [3, 1, 0, 1]]);
+  });
+});
+
+describe("tdBulk", () => {
+  it("aceita topCut e swissNum vindos como texto", () => {
+    const base = { TID: "x", tournamentName: "Melbourne Showdown", startDate: 1_790_000_000 };
+    const parsed = tdBulk.parse([
+      { ...base, topCut: "8", swissNum: "9" },
+      { ...base, topCut: "", swissNum: null },
+      { ...base, topCut: 16, swissNum: 8 },
+    ]);
+    expect(parsed.map((t) => [t.topCut, t.swissNum])).toEqual([
+      [8, 9],
+      [null, null],
+      [16, 8],
+    ]);
   });
 });
