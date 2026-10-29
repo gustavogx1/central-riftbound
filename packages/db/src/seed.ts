@@ -24,6 +24,9 @@ const LEGEND_REFS = [
   ["matchup_stats", "opponent"],
   ["pilot_stats", "legend"],
   ["power_snapshot", "legend"],
+  ["event_deck", "legend"],
+  ["deck_submission", "legend"],
+  ["deck_submission", "expected_legend"],
 ] as const;
 
 function chunks<T>(rows: T[]): T[][] {
