@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { Fragment, type ReactNode } from "react";
 import { energyCurve, fullName, mainCount, type DeckList, type PoolCard } from "@cr/core";
 import { getTranslations } from "next-intl/server";
 import { domainColor } from "@/components/LegendAvatar";
@@ -88,6 +88,47 @@ function Meters({ title, items }: { title: string; items: { key: string; label: 
   );
 }
 
+interface DomainRow {
+  key: string;
+  domains: string[];
+  label: string;
+  cards: number | null;
+  power: number;
+}
+
+/** Domínios do deck: cartas de cada um e quanto power elas pedem. Power de carta com dois domínios fica numa linha à parte. */
+function DomainStats({ title, rows, labels }: { title: string; rows: DomainRow[]; labels: { cards: string; power: string; note: string } }) {
+  const peak = Math.max(1, ...rows.map((r) => r.cards ?? 0));
+  const hybrid = rows.some((r) => r.domains.length !== 1);
+  return (
+    <div>
+      <p className="font-display text-xs font-semibold tracking-[0.18em] text-muted uppercase">{title}</p>
+      <div className="mt-3 grid grid-cols-[minmax(5.5rem,auto)_1fr_2.5rem_3rem] items-center gap-x-2 gap-y-2 text-sm">
+        <span />
+        <span />
+        <span className="text-right text-[10px] tracking-wider text-muted uppercase">{labels.cards}</span>
+        <span className="text-right text-[10px] tracking-wider text-muted uppercase">{labels.power}</span>
+        {rows.map((r) => (
+          <Fragment key={r.key}>
+            <span className="flex items-center gap-1.5 truncate">
+              {r.domains.map((d) => (
+                <span key={d} className="size-2.5 shrink-0 rounded-full" style={{ background: domainColor(d) }} />
+              ))}
+              {r.label}
+            </span>
+            <span className="h-1.5 rounded-full bg-surface-2">
+              {r.cards !== null && <span className="block h-full rounded-full" style={{ width: `${(r.cards / peak) * 100}%`, background: domainColor(r.domains[0]) }} />}
+            </span>
+            <span className="text-right font-semibold tabular-nums">{r.cards ?? ""}</span>
+            <span className="text-right font-semibold text-accent-2 tabular-nums">{r.power}</span>
+          </Fragment>
+        ))}
+      </div>
+      {hybrid && <p className="mt-3 text-[11px] text-muted">{labels.note}</p>}
+    </div>
+  );
+}
+
 export interface DeckShowcaseProps {
   deck: DeckList;
   pool: Map<string, PoolCard>;
@@ -141,10 +182,19 @@ export async function DeckShowcase({ deck, pool, title, titleText, kicker, bylin
   const curve = energyCurve(deck, pool);
   const power = [0, 0, 0, 0];
   const domains = new Map<string, number>();
+  // Power pedido por domínio. Em carta de dois domínios, cada power sai de qualquer um deles (Core Rules 135.2.e.6.c);
+  // carta sem domínio aceita power de qualquer domínio.
+  const powerBy = new Map<string, { domains: string[]; power: number }>();
   const types = new Map<string, number>();
   for (const [c, n] of mainAll) {
     if (c.powerCost !== null) power[Math.min(c.powerCost, 3)]! += n;
     for (const d of c.domains) domains.set(d, (domains.get(d) ?? 0) + n);
+    if (c.powerCost) {
+      const key = c.domains.join("/") || "any";
+      const cur = powerBy.get(key) ?? { domains: c.domains, power: 0 };
+      cur.power += c.powerCost * n;
+      powerBy.set(key, cur);
+    }
     if (c.type) types.set(c.type, (types.get(c.type) ?? 0) + n);
   }
 
@@ -278,6 +328,7 @@ export async function DeckShowcase({ deck, pool, title, titleText, kicker, bylin
                   className={btnClass}
                   labels={{
                     button: t("export"),
+                    close: t("close"),
                     vertical: t("vertical"),
                     horizontal: t("horizontal"),
                     format: t("format"),
@@ -305,12 +356,24 @@ export async function DeckShowcase({ deck, pool, title, titleText, kicker, bylin
       <section className="mt-10">
         <SectionTitle title={t("stats")} />
         <p className="mt-1 text-xs text-muted">{t("statsSub", { count: total })}</p>
-        <div className="mt-4 grid gap-6 rounded-2xl border border-border bg-surface p-5 md:grid-cols-[1.4fr_0.8fr_1fr_1fr]">
+        <div className="mt-4 grid gap-6 rounded-2xl border border-border bg-surface p-5 md:grid-cols-2 lg:grid-cols-[1.3fr_0.7fr_1.4fr_0.9fr]">
           <Bars title={t("energy")} values={curve} labels={curve.map((_, i) => (i === 7 ? "7+" : String(i)))} />
           <Bars title={t("power")} values={power} labels={["0", "1", "2", "3+"]} />
-          <Meters
+          <DomainStats
             title={t("domains")}
-            items={[...domains].sort((a, b) => b[1] - a[1]).map(([d, n]) => ({ key: d, label: td(d as "Fury"), value: n, color: domainColor(d) }))}
+            labels={{ cards: t("cardsCol"), power: t("powerCol"), note: t("hybridNote") }}
+            rows={[
+              ...[...domains].sort((a, b) => b[1] - a[1]).map(([d, n]): DomainRow => ({ key: d, domains: [d], label: td(d as "Fury"), cards: n, power: powerBy.get(d)?.power ?? 0 })),
+              ...[...powerBy]
+                .filter(([, v]) => v.domains.length !== 1)
+                .map(([k, v]): DomainRow => ({
+                  key: k,
+                  domains: v.domains,
+                  label: v.domains.length ? v.domains.map((d) => td(d as "Fury")).join(t("or")) : t("anyDomain"),
+                  cards: null,
+                  power: v.power,
+                })),
+            ]}
           />
           <Meters title={t("types")} items={(["Unit", "Spell", "Gear"] as const).filter((x) => types.get(x)).map((x) => ({ key: x, label: tt(x), value: types.get(x)! }))} />
         </div>

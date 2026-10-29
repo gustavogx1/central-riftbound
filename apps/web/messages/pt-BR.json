@@ -570,9 +570,15 @@
     "stats": "Estatísticas",
     "statsSub": "Deck principal, {count} cartas",
     "energy": "Energia",
-    "power": "Poder",
+    "power": "Power",
     "domains": "Domínios",
-    "types": "Tipos"
+    "types": "Tipos",
+    "close": "Fechar",
+    "cardsCol": "Cartas",
+    "powerCol": "Power",
+    "or": " ou ",
+    "anyDomain": "Qualquer domínio",
+    "hybridNote": "Cartas de dois domínios pagam o power com qualquer um dos dois; cartas sem domínio, com qualquer power."
   },
   "Submit": {
     "title": "Enviar decklist",
