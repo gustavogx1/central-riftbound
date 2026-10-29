@@ -25,6 +25,25 @@ export function showdownSize(e: UvsEventSummary): number {
   return Math.max(started, e.registered_user_count ?? 0, e.capacity ?? 0);
 }
 
+/** Regional Qualifier / Regional Championship da Riot: milhares de jogadores. */
+export const REGIONAL_MIN_PLAYERS = 256;
+const REGIONAL_MAIN = /regional (qualifier|championship)/i;
+/** Pre-Regional Challenge e Regional Rebound, no mesmo fim de semana. */
+const REGIONAL_SIDE = /pre-?regional|regional rebound/i;
+/** "Road to Regionals" e afins são eventos de loja. */
+const REGIONAL_STORE = /road to/i;
+
+/** "main" (Regional), "side" (paralelo do Regional) ou null (fora). */
+export function classifyRegional(e: UvsEventSummary): "main" | "side" | null {
+  if (e.game_type !== "RIFTBOUND" || e.is_test_event) return null;
+  if (LIMITED.test(e.name) || REGIONAL_STORE.test(e.name)) return null;
+  if (e.gameplay_format && e.gameplay_format.name !== "Constructed") return null;
+  const size = showdownSize(e);
+  if (REGIONAL_SIDE.test(e.name)) return size >= SHOWDOWN_SIDE_MIN_PLAYERS ? "side" : null;
+  if (REGIONAL_MAIN.test(e.name)) return size >= REGIONAL_MIN_PLAYERS ? "main" : null;
+  return null;
+}
+
 /** "showdown" (principal), "side" (paralelo) ou null (fora). */
 export function classifyShowdown(e: UvsEventSummary): "showdown" | "side" | null {
   if (e.game_type !== "RIFTBOUND" || e.is_test_event) return null;
@@ -35,24 +54,36 @@ export function classifyShowdown(e: UvsEventSummary): "showdown" | "side" | null
   return size >= SHOWDOWN_MIN_PLAYERS ? "showdown" : null;
 }
 
+type MajorKind = "showdown" | "main" | "side";
+
+/** Termo buscado no nome → regra que decide se o evento entra. */
+const SEARCHES: [string, (e: UvsEventSummary) => MajorKind | null][] = [
+  ["Showdown", classifyShowdown],
+  ["Regional", classifyRegional],
+];
+
 /**
- * Busca na UVS os eventos com "Showdown" no nome (são poucas centenas, de todos
- * os jogos, então 1 ou 2 requisições) e devolve os que entram.
+ * Busca na UVS os eventos com "Showdown" ou "Regional" no nome (são poucas
+ * centenas, de todos os jogos, então 1 ou 2 requisições por termo) e devolve os
+ * que entram: Showdowns, Regionais e os paralelos deles.
  */
 export async function findShowdowns(client: UvsClient) {
-  const found: (UvsEventSummary & { kind: "showdown" | "side" })[] = [];
-  for (let p = 1; ; p++) {
-    const res = await client.get(`events/?page=${p}&page_size=250&name=Showdown`, (d) => uvsEventSearch.parse(d));
-    for (const e of res.results) {
-      const kind = classifyShowdown(e);
-      if (kind) found.push({ ...e, kind });
+  const found = new Map<number, UvsEventSummary & { start_datetime: string; kind: MajorKind }>();
+  for (const [name, classify] of SEARCHES) {
+    for (let p = 1; ; p++) {
+      const res = await client.get(`events/?page=${p}&page_size=250&name=${name}`, (d) => uvsEventSearch.parse(d));
+      for (const e of res.results) {
+        const kind = classify(e);
+        if (kind && e.start_datetime && !found.has(e.id)) found.set(e.id, { ...e, start_datetime: e.start_datetime, kind });
+      }
+      if (!res.next) break;
     }
-    if (!res.next) return found.sort((a, b) => a.start_datetime.localeCompare(b.start_datetime));
   }
+  return [...found.values()].sort((a, b) => a.start_datetime.localeCompare(b.start_datetime));
 }
 
 /**
- * Passa a acompanhar os Showdowns novos. Quem já está na lista não muda (um
+ * Passa a acompanhar os Showdowns e Regionais novos. Quem já está na lista não muda (um
  * evento cadastrado à mão com outro tipo continua como está), e os ids em
  * `ignore` nunca entram.
  */

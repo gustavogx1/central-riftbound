@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { classifyShowdown } from "../src/showdown";
+import { classifyRegional, classifyShowdown } from "../src/showdown";
 import type { UvsEventSummary } from "../src/uvs/schemas";
 
 const ev = (name: string, players: number | null, extra: Partial<UvsEventSummary> = {}): UvsEventSummary => ({
@@ -41,5 +41,24 @@ describe("classifyShowdown", () => {
     expect(classifyShowdown(ev("Weekly Riftbound Showdown", null, { display_status: "upcoming", capacity: 16 }))).toBeNull();
     // Terminado: só vale quem jogou.
     expect(classifyShowdown(ev("Riftbound Showdown Series", 40, { capacity: 1000 }))).toBeNull();
+  });
+});
+
+describe("classifyRegional", () => {
+  it("aceita os Regionais e os paralelos do fim de semana", () => {
+    expect(classifyRegional(ev("Riftbound Regional Qualifier - Las Vegas", 1670))).toBe("main");
+    expect(classifyRegional(ev("Riftbound Regional Qualifier: Lille", 1949, { capacity: 1 }))).toBe("main");
+    expect(classifyRegional(ev("Regional Rebound - RQ Las Vegas", 418))).toBe("side");
+    expect(classifyRegional(ev("Pre-Regional Challenge - RQ Sydney Friday 1pm", 714))).toBe("side");
+    expect(classifyRegional(ev("Secretlab Regional Rebound - RQ Barcelona Sunday 11am", 1003))).toBe("side");
+  });
+  it("aceita o Regional que ainda vai começar pelo total de inscritos", () => {
+    expect(classifyRegional(ev("Riftbound Regional Championship: Europe", 311, { display_status: "upcoming", capacity: 8 }))).toBe("main");
+  });
+  it("deixa de fora eventos de loja e de outros jogos", () => {
+    expect(classifyRegional(ev("Road to Regionals: Testing Tournament 1/2 @Damnation 2026", 81))).toBeNull();
+    expect(classifyRegional(ev("Store Regional Championship", 40))).toBeNull();
+    expect(classifyRegional(ev("Lorcana Regional Qualifier", 900, { game_type: "LORCANA" }))).toBeNull();
+    expect(classifyRegional(ev("Riftbound Regional Qualifier - Sealed", 900, { gameplay_format: { name: "Sealed" } }))).toBeNull();
   });
 });

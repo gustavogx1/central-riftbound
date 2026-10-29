@@ -1,8 +1,9 @@
 /**
  * Importa do TopDeck.gg os torneios grandes de Riftbound (Showdowns, Regionals, majors)
  * e as decklists. Evento que já veio da UVS só recebe as decklists; o resto entra inteiro.
- *   pnpm topdeck                     # terminados nos últimos 30 dias, só os novos
- *   pnpm topdeck --since 2025-10-01  # desde a data (primeira carga)
+ *   pnpm topdeck                     # desde o lançamento do jogo, só os novos
+ *   pnpm topdeck --days 30           # só os terminados nos últimos 30 dias
+ *   pnpm topdeck --since 2026-06-01  # desde a data
  *   pnpm topdeck --dry-run           # só lista
  *   pnpm topdeck --force             # reimporta os já importados
  *   pnpm topdeck <tid> …             # torneios específicos
@@ -23,7 +24,7 @@ const { positionals, values } = parseArgs({
   allowPositionals: true,
   options: {
     since: { type: "string" },
-    days: { type: "string", default: "30" },
+    days: { type: "string" },
     "dry-run": { type: "boolean", default: false },
     force: { type: "boolean", default: false },
     "no-stats": { type: "boolean", default: false },
@@ -31,9 +32,13 @@ const { positionals, values } = parseArgs({
 });
 
 if (!process.env.TOPDECK_API_KEY) {
-  console.log("Defina o segredo TOPDECK_API_KEY (chave grátis do TopDeck.gg) para importar do TopDeck.");
+  // Aviso no resumo do GitHub Actions: sem a chave, os Showdowns que só estão no TopDeck não entram.
+  console.log("::warning::Defina o segredo TOPDECK_API_KEY (chave grátis do TopDeck.gg) para importar do TopDeck.");
   process.exit(0);
 }
+
+/** Antes do primeiro torneio de Riftbound; cobre toda a história do jogo. */
+const RIFTBOUND_LAUNCH = new Date("2025-10-01T00:00:00Z");
 
 const config = JSON.parse(readFileSync(new URL("../../topdeck-events.json", import.meta.url), "utf8")) as { ignore: string[]; link: Record<string, number> };
 const client = new TopdeckClient({ log: console.warn });
@@ -52,7 +57,13 @@ if (positionals.length) {
     address: [t.eventData?.city, t.eventData?.state].filter(Boolean).join(", ") || null,
   }));
 } else {
-  const since = values.since ? new Date(values.since) : new Date(Date.now() - Number(values.days) * 86_400_000);
+  // Sem data, olha desde o lançamento: são ~1 requisição por mês de história e os
+  // já importados são pulados, então evento que escapou de um dia entra no seguinte.
+  const since = values.since
+    ? new Date(values.since)
+    : values.days
+      ? new Date(Date.now() - Number(values.days) * 86_400_000)
+      : RIFTBOUND_LAUNCH;
   majors = await findTopdeckMajors(client, { since, ignore: config.ignore });
 }
 

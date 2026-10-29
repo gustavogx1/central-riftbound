@@ -1,6 +1,6 @@
 /**
- * Acha os eventos do Showdown Series na UVS e passa a acompanhá-los.
- * Roda todo dia antes da importação, então Showdowns novos entram sozinhos.
+ * Acha na UVS os eventos do Showdown Series e os Regionais (com os paralelos) e passa a acompanhá-los.
+ * Roda todo dia antes da importação, então eventos novos entram sozinhos.
  *   pnpm discover            # cadastra os novos
  *   pnpm discover --dry-run  # só lista
  * Para nunca acompanhar um evento achado por engano, ponha o id em showdown-ignore.json.
@@ -23,5 +23,5 @@ const isNew = new Set(added);
 for (const e of found) {
   console.log(`${isNew.has(e.id) ? "+" : " "} ${e.id}\t${e.start_datetime.slice(0, 10)}\t${e.kind}\t${e.starting_player_count ?? "?"}\t${e.name}`);
 }
-console.log(`${found.length} Showdowns na UVS, ${added.length} novos acompanhados`);
+console.log(`${found.length} Showdowns e Regionais na UVS, ${added.length} novos acompanhados`);
 process.exit(0);

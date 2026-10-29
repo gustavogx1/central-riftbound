@@ -106,7 +106,8 @@ export const uvsEventSearch = page(
   z.object({
     id: z.number(),
     name: z.string(),
-    start_datetime: z.string(),
+    // Eventos sem data ("open play" sem agenda) vêm com null.
+    start_datetime: z.string().nullable(),
     starting_player_count: z.number().nullable(),
     registered_user_count: z.number().nullable().optional(),
     capacity: z.number().nullable().optional(),
