@@ -56,7 +56,9 @@ export class TopdeckClient {
       if (res.ok) return parse(await res.json());
       const retryable = res.status === 429 || res.status >= 500;
       if (!retryable || attempt >= this.maxRetries) {
-        throw new Error(`TopDeck ${res.status} em ${path}`);
+        // O corpo diz o que a API recusou (ex.: campo obrigatório faltando).
+        const detail = (await res.text().catch(() => "")).slice(0, 300);
+        throw new Error(`TopDeck ${res.status} em ${path}${detail ? `: ${detail}` : ""}`);
       }
       const after = Number(res.headers.get("retry-after"));
       const delay = after > 0 ? after * 1000 : 2000 * 2 ** attempt;
