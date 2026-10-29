@@ -1,5 +1,6 @@
 import "server-only";
 import { and, asc, desc, eq, ilike, inArray, or, sql, type SQL } from "drizzle-orm";
+import { bestOfByLegend, MIN_BEST_OF_PILOTS } from "@cr/core";
 import { schema } from "@cr/db";
 import type { PoolCard } from "@cr/core";
 import { getDb } from "./db";
@@ -348,6 +349,52 @@ export async function getPlayerMatches(id: number, opts: { vs?: number; limit?: 
     const games = !reported || r.isBye ? null : result === "loss" ? `${gamesLoser}–${gamesWinner}` : `${gamesWinner}–${gamesLoser}`;
     return { ...r, result, games };
   });
+}
+
+/**
+ * Títulos do jogador em eventos encerrados, pela classificação final (última fase):
+ * campeão (1º lugar) e "best of" (melhor colocado com a lenda, com ao menos MIN_BEST_OF_PILOTS pilotos dela).
+ */
+export async function getPlayerHonors(id: number) {
+  const db = getDb();
+  if (!db) return [];
+  const rows = await db.execute(sql`
+    with fr as (
+      select distinct on (r.event_id) r.event_id, r.id as round_id
+      from event_round r join event e on e.id = r.event_id and e.status = 'complete'
+      where r.event_id in (select event_id from standing where player_id = ${id})
+        and exists (select 1 from standing s where s.round_id = r.id)
+      order by r.event_id, r.phase_order desc, r.round_number desc
+    ), fin as (
+      select s.event_id, s.player_id, s.rank, s.legend,
+        min(s.rank) over (partition by s.event_id, s.legend) as best,
+        count(*) over (partition by s.event_id, s.legend) as pilots
+      from standing s join fr on fr.round_id = s.round_id
+    )
+    select e.id, e.name, e.kind, e.starts_at as "startsAt", e.player_count as "playerCount", fin.legend,
+      fin.rank = 1 as won,
+      (fin.legend is not null and fin.rank = fin.best and fin.pilots >= ${MIN_BEST_OF_PILOTS}) as "bestOf"
+    from fin join event e on e.id = fin.event_id
+    where fin.player_id = ${id}
+      and (fin.rank = 1 or (fin.legend is not null and fin.rank = fin.best and fin.pilots >= ${MIN_BEST_OF_PILOTS}))
+    order by e.starts_at desc
+  `);
+  return rows as unknown as { id: number; name: string; kind: string; startsAt: string; playerCount: number; legend: string | null; won: boolean; bestOf: boolean }[];
+}
+
+/** "Best of" de cada lenda no evento (classificação final): jogador → lenda. */
+export async function getEventBestOf(eventId: number) {
+  const db = getDb();
+  if (!db) return new Map<number, string>();
+  const rows = (await db.execute(sql`
+    with fr as (
+      select r.id from event_round r where r.event_id = ${eventId}
+        and exists (select 1 from standing s where s.round_id = r.id)
+      order by r.phase_order desc, r.round_number desc limit 1
+    )
+    select s.player_id as "playerId", s.rank, s.legend from standing s join fr on fr.id = s.round_id
+  `)) as unknown as { playerId: number; rank: number; legend: string | null }[];
+  return new Map([...bestOfByLegend(rows)].map(([legend, pid]) => [pid, legend]));
 }
 
 /** Lendas no evento, pela classificação da primeira fase (todos os jogadores). */

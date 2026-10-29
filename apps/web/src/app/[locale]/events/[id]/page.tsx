@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { CrownIcon } from "@/components/Honors";
 import { LegendAvatar } from "@/components/LegendAvatar";
 import { LiveRefresher } from "@/components/live/LiveRefresher";
 import { MyMatch } from "@/components/live/MyMatch";
@@ -8,7 +9,7 @@ import { RoundTimer } from "@/components/live/RoundTimer";
 import { Pagination } from "@/components/Pagination";
 import { Link } from "@/i18n/navigation";
 import { makeFormat } from "@/lib/format";
-import { getEvent, getEventMeta, getLegendsBySlugs, getPairings, getRoundPlayers, getStandings, type LegendInfo } from "@/lib/queries";
+import { getEvent, getEventBestOf, getEventMeta, getLegendsBySlugs, getPairings, getRoundPlayers, getStandings, type LegendInfo } from "@/lib/queries";
 
 const PAGE_SIZE = 50;
 
@@ -54,16 +55,19 @@ export default async function EventPage({ params, searchParams }: PageProps<"/[l
   const currentRound = ev.rounds.at(-1);
   const roundLabel = (r: { phaseName: string; roundNumber: number }) => `${r.phaseName} · ${t("round")} ${r.roundNumber}`;
 
-  const [metaRows, standings, pairings, roundPlayers] = await Promise.all([
+  const [metaRows, standings, pairings, roundPlayers, bestOf] = await Promise.all([
     getEventMeta(ev.id),
     view === "standings" && round ? getStandings(round.id, { q, page, pageSize: PAGE_SIZE }) : Promise.resolve({ rows: [], total: 0 }),
     view === "pairings" && round ? getPairings(round.id, { q, page, pageSize: PAGE_SIZE }) : Promise.resolve({ rows: [], total: 0 }),
     isLive && currentRound ? getRoundPlayers(ev.id, currentRound.id, lastStanding?.id ?? null) : Promise.resolve([]),
+    // "Best of" só existe com a classificação final fechada.
+    view === "standings" && ev.status === "complete" ? getEventBestOf(ev.id) : Promise.resolve(new Map<number, string>()),
   ]);
   const slugs = new Set<string>(metaRows.map((m) => m.legend));
   standings.rows.forEach((r) => r.s.legend && slugs.add(r.s.legend));
   pairings.rows.forEach((r) => { if (r.l1) slugs.add(r.l1); if (r.l2) slugs.add(r.l2); });
   roundPlayers.forEach((r) => { if (r.legend) slugs.add(r.legend); });
+  bestOf.forEach((legend) => slugs.add(legend));
   const legends = await getLegendsBySlugs([...slugs]);
   const legendsLite = Object.fromEntries([...legends].map(([k, l]) => [k, { champion: l.champion, cardId: l.cardId, domains: l.domains }]));
   const standingsUnofficial = round?.status !== "COMPLETE" && view === "standings";
@@ -76,6 +80,17 @@ export default async function EventPage({ params, searchParams }: PageProps<"/[l
     ) : (
       name(n, hidden)
     );
+  const bestOfLabel = (pid: number) => {
+    const slug = bestOf.get(pid);
+    if (!slug) return null;
+    const label = t("bestOf", { champion: legends.get(slug)?.champion ?? slug });
+    return (
+      <span title={label} className="inline-flex">
+        <CrownIcon size={15} />
+        <span className="sr-only">{label}</span>
+      </span>
+    );
+  };
   const tab = (active: boolean) => `rounded-md px-3 py-1.5 text-sm ${active ? "bg-surface-2 text-text" : "text-muted hover:text-text"}`;
 
   return (
@@ -174,7 +189,12 @@ export default async function EventPage({ params, searchParams }: PageProps<"/[l
                     {standings.rows.map((r) => (
                       <tr key={r.s.playerId} className="border-t border-border">
                         <td className="px-3 py-2 tabular-nums text-muted">{r.s.rank}</td>
-                        <td className="px-3 py-2 font-medium">{playerLink(r.s.playerId, r.name, r.hidden)}</td>
+                        <td className="px-3 py-2 font-medium">
+                          <span className="flex items-center gap-1.5">
+                            {playerLink(r.s.playerId, r.name, r.hidden)}
+                            {bestOfLabel(r.s.playerId)}
+                          </span>
+                        </td>
                         <td className="px-3 py-2"><LegendCell slug={r.s.legend} legends={legends} /></td>
                         <td className="px-3 py-2 text-right tabular-nums">{r.s.wins}-{r.s.losses}-{r.s.draws}</td>
                         <td className="px-3 py-2 text-right tabular-nums">{r.s.points}</td>

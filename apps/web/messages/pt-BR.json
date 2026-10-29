@@ -178,7 +178,8 @@
     "vs": "vs",
     "points": "Pontos",
     "omw": "OMW",
-    "omwHint": "Percentual de vitórias dos adversários"
+    "omwHint": "Percentual de vitórias dos adversários",
+    "bestOf": "Best of {champion}: melhor colocação com esta lenda no evento"
   },
   "Cards": {
     "title": "Cartas",
@@ -275,7 +276,11 @@
     "recentMatches": "Partidas recentes",
     "h2hSummary": "{matches, plural, one {# partida} other {# partidas}} nos eventos acompanhados, {draws, plural, one {# empate} other {# empates}}",
     "neverMet": "Esses jogadores ainda não se enfrentaram nos eventos acompanhados.",
-    "realName": "Nome na UVS: {name}"
+    "realName": "Nome na UVS: {name}",
+    "honors": "Títulos",
+    "won": "Campeão",
+    "bestOf": "Best of {champion}",
+    "honorsNote": "Campeão = 1º na classificação final. Best of = melhor colocação com uma lenda no evento, entre ao menos {min} jogadores com ela."
   },
   "Builder": {
     "title": "Deckbuilder",
