@@ -45,6 +45,10 @@ jobs:
       - name: Acompanha os Showdowns e Regionais novos
         run: pnpm discover
         if: env.DATABASE_URL != ''
+      # Eventos "não listados" na UVS não aparecem na busca por nome; entram por tracked-events.json.
+      - name: Acompanha os eventos cadastrados à mão
+        run: pnpm track seed
+        if: env.DATABASE_URL != ''
       - run: pnpm ingest
         if: env.DATABASE_URL != ''
       - name: Decklists e eventos grandes do TopDeck.gg (desde o lançamento, só os novos)

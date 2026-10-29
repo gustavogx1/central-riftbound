@@ -122,5 +122,9 @@
   {
     "uvsEventId": 892341,
     "kind": "side"
+  },
+  {
+    "uvsEventId": 1222298,
+    "kind": "showdown"
   }
 ]

@@ -28,7 +28,7 @@ if (cmd === "add" && id) {
     console.log(`Acompanhando ${uvsEventId} (${values.kind}${values.live ? ", ao vivo" : ""})`);
   }
 } else if (cmd === "seed") {
-  const rows = JSON.parse(readFileSync(new URL("../../tracked-events.json", import.meta.url), "utf8")) as { uvsEventId: number; kind: "main" | "side" }[];
+  const rows = JSON.parse(readFileSync(new URL("../../tracked-events.json", import.meta.url), "utf8")) as { uvsEventId: number; kind: "main" | "side" | "showdown" }[];
   const added = await db.insert(schema.trackedEvent).values(rows).onConflictDoNothing().returning({ id: schema.trackedEvent.uvsEventId });
   console.log(`${added.length} eventos novos (${rows.length} na lista)`);
 } else if (cmd === "live" && id) {
