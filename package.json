@@ -19,6 +19,7 @@
     "track": "pnpm --filter @cr/ingest track",
     "suggest": "pnpm --filter @cr/ingest suggest",
     "discover": "pnpm --filter @cr/ingest discover",
+    "topdeck": "pnpm --filter @cr/ingest topdeck",
     "ingest": "pnpm --filter @cr/ingest ingest",
     "nicks": "pnpm --filter @cr/ingest nicks",
     "stats": "pnpm --filter @cr/ingest stats",

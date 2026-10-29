@@ -153,11 +153,14 @@
     "entries": "Entradas",
     "topCut": "Chegadas ao top 25%",
     "publicDecks": "Decks públicos com esta lenda",
-    "buildDeck": "Montar um deck"
+    "buildDeck": "Montar um deck",
+    "eventDecksTitle": "Decklists de torneio",
+    "eventDecksLead": "Listas bem colocadas em Showdowns, Regionals e outros eventos grandes, publicadas no <link>TopDeck.gg</link>.",
+    "eventDeckPlace": "{rank}º · {event}"
   },
   "Events": {
     "title": "Eventos",
-    "lead": "Eventos oficiais que acompanhamos (Regional Qualifiers e o Showdown Series), importados dos resultados públicos da plataforma de jogo organizado.",
+    "lead": "Eventos oficiais que acompanhamos (Regional Qualifiers e o Showdown Series), importados dos resultados públicos da plataforma de jogo organizado. Decklists e alguns eventos que não estão lá vêm do TopDeck.gg.",
     "date": "Data",
     "name": "Evento",
     "kind": "Tipo",
@@ -184,7 +187,14 @@
     "points": "Pontos",
     "omw": "OMW",
     "omwHint": "Percentual de vitórias dos adversários",
-    "bestOf": "Best of {champion}: melhor colocação com esta lenda no evento"
+    "bestOf": "Best of {champion}: melhor colocação com esta lenda no evento",
+    "decks": "Decklists",
+    "decklist": "Decklist",
+    "viewDeck": "Ver deck",
+    "noDecks": "Nenhuma decklist publicada para este evento.",
+    "sourceTopdeck": "Fonte: resultados e decklists públicos do TopDeck.gg.",
+    "creditTopdeck": "Decklists: <link>TopDeck.gg</link>.",
+    "creditTopdeckOwn": "<link>Ver o evento no TopDeck.gg</link>."
   },
   "Cards": {
     "title": "Cartas",
@@ -502,5 +512,12 @@
     "overnumbered": "Overnumbered",
     "signed": "Assinada",
     "special": "Especial"
+  },
+  "EventDeck": {
+    "deckName": "{player} · {event}",
+    "placed": "{rank}º de {players}",
+    "copyToBuilder": "Abrir no deckbuilder",
+    "onTopdeck": "Ver no TopDeck.gg",
+    "credit": "Decklist publicada no <link>TopDeck.gg</link>."
   }
 }

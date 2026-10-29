@@ -1,4 +1,5 @@
-import { boolean, index, integer, pgEnum, pgTable, primaryKey, real, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
+import { boolean, index, integer, pgEnum, pgSequence, pgTable, primaryKey, real, text, timestamp, uuid } from "drizzle-orm/pg-core";
 
 export const domainEnum = pgEnum("domain", ["Fury", "Calm", "Mind", "Body", "Chaos", "Order"]);
 export const cardTypeEnum = pgEnum("card_type", ["Legend", "Unit", "Spell", "Gear", "Rune", "Battlefield"]);
@@ -189,6 +190,68 @@ export const standing = pgTable(
     legend: text("legend"),
   },
   (t) => [primaryKey({ columns: [t.roundId, t.playerId] }), index("standing_event_idx").on(t.eventId)],
+);
+
+// ---------------------------------------------------------------------------
+// TopDeck.gg (API oficial, com chave): decklists dos eventos grandes e os
+// eventos que não estão na UVS. Quem vem só do TopDeck ganha id negativo,
+// para nunca bater com os ids da UVS.
+// ---------------------------------------------------------------------------
+
+export const topdeckIdSeq = pgSequence("topdeck_id_seq", { increment: -1, startWith: -1, maxValue: -1, minValue: -2147483648 });
+
+/** Id negativo estável para cada coisa do TopDeck ("e:<tid>", "p:<id do jogador>", "r:…", "m:…"). */
+export const topdeckRef = pgTable("topdeck_ref", {
+  key: text("key").primaryKey(),
+  id: integer("id").notNull().unique().default(sql`nextval('topdeck_id_seq')`),
+});
+
+/**
+ * Torneio do TopDeck ligado a um evento nosso. `own` = o evento foi criado a partir do
+ * TopDeck; senão é um evento da UVS que recebeu as decklists.
+ */
+export const topdeckEvent = pgTable(
+  "topdeck_event",
+  {
+    tid: text("tid").primaryKey(),
+    eventId: integer("event_id")
+      .notNull()
+      .references(() => event.id, { onDelete: "cascade" }),
+    own: boolean("own").notNull(),
+    name: text("name").notNull(),
+    startsAt: timestamp("starts_at", { withTimezone: true }).notNull(),
+    playerCount: integer("player_count").notNull(),
+    fetchedAt: timestamp("fetched_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("topdeck_event_event_idx").on(t.eventId)],
+);
+
+/**
+ * Decklist de um jogador num evento, como o TopDeck publica depois do fim. `playerId`
+ * fica vazio quando o jogador do TopDeck não casou com ninguém da UVS. `code` é o
+ * código de deck (formato do Piltover Archive); `unknown` = linhas que não reconhecemos.
+ */
+export const eventDeck = pgTable(
+  "event_deck",
+  {
+    eventId: integer("event_id")
+      .notNull()
+      .references(() => event.id, { onDelete: "cascade" }),
+    topdeckPlayerId: text("topdeck_player_id").notNull(),
+    tid: text("tid").notNull(),
+    playerId: integer("player_id").references(() => player.id, { onDelete: "set null" }),
+    playerName: text("player_name").notNull(),
+    rank: integer("rank"),
+    legend: text("legend"),
+    code: text("code"),
+    unknown: text("unknown").array().notNull().default([]),
+    fetchedAt: timestamp("fetched_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.eventId, t.topdeckPlayerId] }),
+    index("event_deck_player_idx").on(t.playerId),
+    index("event_deck_legend_idx").on(t.legend),
+  ],
 );
 
 /** Nome da lenda como a UVS manda ("Nasus, Curator of the Sands") que não casou com o catálogo. */

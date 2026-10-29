@@ -88,6 +88,25 @@ UVS_BASE_URL=http://localhost:8787 UVS_MIN_INTERVAL_MS=0 pnpm live --watch --eve
 
 Cada rodada passa por quatro passos: pairings saem, metade dos resultados, todos os resultados, rodada fechada.
 
+## Decklists do TopDeck.gg
+
+Os Showdowns e outros eventos grandes usam o TopDeck.gg para inscrição e decklist. O `pnpm topdeck` (no workflow diário, depois do `pnpm ingest`) busca pela [API oficial](https://topdeck.gg/docs/tournaments-v2) os torneios de Riftbound construído terminados com 128+ jogadores e nome de evento grande (Showdown, Regional, Qualifier, Summit, prêmio em dinheiro…), sem grinders, paralelos e limitados.
+
+```bash
+pnpm topdeck                     # terminados nos últimos 30 dias, só os novos
+pnpm topdeck --since 2025-10-01  # primeira carga
+pnpm topdeck --dry-run           # só lista o que entraria
+pnpm topdeck --force             # reimporta os já importados
+pnpm topdeck <tid>               # um torneio específico
+```
+
+- **Sem duplicar:** quando o mesmo evento já veio da UVS (até 36 h de diferença e até 20% de diferença no público, o nome desempata), ele só ganha as decklists, ligadas aos jogadores da UVS pelo nome ("Nam Dang" ↔ "Nam D" ou o nick), com a lenda e a colocação para desempatar. Quem não casa com certeza fica com a decklist, sem link de jogador.
+- **Evento só no TopDeck:** entra inteiro (rodadas, partidas, classificação) com ids negativos (`topdeck_ref`), e conta nas estatísticas. Se depois aparecer na UVS, sai e vira só decklist.
+- Correções à mão em `packages/ingest/topdeck-events.json`: `ignore` (tids que nunca entram) e `link` (tid → id do evento na UVS).
+- Cada decklist vira código de deck (`event_deck.code`); linhas não reconhecidas ficam em `unknown`. Páginas: aba Decklists em `/events/[id]`, `/events/[id]/decks/[jogador]` e "Decklists de torneio" na página da lenda.
+- Termos do TopDeck: crédito com link para o TopDeck.gg em toda página que mostra esses dados (já está lá), nada de vender os dados, e o nome segue o TopDeck (inclusive "Deleted User").
+- Precisa do segredo `TOPDECK_API_KEY` (chave grátis em topdeck.gg). Sem ele o passo só avisa e segue.
+
 ## Jogadores
 
 `/players` busca pelo nome público dos eventos oficiais; `/players/[id]` mostra eventos, lendas, partidas recentes e adversários mais enfrentados; `/players/[id]/vs/[outro]` é o confronto direto. Jogador com `hidden = true` não aparece em lugar nenhum.
@@ -132,6 +151,7 @@ Todo texto de interface fica em `apps/web/messages/en.json` e `pt-BR.json`. O te
 | `pnpm build` | Build de produção do site |
 | `pnpm db:generate` | Gera migração a partir do esquema |
 | `pnpm live` | Atualiza os eventos ao vivo |
+| `pnpm topdeck` | Decklists e eventos grandes do TopDeck.gg |
 | `pnpm record` / `pnpm simulate` | Grava um evento e o reproduz como ao vivo |
 
 ## Custo
