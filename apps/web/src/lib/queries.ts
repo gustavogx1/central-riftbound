@@ -1,11 +1,11 @@
 import "server-only";
-import { and, asc, desc, eq, ilike, inArray, sql, type SQL } from "drizzle-orm";
+import { and, asc, desc, eq, ilike, inArray, or, sql, type SQL } from "drizzle-orm";
 import { schema } from "@cr/db";
 import type { PoolCard } from "@cr/core";
 import { getDb } from "./db";
 
 export const METAGAMES = ["RAD", "VEN", "UNL", "SFD", "OGN"] as const;
-export type Kind = "main" | "all";
+export type Kind = "main" | "showdown" | "all";
 
 export interface LegendInfo {
   slug: string;
@@ -67,7 +67,7 @@ export async function getScopeTotals(scope: string) {
   const [meta, kind] = scope.split(":") as [string, Kind];
   const where: SQL[] = [];
   if (meta !== "all") where.push(eq(schema.event.metagame, meta));
-  if (kind === "main") where.push(eq(schema.event.kind, "main"));
+  if (kind !== "all") where.push(eq(schema.event.kind, kind));
   const [row] = await db
     .select({
       events: sql<number>`count(distinct ${schema.event.id})::int`,
@@ -401,6 +401,70 @@ export async function getPairings(roundId: number, opts: { q?: string; page: num
   return { rows, total: rows[0]?.total ?? 0 };
 }
 
+/** Versões de impressão filtráveis no catálogo (o campo `variant` vem da galeria oficial). */
+export const PRINT_VERSIONS = ["normal", "altArt", "overnumbered", "signed", "special"] as const;
+export type PrintVersion = (typeof PRINT_VERSIONS)[number];
+
+export const COLORLESS = "Colorless";
+
+export interface CardFilters {
+  q?: string;
+  type?: string;
+  domain?: string;
+  set?: string;
+  version?: PrintVersion;
+  /** Cartas base já filtradas pela busca com sintaxe; substitui o filtro por texto. */
+  cardIds?: string[];
+  page: number;
+  pageSize: number;
+}
+
+const versionWhere: Record<PrintVersion, SQL> = {
+  normal: sql`${schema.cardPrint.variant} is null`,
+  altArt: sql`${schema.cardPrint.variant} = 'alt art'`,
+  overnumbered: sql`${schema.cardPrint.variant} like 'overnumbered%'`,
+  signed: sql`${schema.cardPrint.variant} like '%signed%'`,
+  special: sql`${schema.cardPrint.variant} = 'special'`,
+};
+
+/**
+ * Lista impressões, não cartas base: cada print aparece no seu próprio set, com sua arte,
+ * e as variantes (alt art, overnumbered, assinadas) aparecem como itens próprios.
+ */
+export async function searchCards(f: CardFilters) {
+  const db = getDb();
+  if (!db) return { rows: [], total: 0 };
+  const where: SQL[] = [];
+  if (f.cardIds) {
+    if (!f.cardIds.length) return { rows: [], total: 0 };
+    where.push(inArray(schema.card.id, f.cardIds));
+  } else if (f.q) {
+    const like = `%${f.q}%`;
+    where.push(or(ilike(schema.card.name, like), ilike(schema.card.rulesText, like), ilike(schema.card.subtitle, like))!);
+  }
+  if (f.type) where.push(eq(schema.card.type, f.type as "Unit"));
+  // Incolor = carta sem domínio (campos de batalha, tokens e algumas unidades e equipamentos).
+  if (f.domain === COLORLESS) where.push(sql`cardinality(${schema.card.domains}) = 0`);
+  else if (f.domain) where.push(sql`${f.domain} = any(${schema.card.domains})`);
+  if (f.set) where.push(eq(schema.cardPrint.setId, f.set));
+  if (f.version) where.push(versionWhere[f.version]);
+  const cond = where.length ? and(...where) : undefined;
+  const [count] = await db
+    .select({ n: sql<number>`count(*)::int` })
+    .from(schema.cardPrint)
+    .innerJoin(schema.card, eq(schema.card.id, schema.cardPrint.cardId))
+    .where(cond);
+  const rows = await db
+    .select({ card: schema.card, print: schema.cardPrint })
+    .from(schema.cardPrint)
+    .innerJoin(schema.card, eq(schema.card.id, schema.cardPrint.cardId))
+    .where(cond)
+    .orderBy(asc(schema.cardPrint.setId), asc(schema.cardPrint.collectorNumber), asc(schema.cardPrint.publicCode))
+    .limit(f.pageSize)
+    .offset((f.page - 1) * f.pageSize);
+  return { rows, total: count?.n ?? 0 };
+}
+
 export async function getSets() {
   const db = getDb();
   if (!db) return [];
@@ -461,3 +525,4 @@ export async function getCardPool(): Promise<PoolCard[]> {
   poolCache.crPool = { at: Date.now(), cards };
   return cards;
 }
+

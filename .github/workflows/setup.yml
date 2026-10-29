@@ -61,5 +61,7 @@ jobs:
         if: inputs.images
       - run: pnpm track seed
         if: inputs.events
+      - run: pnpm discover
+        if: inputs.events
       - run: pnpm ingest
         if: inputs.events

@@ -35,7 +35,7 @@
     "featureMetaTitle": "Gráfico do meta calculado",
     "featureMetaBody": "Cada lenda posicionada por poder e popularidade ou complexidade votada pela comunidade, recalculada com partidas reais.",
     "featureLiveTitle": "Eventos ao vivo",
-    "featureLiveBody": "Pairings e standings dos Regional Qualifiers que se atualizam sozinhos enquanto o evento acontece.",
+    "featureLiveBody": "Pairings e standings dos Regional Qualifiers e Showdowns que se atualizam sozinhos enquanto o evento acontece.",
     "featureLegendsTitle": "Lendas e pilotos",
     "featureLegendsBody": "Win rate, conversão, matchups e os melhores jogadores de cada lenda, com intervalo de confiança.",
     "featureToolsTitle": "Deckbuilder",
@@ -98,7 +98,8 @@
     "trendFlat": "Sem mudança",
     "seeAll": "Ver todos",
     "basedOn": "Com base em {matches} partidas de {events} eventos",
-    "player": "Jogador"
+    "player": "Jogador",
+    "showdownOnly": "Showdowns"
   },
   "Meta": {
     "title": "Meta",
@@ -151,7 +152,7 @@
   },
   "Events": {
     "title": "Eventos",
-    "lead": "Eventos oficiais que acompanhamos, importados dos resultados públicos da plataforma de jogo organizado.",
+    "lead": "Eventos oficiais que acompanhamos (Regional Qualifiers e o Showdown Series), importados dos resultados públicos da plataforma de jogo organizado.",
     "date": "Data",
     "name": "Evento",
     "kind": "Tipo",
@@ -159,7 +160,8 @@
     "main": "Regional Qualifier",
     "side": "Evento paralelo",
     "community": "Comunidade",
-    "live": "Ao vivo"
+    "live": "Ao vivo",
+    "showdown": "Showdown Series"
   },
   "Event": {
     "standings": "Classificação",
@@ -190,7 +192,8 @@
     "might": "Might",
     "noResults": "Nenhuma carta com esses filtros.",
     "syntaxHint": "Aceita <link>sintaxe de busca</link>: t:unit d:fury c<=3 o:\"draw\".",
-    "syntaxErrors": "Ignorado: {terms}"
+    "syntaxErrors": "Ignorado: {terms}",
+    "version": "Versão"
   },
   "Types": {
     "Legend": "Legend",
@@ -206,7 +209,8 @@
     "Mind": "Mind",
     "Body": "Body",
     "Chaos": "Chaos",
-    "Order": "Order"
+    "Order": "Order",
+    "Colorless": "Incolor"
   },
   "Sets": {
     "OGN": "Origins",
@@ -399,5 +403,12 @@
       "negate": "Tudo menos feitiços.",
       "or": "Cartas de Zaun ou Piltover."
     }
+  },
+  "PrintVersions": {
+    "normal": "Padrão",
+    "altArt": "Arte alternativa",
+    "overnumbered": "Overnumbered",
+    "signed": "Assinada",
+    "special": "Especial"
   }
 }
