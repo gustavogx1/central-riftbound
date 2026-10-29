@@ -188,7 +188,8 @@
     "results": "{count, plural, one {# card} other {# cards}}",
     "energy": "Energy",
     "might": "Might",
-    "noResults": "No card matches these filters."
+    "noResults": "No card matches these filters.",
+    "version": "Version"
   },
   "Types": {
     "Legend": "Legend",
@@ -204,7 +205,8 @@
     "Mind": "Mind",
     "Body": "Body",
     "Chaos": "Chaos",
-    "Order": "Order"
+    "Order": "Order",
+    "Colorless": "Colorless"
   },
   "Sets": {
     "OGN": "Origins",
@@ -269,5 +271,12 @@
     "recentMatches": "Recent matches",
     "h2hSummary": "{matches, plural, one {# match} other {# matches}} in tracked events, {draws, plural, one {# draw} other {# draws}}",
     "neverMet": "These players have not faced each other in the tracked events."
+  },
+  "PrintVersions": {
+    "normal": "Standard",
+    "altArt": "Alt art",
+    "overnumbered": "Overnumbered",
+    "signed": "Signed",
+    "special": "Special"
   }
 }

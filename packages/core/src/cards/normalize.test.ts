@@ -38,6 +38,15 @@ describe("normalizeCatalog", () => {
     ]);
   });
 
+  it("preenche o domínio que a galeria manda vazio e respeita o da origem", () => {
+    const c = normalizeCatalog([
+      raw({ id: "rad-041-167", public_code: "RAD-041/167", set: "RAD", domains: [] }),
+      raw({ id: "rad-006-167", public_code: "RAD-006/167", set: "RAD", domains: ["Body"] }),
+      raw({ id: "rad-999-167", public_code: "RAD-999/167", set: "RAD", domains: ["Colorless"] }),
+    ]);
+    expect(c.cards.map((x) => x.domains)).toEqual([["Calm"], ["Body"], []]);
+  });
+
   it("conta impressões por set", () => {
     expect(catalog.sets).toEqual([{ id: "OGN", name: "Origins", printCount: 3 }]);
   });
