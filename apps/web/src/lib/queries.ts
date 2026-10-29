@@ -4,7 +4,7 @@ import { schema } from "@cr/db";
 import { getDb } from "./db";
 
 export const METAGAMES = ["RAD", "VEN", "UNL", "SFD", "OGN"] as const;
-export type Kind = "main" | "all";
+export type Kind = "main" | "showdown" | "all";
 
 export interface LegendInfo {
   slug: string;
@@ -66,7 +66,7 @@ export async function getScopeTotals(scope: string) {
   const [meta, kind] = scope.split(":") as [string, Kind];
   const where: SQL[] = [];
   if (meta !== "all") where.push(eq(schema.event.metagame, meta));
-  if (kind === "main") where.push(eq(schema.event.kind, "main"));
+  if (kind !== "all") where.push(eq(schema.event.kind, kind));
   const [row] = await db
     .select({
       events: sql<number>`count(distinct ${schema.event.id})::int`,
