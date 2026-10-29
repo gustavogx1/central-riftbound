@@ -170,11 +170,19 @@ export function normalizeCatalog(rows: RawCard[], now = new Date()): Catalog {
     sets.set(r.set, set);
   }
 
+  // Tags de tribo/região ("Yordle", "Noxus") aparecem em cartas comuns; o nome do campeão
+  // só aparece em lendas, campeões e assinaturas. Kennen e Ziggs vêm como "Yordle / <nome>".
+  const commonTags = new Set<string>();
+  for (const card of cards.values()) {
+    if (card.type === "Legend" || card.supertypes.includes("Champion") || card.supertypes.includes("Signature")) continue;
+    for (const tag of card.tags) commonTags.add(tag);
+  }
+
   const legends: Legend[] = [];
   const usedSlugs = new Set<string>();
   for (const card of cards.values()) {
     if (card.type !== "Legend") continue;
-    const champion = card.tags[0] ?? card.name;
+    const champion = card.tags.find((t) => !commonTags.has(t)) ?? card.tags[0] ?? card.name;
     let slug = slugify(`${champion} ${card.name}`);
     for (let i = 2; usedSlugs.has(slug); i++) slug = `${slugify(`${champion} ${card.name}`)}-${i}`;
     usedSlugs.add(slug);
