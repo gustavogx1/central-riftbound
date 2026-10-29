@@ -40,6 +40,9 @@ jobs:
         if: env.DATABASE_URL != ''
       - run: pnpm ingest
         if: env.DATABASE_URL != ''
+      - name: Preenche o nick dos eventos importados antes de existir nick (só os que faltam)
+        run: pnpm nicks
+        if: env.DATABASE_URL != ''
       - name: Liga o ao vivo dos eventos que começam em até 36 h
         run: pnpm live --arm
         if: env.DATABASE_URL != ''

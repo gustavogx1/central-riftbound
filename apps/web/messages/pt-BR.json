@@ -255,9 +255,9 @@
   },
   "Players": {
     "title": "Jogadores",
-    "lead": "Busque um jogador pelo nome que aparece nos eventos oficiais para ver resultados, lendas e confrontos diretos.",
+    "lead": "Busque um jogador pelo nick ou pelo nome que aparece nos eventos oficiais para ver resultados, lendas e confrontos diretos.",
     "pickOpponent": "Escolha o adversário",
-    "none": "Nenhum jogador encontrado com esse nome.",
+    "none": "Nenhum jogador encontrado com esse nick ou nome.",
     "eventsCount": "{n} eventos",
     "privacy": "Os nomes vêm dos resultados públicos dos eventos oficiais. Qualquer jogador pode pedir para esconder o nome neste site."
   },
@@ -279,7 +279,8 @@
     "compareWith": "Comparar com outro jogador",
     "recentMatches": "Partidas recentes",
     "h2hSummary": "{matches, plural, one {# partida} other {# partidas}} nos eventos acompanhados, {draws, plural, one {# empate} other {# empates}}",
-    "neverMet": "Esses jogadores ainda não se enfrentaram nos eventos acompanhados."
+    "neverMet": "Esses jogadores ainda não se enfrentaram nos eventos acompanhados.",
+    "realName": "Nome na UVS: {name}"
   },
   "Builder": {
     "title": "Deckbuilder",

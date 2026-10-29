@@ -33,8 +33,15 @@
     {
       "idx": 4,
       "version": "7",
-      "when": 1793236903356,
-      "tag": "0004_accounts",
+      "when": 1793236797399,
+      "tag": "0004_player_nick",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1793237078417,
+      "tag": "0005_accounts",
       "breakpoints": true
     }
   ]

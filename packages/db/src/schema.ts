@@ -131,10 +131,16 @@ export const eventRound = pgTable(
   (t) => [index("event_round_event_idx").on(t.eventId)],
 );
 
-/** Jogador como a UVS mostra publicamente. `hidden` = pediu remoção do nome. */
+/**
+ * Jogador como a UVS mostra publicamente. `name` = nome curto ("Marc R");
+ * `nick` = apelido da inscrição mais recente (`nickAt` = início desse evento).
+ * `hidden` = pediu remoção do nome.
+ */
 export const player = pgTable("player", {
   id: integer("id").primaryKey(),
   name: text("name").notNull(),
+  nick: text("nick"),
+  nickAt: timestamp("nick_at", { withTimezone: true }),
   countryCode: text("country_code"),
   hidden: boolean("hidden").notNull().default(false),
 });

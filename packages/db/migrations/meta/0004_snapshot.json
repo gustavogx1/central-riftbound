@@ -1,5 +1,5 @@
 {
-  "id": "b5560928-d45a-4cab-a821-32b9c30f97cf",
+  "id": "f33615e1-93b7-44f0-a3b7-9d0c272ed0cb",
   "prevId": "1e5bd534-531e-4407-994d-174d37b23375",
   "version": "7",
   "dialect": "postgresql",
@@ -312,108 +312,6 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.complexity_vote": {
-      "name": "complexity_vote",
-      "schema": "",
-      "columns": {
-        "user_id": {
-          "name": "user_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "legend": {
-          "name": "legend",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "metagame": {
-          "name": "metagame",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "value": {
-          "name": "value",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {
-        "complexity_vote_legend_idx": {
-          "name": "complexity_vote_legend_idx",
-          "columns": [
-            {
-              "expression": "metagame",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "legend",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "complexity_vote_user_id_profile_user_id_fk": {
-          "name": "complexity_vote_user_id_profile_user_id_fk",
-          "tableFrom": "complexity_vote",
-          "tableTo": "profile",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "user_id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "complexity_vote_legend_legend_slug_fk": {
-          "name": "complexity_vote_legend_legend_slug_fk",
-          "tableFrom": "complexity_vote",
-          "tableTo": "legend",
-          "columnsFrom": [
-            "legend"
-          ],
-          "columnsTo": [
-            "slug"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {
-        "complexity_vote_user_id_legend_metagame_pk": {
-          "name": "complexity_vote_user_id_legend_metagame_pk",
-          "columns": [
-            "user_id",
-            "legend",
-            "metagame"
-          ]
-        }
-      },
       "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
@@ -1325,6 +1223,18 @@
           "primaryKey": false,
           "notNull": true
         },
+        "nick": {
+          "name": "nick",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "nick_at": {
+          "name": "nick_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
         "country_code": {
           "name": "country_code",
           "type": "text",
@@ -1394,38 +1304,6 @@
           ]
         }
       },
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.profile": {
-      "name": "profile",
-      "schema": "",
-      "columns": {
-        "user_id": {
-          "name": "user_id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "display_name": {
-          "name": "display_name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
@@ -1664,177 +1542,6 @@
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
-    },
-    "public.user_deck": {
-      "name": "user_deck",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "user_id": {
-          "name": "user_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "name": {
-          "name": "name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "legend_card_id": {
-          "name": "legend_card_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "code": {
-          "name": "code",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "format": {
-          "name": "format",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'constructed'"
-        },
-        "legal": {
-          "name": "legal",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
-        "visibility": {
-          "name": "visibility",
-          "type": "deck_visibility",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'private'"
-        },
-        "description": {
-          "name": "description",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "''"
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {
-        "user_deck_user_idx": {
-          "name": "user_deck_user_idx",
-          "columns": [
-            {
-              "expression": "user_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "updated_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "user_deck_public_idx": {
-          "name": "user_deck_public_idx",
-          "columns": [
-            {
-              "expression": "visibility",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "updated_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "user_deck_legend_idx": {
-          "name": "user_deck_legend_idx",
-          "columns": [
-            {
-              "expression": "legend_card_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "user_deck_user_id_profile_user_id_fk": {
-          "name": "user_deck_user_id_profile_user_id_fk",
-          "tableFrom": "user_deck",
-          "tableTo": "profile",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "user_id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "user_deck_legend_card_id_card_id_fk": {
-          "name": "user_deck_legend_card_id_card_id_fk",
-          "tableFrom": "user_deck",
-          "tableTo": "card",
-          "columnsFrom": [
-            "legend_card_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
     }
   },
   "enums": {
@@ -1848,15 +1555,6 @@
         "Gear",
         "Rune",
         "Battlefield"
-      ]
-    },
-    "public.deck_visibility": {
-      "name": "deck_visibility",
-      "schema": "public",
-      "values": [
-        "private",
-        "unlisted",
-        "public"
       ]
     },
     "public.domain": {
