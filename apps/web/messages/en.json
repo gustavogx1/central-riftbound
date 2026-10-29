@@ -677,5 +677,24 @@
     "ofDecks": "{count}/{total}",
     "spice": "Spice {value}/100",
     "spiceHint": "How much this list strays from {count, plural, one {# other tournament list} other {# other tournament lists}} of the same legend: 0 = only staples, 100 = nothing in common"
+  },
+  "CardPage": {
+    "allCards": "Cards",
+    "type": "Type",
+    "energy": "Energy",
+    "power": "Power",
+    "might": "Might",
+    "colorless": "Colorless",
+    "banned": "Banned in sanctioned Constructed",
+    "legendPage": "Legend page and stats",
+    "sameName": "Search cards with this name",
+    "prints": "Printings",
+    "artist": "Art: {artist}",
+    "tournamentTitle": "In tournament decklists",
+    "notPlayed": "Not in any of the {total} tournament decklists we have.",
+    "playedIn": "In {count} of {total} tournament decklists (TopDeck.gg and moderated community lists), all sets.",
+    "recentDecks": "Recent lists with this card",
+    "place": "#{rank} · {event}",
+    "copiesIn": "{copies}× · {zone}"
   }
 }

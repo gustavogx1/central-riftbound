@@ -3,6 +3,7 @@ import { energyCurve, fullName, mainCount, type DeckList, type PoolCard } from "
 import { getTranslations } from "next-intl/server";
 import { domainColor } from "@/components/LegendAvatar";
 import { DomainDots } from "@/components/DomainDots";
+import { Link } from "@/i18n/navigation";
 import { cardImage, hasImages } from "@/lib/images";
 import type { ExportCard, ExportDeck } from "@/lib/deck-image";
 import { CardHover } from "./CardHover";
@@ -37,7 +38,7 @@ function ListBlock({ title, rows, total }: DeckSection) {
             <span className="w-4 text-center text-xs text-muted">{c.energyCost ?? ""}</span>
             <DomainDots domains={c.domains} />
             <CardHover src={cardImage(c.id, 744)} lowSrc={cardImage(c.id)} landscape={c.type === "Battlefield"} className="truncate">
-              {cardName(c)}
+              <Link href={`/cards/${c.code}`} className="hover:text-accent">{cardName(c)}</Link>
             </CardHover>
           </li>
         ))}

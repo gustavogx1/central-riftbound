@@ -578,3 +578,17 @@ export async function getCardPool(): Promise<PoolCard[]> {
   return cards;
 }
 
+
+/** Uma carta pelo código de qualquer impressão (OGN-007, ogn-007a…), com todas as impressões. */
+export async function getCardByCode(code: string) {
+  const db = getDb();
+  if (!db) return null;
+  const [hit] = await db.select({ cardId: schema.cardPrint.cardId }).from(schema.cardPrint).where(sql`upper(${schema.cardPrint.code}) = upper(${code})`).limit(1);
+  if (!hit) return null;
+  const [card] = await db.select().from(schema.card).where(eq(schema.card.id, hit.cardId));
+  if (!card) return null;
+  const prints = await db.select().from(schema.cardPrint).where(eq(schema.cardPrint.cardId, card.id)).orderBy(asc(schema.cardPrint.setId), asc(schema.cardPrint.collectorNumber), asc(schema.cardPrint.code));
+  const [legend] = await db.select({ slug: schema.legend.slug }).from(schema.legend).where(eq(schema.legend.cardId, card.id));
+  const base = prints.find((p) => p.id === card.id) ?? prints[0]!;
+  return { card, prints, base, legendSlug: legend?.slug ?? null };
+}

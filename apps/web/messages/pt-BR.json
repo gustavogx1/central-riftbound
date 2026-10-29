@@ -677,5 +677,24 @@
     "ofDecks": "{count}/{total}",
     "spice": "Tempero {value}/100",
     "spiceHint": "Quanto esta lista foge de {count, plural, one {# outra lista} other {# outras listas}} de torneio da mesma lenda: 0 = só staples, 100 = nada em comum"
+  },
+  "CardPage": {
+    "allCards": "Cartas",
+    "type": "Tipo",
+    "energy": "Energia",
+    "power": "Poder",
+    "might": "Força",
+    "colorless": "Incolor",
+    "banned": "Banida no Constructed sancionado",
+    "legendPage": "Página e estatísticas da lenda",
+    "sameName": "Buscar cartas com este nome",
+    "prints": "Impressões",
+    "artist": "Arte: {artist}",
+    "tournamentTitle": "Nas decklists de torneio",
+    "notPlayed": "Não aparece em nenhuma das {total} decklists de torneio que temos.",
+    "playedIn": "Em {count} de {total} decklists de torneio (TopDeck.gg e listas da comunidade moderadas), todos os sets.",
+    "recentDecks": "Listas recentes com esta carta",
+    "place": "{rank}º · {event}",
+    "copiesIn": "{copies}× · {zone}"
   }
 }

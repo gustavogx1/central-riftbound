@@ -206,3 +206,34 @@ export async function getLegendDeckPool(legend: string, metagame: string | null)
     `)) as unknown as PoolDeck[];
   });
 }
+
+export interface AnyDeck {
+  code: string;
+  eventId: number;
+  key: string;
+  legend: string | null;
+  rank: number | null;
+  name: string;
+  hidden: boolean;
+  eventName: string;
+  startsAt: string;
+  playerCount: number;
+  metagame: string | null;
+}
+
+/** Todas as decklists publicadas, dos eventos mais recentes primeiro. Base da página de cada carta. */
+export async function getAllDecks(): Promise<AnyDeck[]> {
+  const db = getDb();
+  if (!db) return [];
+  return safe([], async () => {
+    const decks = await allDecks(db);
+    return (await db.execute(sql`
+      select d.code, d.event_id as "eventId", d.key, d.legend, d.rank,
+        coalesce(p.nick, p.name, d.player_name) as name, coalesce(p.hidden, false) as hidden,
+        e.name as "eventName", e.starts_at as "startsAt", e.player_count as "playerCount", e.metagame
+      from ${decks} join event e on e.id = d.event_id left join player p on p.id = d.player_id
+      where d.code is not null
+      order by e.starts_at desc, d.rank asc nulls last
+    `)) as unknown as AnyDeck[];
+  });
+}
