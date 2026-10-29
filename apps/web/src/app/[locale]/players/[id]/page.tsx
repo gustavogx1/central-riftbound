@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { MIN_BEST_OF_PILOTS } from "@cr/core";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { CrownIcon, TrophyIcon } from "@/components/Honors";
 import { LegendAvatar } from "@/components/LegendAvatar";
 import { PlayerMatches, recordOf } from "@/components/PlayerMatches";
 import { getPathname, Link } from "@/i18n/navigation";
 import { makeFormat } from "@/lib/format";
-import { getLegendsBySlugs, getPlayer, getPlayerEvents, getPlayerLegends, getPlayerMatches, getTopOpponents } from "@/lib/queries";
+import { getLegendsBySlugs, getPlayer, getPlayerEvents, getPlayerHonors, getPlayerLegends, getPlayerMatches, getTopOpponents } from "@/lib/queries";
 
 export const revalidate = 600;
 
@@ -26,18 +28,23 @@ export default async function PlayerPage({ params }: PageProps<"/[locale]/player
   const te = await getTranslations("Events");
   const f = makeFormat(locale);
 
-  const [events, byLegend, matches, opponents] = await Promise.all([
+  const [events, byLegend, matches, opponents, honors] = await Promise.all([
     getPlayerEvents(player.id),
     getPlayerLegends(player.id),
     getPlayerMatches(player.id, { limit: 30 }),
     getTopOpponents(player.id),
+    getPlayerHonors(player.id),
   ]);
   const slugs = new Set<string>(byLegend.map((l) => l.legend));
   events.forEach((e) => e.legend && slugs.add(e.legend));
+  honors.forEach((h) => h.legend && slugs.add(h.legend));
   matches.forEach((m) => { if (m.legend) slugs.add(m.legend); if (m.opponentLegend) slugs.add(m.opponentLegend); });
   const legends = await getLegendsBySlugs([...slugs]);
   const total = recordOf(byLegend);
   const decided = total.wins + total.losses;
+  const wins = honors.filter((h) => h.won);
+  const crowns = honors.filter((h) => h.bestOf && h.legend);
+  const honorOf = new Map(honors.map((h) => [h.id, h]));
   const best = events.filter((e) => e.rank !== null).sort((a, b) => a.rank! - b.rank!)[0];
 
   return (
@@ -61,12 +68,68 @@ export default async function PlayerPage({ params }: PageProps<"/[locale]/player
       </dl>
       <p className="mt-2 text-xs text-muted">{t("recordNote")}</p>
 
+      {honors.length > 0 && (
+        <section className="mt-10" aria-labelledby="pl-honors">
+          <h2 id="pl-honors" className="font-display text-xl font-semibold">{t("honors")}</h2>
+          {wins.length > 0 && (
+            <ul className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {wins.map((h) => {
+                const l = h.legend ? legends.get(h.legend) : undefined;
+                return (
+                  <li key={h.id}>
+                    <Link
+                      href={`/events/${h.id}`}
+                      className="flex h-full flex-col items-center gap-2 rounded-xl border border-gold/40 bg-gradient-to-b from-gold/15 to-surface px-4 py-5 text-center hover:border-gold"
+                    >
+                      <TrophyIcon size={44} />
+                      <span className="text-xs font-semibold uppercase tracking-wide text-gold">{t("won")}</span>
+                      <span className="font-display font-semibold leading-snug">{h.name}</span>
+                      <span className="flex flex-wrap items-center justify-center gap-x-2 text-xs text-muted">
+                        <span>{f.date(h.startsAt)}</span>
+                        <span>{f.num(h.playerCount)} {tc("players").toLowerCase()}</span>
+                      </span>
+                      {l && (
+                        <span className="flex items-center gap-2 text-sm">
+                          <LegendAvatar cardId={l.cardId} champion={l.champion} domains={l.domains} size={24} />
+                          {l.champion}
+                        </span>
+                      )}
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+          {crowns.length > 0 && (
+            <ul className="mt-3 flex flex-wrap gap-2">
+              {crowns.map((h) => {
+                const l = legends.get(h.legend!);
+                return (
+                  <li key={h.id}>
+                    <Link href={`/events/${h.id}`} className="flex items-center gap-2 rounded-full border border-border bg-surface py-1 pl-1 pr-3 text-sm hover:border-gold">
+                      {l && <LegendAvatar cardId={l.cardId} champion={l.champion} domains={l.domains} size={28} />}
+                      <CrownIcon size={16} />
+                      <span>
+                        <span className="font-semibold">{t("bestOf", { champion: l?.champion ?? h.legend! })}</span>
+                        <span className="text-muted"> · {h.name}</span>
+                      </span>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+          <p className="mt-2 text-xs text-muted">{t("honorsNote", { min: MIN_BEST_OF_PILOTS })}</p>
+        </section>
+      )}
+
       <div className="mt-10 grid gap-8 lg:grid-cols-[1fr_20rem]">
         <section aria-labelledby="pl-events" className="min-w-0">
           <h2 id="pl-events" className="font-display text-xl font-semibold">{tc("events")}</h2>
           <ul className="mt-3 divide-y divide-border overflow-hidden rounded-xl border border-border">
             {events.map((e) => {
               const l = e.legend ? legends.get(e.legend) : undefined;
+              const h = honorOf.get(e.id);
               return (
                 <li key={e.id}>
                   <Link href={{ pathname: `/events/${e.id}`, query: { q: player.name } }} className="flex flex-wrap items-center gap-x-4 gap-y-1 bg-surface px-4 py-3 hover:bg-surface-2">
@@ -82,7 +145,11 @@ export default async function PlayerPage({ params }: PageProps<"/[locale]/player
                       </span>
                     )}
                     <span className="w-28 text-right text-sm tabular-nums">
-                      <span className="block font-semibold">{e.rank ? `#${e.rank}` : "—"}</span>
+                      <span className="flex items-center justify-end gap-1 font-semibold">
+                        {h?.won && <><TrophyIcon size={14} /><span className="sr-only">{t("won")}</span></>}
+                        {h?.bestOf && h.legend && <><CrownIcon size={14} /><span className="sr-only">{t("bestOf", { champion: legends.get(h.legend)?.champion ?? h.legend })}</span></>}
+                        {e.rank ? `#${e.rank}` : "—"}
+                      </span>
                       <span className="text-xs text-muted">{e.wins}-{e.losses}-{e.draws}</span>
                     </span>
                   </Link>
