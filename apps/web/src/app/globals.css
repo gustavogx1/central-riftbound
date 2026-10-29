@@ -83,3 +83,16 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Folha de impressão do deck: só o conteúdo, em preto no branco. */
+@media print {
+  body > header,
+  body > footer {
+    display: none !important;
+  }
+  html,
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+}

@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
-import { CARD_TYPES, DOMAINS } from "@cr/core";
+import { CARD_TYPES, DOMAINS, matchCard, parseCardQuery } from "@cr/core";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
 import { DomainDots } from "@/components/DomainDots";
 import { Pagination } from "@/components/Pagination";
 import { RulesText } from "@/components/RulesText";
-import { makeFormat } from "@/lib/format";
 import { cardImage } from "@/lib/images";
-import { getSets, searchCards } from "@/lib/queries";
+import { getCardPool, getSets } from "@/lib/queries";
 
 export const revalidate = 3600;
 const PAGE_SIZE = 36;
@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/cards">)
   return { title: t("title"), description: t("lead") };
 }
 
-const str = (v: string | string[] | undefined) => (typeof v === "string" && v.trim() ? v.trim().slice(0, 80) : undefined);
+const str = (v: string | string[] | undefined, max = 80) => (typeof v === "string" && v.trim() ? v.trim().slice(0, max) : undefined);
 
 export default async function CardsPage({ params, searchParams }: PageProps<"/[locale]/cards">) {
   const { locale } = await params;
@@ -28,15 +28,19 @@ export default async function CardsPage({ params, searchParams }: PageProps<"/[l
   const td = await getTranslations("Domains");
   const ts = await getTranslations("Sets");
   const tc = await getTranslations("Common");
-  const f = makeFormat(locale);
 
-  const q = str(sp.q);
+  const q = str(sp.q, 200);
   const type = (CARD_TYPES as readonly string[]).includes(str(sp.type) ?? "") ? str(sp.type) : undefined;
   const domain = (DOMAINS as readonly string[]).includes(str(sp.domain) ?? "") ? str(sp.domain) : undefined;
   const sets = await getSets();
   const set = sets.some((s) => s.id === str(sp.set)) ? str(sp.set) : undefined;
   const page = Math.max(1, Number(sp.page) || 1);
-  const { rows, total } = await searchCards({ q, type, domain, set, page, pageSize: PAGE_SIZE });
+  const parsed = parseCardQuery(q ?? "");
+  const matches = (await getCardPool()).filter(
+    (c) => (!type || c.type === type) && (!domain || c.domains.includes(domain as never)) && (!set || c.setId === set) && matchCard(c, parsed),
+  );
+  const total = matches.length;
+  const rows = matches.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10">
@@ -66,14 +70,20 @@ export default async function CardsPage({ params, searchParams }: PageProps<"/[l
         <button className="rounded-md bg-accent px-4 py-2 text-sm font-semibold text-accent-ink">{tc("search")}</button>
       </form>
 
+      <p className="mt-2 text-sm text-muted">
+        {t.rich("syntaxHint", { link: (chunks) => <Link href="/cards/syntax" className="text-accent underline">{chunks}</Link> })}
+      </p>
+      {parsed.errors.length > 0 && (
+        <p role="status" className="mt-2 text-sm text-bad">{t("syntaxErrors", { terms: parsed.errors.join(" ") })}</p>
+      )}
       <p className="mt-4 text-sm text-muted">{t("results", { count: total })}</p>
 
       {rows.length === 0 ? (
         <p className="mt-8 rounded-xl border border-border bg-surface p-6 text-muted">{total === 0 && !q && !type && !domain && !set ? tc("noData") : t("noResults")}</p>
       ) : (
         <ul className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-          {rows.map(({ card, print }) => {
-            const img = cardImage(print.id);
+          {rows.map((card) => {
+            const img = cardImage(card.id);
             return (
               <li key={card.id} className="overflow-hidden rounded-xl border border-border bg-surface">
                 {img ? (
@@ -93,7 +103,7 @@ export default async function CardsPage({ params, searchParams }: PageProps<"/[l
                     {card.rulesText && <p className="mt-2 text-xs leading-relaxed"><RulesText text={card.rulesText} /></p>}
                   </div>
                 )}
-                <p className="border-t border-border px-3 py-1.5 text-[11px] text-muted">{print.publicCode} · {f.num(print.collectorNumber)}</p>
+                <p className="border-t border-border px-3 py-1.5 text-[11px] text-muted">{card.code}{card.rarity ? ` · ${card.rarity}` : ""}</p>
               </li>
             );
           })}

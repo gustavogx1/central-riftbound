@@ -92,6 +92,13 @@ Cada rodada passa por quatro passos: pairings saem, metade dos resultados, todos
 
 `/players` busca pelo nome público dos eventos oficiais; `/players/[id]` mostra eventos, lendas, partidas recentes e adversários mais enfrentados; `/players/[id]/vs/[outro]` é o confronto direto. Jogador com `hidden = true` não aparece em lugar nenhum.
 
+## Deckbuilder e busca
+
+- `/builder`: deckbuilder com validação na hora (Core Rules 103 e Tournament Rules 402/601: lenda, campeão escolhido com a tag da lenda, 40 cartas, até 3 cópias por nome, [Unique], Signature, identidade de domínio, 12 runas, 3 campos de nomes diferentes, sideboard até 10, banidas do Constructed). O rascunho fica no `localStorage` do navegador.
+- Códigos de deck no formato aberto do Piltover Archive (`@piltoverarchive/riftbound-deck-codes`, Apache-2.0), lista em texto, link `?code=`, `.txt` e folha de inscrição para imprimir ou salvar em PDF (`/builder/print`).
+- `/cards` aceita sintaxe (`t:unit d:fury c<=3 o:"draw" -is:signature`, `or`); a ajuda fica em `/cards/syntax`. A mesma busca roda no deckbuilder.
+- Regras e banidas ficam em `packages/core/src/deck/rules.ts`, com a fonte de cada número.
+
 ## Colocar no ar
 
 Tudo em plano grátis e sem cartão: Supabase (banco e Storage das imagens) e Vercel Hobby (site).

@@ -1,6 +1,7 @@
 import "server-only";
-import { and, asc, desc, eq, ilike, inArray, or, sql, type SQL } from "drizzle-orm";
+import { and, asc, desc, eq, ilike, inArray, sql, type SQL } from "drizzle-orm";
 import { schema } from "@cr/db";
+import type { PoolCard } from "@cr/core";
 import { getDb } from "./db";
 
 export const METAGAMES = ["RAD", "VEN", "UNL", "SFD", "OGN"] as const;
@@ -400,39 +401,6 @@ export async function getPairings(roundId: number, opts: { q?: string; page: num
   return { rows, total: rows[0]?.total ?? 0 };
 }
 
-export interface CardFilters {
-  q?: string;
-  type?: string;
-  domain?: string;
-  set?: string;
-  page: number;
-  pageSize: number;
-}
-
-export async function searchCards(f: CardFilters) {
-  const db = getDb();
-  if (!db) return { rows: [], total: 0 };
-  const where: SQL[] = [];
-  if (f.q) {
-    const like = `%${f.q}%`;
-    where.push(or(ilike(schema.card.name, like), ilike(schema.card.rulesText, like), ilike(schema.card.subtitle, like))!);
-  }
-  if (f.type) where.push(eq(schema.card.type, f.type as "Unit"));
-  if (f.domain) where.push(sql`${f.domain} = any(${schema.card.domains})`);
-  if (f.set) where.push(sql`exists (select 1 from card_print p where p.card_id = ${schema.card.id} and p.set_id = ${f.set})`);
-  const cond = where.length ? and(...where) : undefined;
-  const [count] = await db.select({ n: sql<number>`count(*)::int` }).from(schema.card).where(cond);
-  const rows = await db
-    .select({ card: schema.card, print: schema.cardPrint })
-    .from(schema.card)
-    .innerJoin(schema.cardPrint, eq(schema.cardPrint.id, schema.card.id))
-    .where(cond)
-    .orderBy(asc(schema.cardPrint.setId), asc(schema.cardPrint.collectorNumber))
-    .limit(f.pageSize)
-    .offset((f.page - 1) * f.pageSize);
-  return { rows, total: count?.n ?? 0 };
-}
-
 export async function getSets() {
   const db = getDb();
   if (!db) return [];
@@ -466,4 +434,30 @@ export async function getTopOpponents(id: number, limit = 10) {
     group by o.id having count(*) > 1 order by matches desc, wins desc limit ${limit}
   `);
   return rows as unknown as { id: number; name: string; matches: number; wins: number; losses: number; draws: number }[];
+}
+
+const poolCache = globalThis as unknown as { crPool?: { at: number; cards: PoolCard[] } };
+const POOL_TTL_MS = 60 * 60 * 1000;
+
+/** Todas as cartas jogáveis (sem fichas), com os códigos das impressões. Fica em memória por 1 h. */
+export async function getCardPool(): Promise<PoolCard[]> {
+  const hit = poolCache.crPool;
+  if (hit && Date.now() - hit.at < POOL_TTL_MS) return hit.cards;
+  const db = getDb();
+  if (!db) return [];
+  const rows = await db.execute(sql`
+    select c.id, c.name, c.subtitle, c.type, c.supertypes, c.tags, c.domains::text[] as domains,
+      c.energy_cost as "energyCost", c.power_cost as "powerCost", c.might, c.rules_text as "rulesText",
+      b.code, b.set_id as "setId", b.collector_number as "number", b.rarity,
+      array_agg(p.code order by p.code) as codes
+    from card c
+    join card_print b on b.id = c.id
+    join card_print p on p.card_id = c.id
+    where c.type is not null and not ('Token' = any(c.supertypes))
+    group by c.id, b.code, b.set_id, b.collector_number, b.rarity
+    order by b.set_id, b.collector_number
+  `);
+  const cards = rows as unknown as PoolCard[];
+  poolCache.crPool = { at: Date.now(), cards };
+  return cards;
 }
