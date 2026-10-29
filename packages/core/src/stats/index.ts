@@ -5,3 +5,4 @@ export * from "./config";
 export * from "./complexity";
 export * from "./honors";
 export * from "./cards";
+export * from "./ranking";

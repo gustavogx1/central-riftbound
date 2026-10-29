@@ -133,7 +133,8 @@
     "power": "O poder é o percentil (0 a 100) de 60% do win rate ajustado mais 40% da taxa de top 25%, ambos padronizados. Tiers: S a partir de 90, A a partir de 70, B a partir de 40, C a partir de 15, D abaixo disso.",
     "pilots": "Os melhores pilotos são ordenados pelo limite inferior do intervalo de Wilson a 95%, com o tamanho da amostra reduzido pelo efeito de desenho de Kish, porque partidas do mesmo evento não são totalmente independentes.",
     "minimum": "Uma lenda precisa de pelo menos {min} pilotos no set escolhido para entrar no gráfico.",
-    "source": "Os dados vêm das páginas públicas dos eventos oficiais na plataforma de jogo organizado (UVS). A lenda de cada jogador é a registrada lá; as listas completas não são públicas."
+    "source": "Os dados vêm das páginas públicas dos eventos oficiais na plataforma de jogo organizado (UVS). A lenda de cada jogador é a registrada lá; as listas completas não são públicas.",
+    "ranking": "O ranking de jogadores soma pontos pela colocação final em cada evento encerrado. Cada evento vale uma base pelo nível: Regional Championship 1000, Regional Qualifier 500, Showdown 300 (512+ jogadores), 200 (256+) ou 120 (menor), side events 60 e eventos da comunidade 40. O jogador leva uma fração dessa base: 1º 100%, 2º 70%, top 4 50%, top 8 35%, top 16 22%, top 32 14%, top 64 9%, top 128 5% e top 256 3%. Só pontua o primeiro quarto de cada evento (no mínimo o top 8). Empates se resolvem por títulos e depois pela melhor colocação. Resultados importados do TopDeck.gg aparecem como jogadores separados quando não foi possível casá-los com a plataforma oficial."
   },
   "Legal": {
     "updated": "Atualizado em 29 de outubro de 2026."
@@ -317,7 +318,23 @@
     "pickOpponent": "Escolha o adversário",
     "none": "Nenhum jogador encontrado com esse nick ou nome.",
     "eventsCount": "{n} eventos",
-    "privacy": "Os nomes vêm dos resultados públicos dos eventos oficiais. Qualquer jogador pode pedir para esconder o nome neste site."
+    "privacy": "Os nomes vêm dos resultados públicos dos eventos oficiais. Qualquer jogador pode pedir para esconder o nome neste site.",
+    "ranking": "Ranking",
+    "rankingLead": "Pontos pela colocação final em cada evento encerrado, com peso pelo nível do evento: Regional Championship, Regional Qualifier, Showdown, side events e eventos da comunidade.",
+    "rankingHow": "Como os pontos funcionam",
+    "period": "Período",
+    "last12m": "Últimos 12 meses",
+    "allTime": "Desde sempre",
+    "country": "País",
+    "allCountries": "Todos os países",
+    "apply": "Aplicar",
+    "points": "Pontos",
+    "scoringEvents": "Eventos",
+    "titles": "Títulos",
+    "bestFinish": "Melhor colocação",
+    "place": "{rank}º",
+    "rankingBasedOn": "{players} jogadores com pontos em {events} eventos",
+    "rankingEmpty": "Ainda não há jogador com pontos neste período."
   },
   "Player": {
     "event": "Evento",
@@ -342,7 +359,8 @@
     "honors": "Títulos",
     "won": "Campeão",
     "bestOf": "Best of {champion}",
-    "honorsNote": "Campeão = 1º na classificação final. Best of = melhor colocação com uma lenda no evento, entre ao menos {min} jogadores com ela."
+    "honorsNote": "Campeão = 1º na classificação final. Best of = melhor colocação com uma lenda no evento, entre ao menos {min} jogadores com ela.",
+    "rankingLine": "Ranking dos últimos 12 meses: {position}º de {total} · {points} pts"
   },
   "Builder": {
     "title": "Deckbuilder",
