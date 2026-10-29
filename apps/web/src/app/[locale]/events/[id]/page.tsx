@@ -7,6 +7,7 @@ import { LiveRefresher } from "@/components/live/LiveRefresher";
 import { MyMatch } from "@/components/live/MyMatch";
 import { RoundTimer } from "@/components/live/RoundTimer";
 import { Pagination } from "@/components/Pagination";
+import { StandingRow } from "@/components/StandingRow";
 import { Link } from "@/i18n/navigation";
 import { getEventDecks, getTopdeckLink, topdeckDeckUrl, topdeckEventUrl } from "@/lib/event-decks";
 import { makeFormat } from "@/lib/format";
@@ -239,6 +240,7 @@ export default async function EventPage({ params, searchParams }: PageProps<"/[l
             </form>
 
             {standingsUnofficial && round && <p className="mt-3 text-sm text-muted">{tl("unofficial")}</p>}
+            {view === "standings" && standings.rows.length > 0 && <p className="mt-3 text-sm text-muted">{t("expandHint")}</p>}
             {view === "standings" ? (
               <div className="mt-4 overflow-x-auto rounded-xl border border-border">
                 <table className="w-full min-w-[620px] text-sm">
@@ -254,7 +256,17 @@ export default async function EventPage({ params, searchParams }: PageProps<"/[l
                   </thead>
                   <tbody>
                     {standings.rows.map((r) => (
-                      <tr key={r.s.playerId} className="border-t border-border">
+                      <StandingRow
+                        key={r.s.playerId}
+                        eventId={ev.id}
+                        playerId={r.s.playerId}
+                        playerName={name(r.name, r.hidden)}
+                        roundId={round?.id}
+                        roundNumber={round?.roundNumber}
+                        multiPhase={new Set(ev.rounds.map((x) => x.phaseName)).size > 1}
+                        cols={6}
+                        expandable={!r.hidden}
+                      >
                         <td className="px-3 py-2 tabular-nums text-muted">{r.s.rank}</td>
                         <td className="px-3 py-2 font-medium">
                           <span className="flex items-center gap-1.5">
@@ -266,7 +278,7 @@ export default async function EventPage({ params, searchParams }: PageProps<"/[l
                         <td className="px-3 py-2 text-right tabular-nums">{r.s.wins}-{r.s.losses}-{r.s.draws}</td>
                         <td className="px-3 py-2 text-right tabular-nums">{r.s.points}</td>
                         <td className="px-3 py-2 text-right tabular-nums">{f.pct(r.s.omw)}</td>
-                      </tr>
+                      </StandingRow>
                     ))}
                   </tbody>
                 </table>

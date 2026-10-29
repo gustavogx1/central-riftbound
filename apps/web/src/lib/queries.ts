@@ -351,6 +351,47 @@ export async function getPlayerMatches(id: number, opts: { vs?: number; limit?: 
   });
 }
 
+export interface EventPlayerMatch {
+  id: number;
+  phaseName: string;
+  roundNumber: number;
+  table: number | null;
+  opponentId: number | null;
+  opponent: string | null;
+  opponentHidden: boolean | null;
+  opponentLegend: string | null;
+  isBye: boolean;
+  result: "win" | "loss" | "draw" | null;
+  games: string | null;
+}
+
+/** Partidas de um jogador num evento, em ordem de rodada; com `uptoRound`, só até essa rodada. */
+export async function getEventPlayerMatches(eventId: number, playerId: number, uptoRound?: number): Promise<EventPlayerMatch[]> {
+  const db = getDb();
+  if (!db) return [];
+  const upto = uptoRound
+    ? sql`and (r.phase_order, r.round_number) <= (select phase_order, round_number from event_round where id = ${uptoRound} and event_id = ${eventId})`
+    : sql``;
+  const rows = (await db.execute(sql`
+    select m.id, r.phase_name as "phaseName", r.round_number as "roundNumber", m.table_number as "table",
+      case when m.player1_id = ${playerId} then m.player2_id else m.player1_id end as "opponentId",
+      coalesce(o.nick, o.name) as opponent, o.hidden as "opponentHidden",
+      case when m.player1_id = ${playerId} then m.legend2 else m.legend1 end as "opponentLegend",
+      m.is_bye as "isBye", m.is_draw as "isDraw", m.winner_id as "winnerId", m.status, m.games_winner as "gamesWinner", m.games_loser as "gamesLoser"
+    from match m
+    join event_round r on r.id = m.round_id
+    left join player o on o.id = case when m.player1_id = ${playerId} then m.player2_id else m.player1_id end
+    where m.event_id = ${eventId} and (m.player1_id = ${playerId} or m.player2_id = ${playerId}) ${upto}
+    order by r.phase_order, r.round_number
+  `)) as unknown as (Omit<EventPlayerMatch, "result" | "games"> & { isDraw: boolean; winnerId: number | null; status: string; gamesWinner: number; gamesLoser: number })[];
+  return rows.map(({ isDraw, winnerId, status, gamesWinner, gamesLoser, ...r }) => {
+    const reported = status === "COMPLETE";
+    const result = r.isBye ? "win" : !reported ? null : isDraw ? "draw" : winnerId === playerId ? "win" : "loss";
+    const games = !reported || r.isBye ? null : result === "loss" ? `${gamesLoser}–${gamesWinner}` : `${gamesWinner}–${gamesLoser}`;
+    return { ...r, result, games };
+  });
+}
+
 /**
  * Títulos do jogador em eventos encerrados, pela classificação final (última fase):
  * campeão (1º lugar) e "best of" (melhor colocado com a lenda, com ao menos MIN_BEST_OF_PILOTS pilotos dela).

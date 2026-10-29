@@ -222,7 +222,14 @@
     "submitDeck": "Submit a decklist",
     "submitYours": "Played it? Submit your list.",
     "community": "Community",
-    "communityHint": "Sent by the community and checked by moderators"
+    "communityHint": "Sent by the community and checked by moderators",
+    "score": "Score",
+    "matchesThrough": "Matches for {player} through round {round}.",
+    "matchesOf": "Matches for {player}.",
+    "loadingMatches": "Loading matches…",
+    "matchesError": "Couldn't load the matches. Try again.",
+    "noMatches": "No matches recorded.",
+    "expandHint": "Click a player to see all their matches."
   },
   "Cards": {
     "title": "Cards",
