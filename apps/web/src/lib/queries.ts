@@ -3,6 +3,9 @@ import { and, asc, desc, eq, ilike, inArray, or, sql, type SQL } from "drizzle-o
 import { schema } from "@cr/db";
 import { getDb } from "./db";
 
+/** Nome que o site mostra: o nick da inscrição mais recente, ou o nome da UVS. */
+const shownName = sql<string>`coalesce(${schema.player.nick}, ${schema.player.name})`;
+
 export const METAGAMES = ["RAD", "VEN", "UNL", "SFD", "OGN"] as const;
 export type Kind = "main" | "all";
 
@@ -109,7 +112,7 @@ export async function getTopPilots(scope: string, legend: string, limit = 20) {
   const db = getDb();
   if (!db) return [];
   return db
-    .select({ stats: schema.pilotStats, name: schema.player.name, hidden: schema.player.hidden, country: schema.player.countryCode })
+    .select({ stats: schema.pilotStats, name: shownName, hidden: schema.player.hidden, country: schema.player.countryCode })
     .from(schema.pilotStats)
     .innerJoin(schema.player, eq(schema.player.id, schema.pilotStats.playerId))
     .where(and(eq(schema.pilotStats.scope, scope), eq(schema.pilotStats.legend, legend)))
@@ -122,7 +125,7 @@ export async function getEvents() {
   if (!db) return [];
   const rows = await db.execute(sql`
     select e.id, e.name, e.kind, e.starts_at as "startsAt", e.player_count as "playerCount", e.metagame, e.status, e.address,
-      w.legend as "winnerLegend", p.name as "winnerName", p.hidden as "winnerHidden", coalesce(t.live, false) as live
+      w.legend as "winnerLegend", coalesce(p.nick, p.name) as "winnerName", p.hidden as "winnerHidden", coalesce(t.live, false) as live
     from event e
     left join tracked_event t on t.uvs_event_id = e.id
     left join lateral (
@@ -174,6 +177,7 @@ export async function getLivePulse(id: number) {
 export interface MyMatchRow {
   playerId: number;
   name: string;
+  realName: string;
   table: number | null;
   status: string;
   isBye: boolean;
@@ -200,17 +204,17 @@ export async function getRoundPlayers(eventId: number, roundId: number, standing
       union all
       select m.*, m.player2_id, m.player1_id, m.legend2, m.legend1 from match m where m.round_id = ${roundId} and m.player2_id is not null
     )
-    select s.me as "playerId", p.name, s.table_number as "table", s.status, s.is_bye as "isBye", s.is_draw as "isDraw",
+    select s.me as "playerId", coalesce(p.nick, p.name) as name, p.name as "realName", s.table_number as "table", s.status, s.is_bye as "isBye", s.is_draw as "isDraw",
       s.winner_id as "winnerId", s.games_winner as "gamesWinner", s.games_loser as "gamesLoser",
-      s.my_legend as legend, s.opp as "opponentId", case when o.hidden then null else o.name end as opponent, s.opp_legend as "opponentLegend",
+      s.my_legend as legend, s.opp as "opponentId", case when o.hidden then null else coalesce(o.nick, o.name) end as opponent, s.opp_legend as "opponentLegend",
       st.rank, case when st.player_id is null then null else st.wins || '-' || st.losses || '-' || st.draws end as record
     from sides s
     join player p on p.id = s.me and not p.hidden
     left join player o on o.id = s.opp
     left join standing st on st.round_id = ${standingRoundId ?? -1} and st.player_id = s.me and st.event_id = ${eventId}
-    order by p.name
+    order by lower(coalesce(p.nick, p.name))
   `)) as unknown as {
-    playerId: number; name: string; table: number | null; status: string; isBye: boolean; isDraw: boolean; winnerId: number | null;
+    playerId: number; name: string; realName: string; table: number | null; status: string; isBye: boolean; isDraw: boolean; winnerId: number | null;
     gamesWinner: number; gamesLoser: number; legend: string | null; opponentId: number | null; opponent: string | null; opponentLegend: string | null;
     rank: number | null; record: string | null;
   }[];
@@ -219,7 +223,7 @@ export async function getRoundPlayers(eventId: number, roundId: number, standing
     const result = r.isBye ? "win" : !reported ? null : r.isDraw ? "draw" : r.winnerId === r.playerId ? "win" : "loss";
     const games = !reported || r.isBye ? null : result === "loss" ? `${r.gamesLoser}–${r.gamesWinner}` : `${r.gamesWinner}–${r.gamesLoser}`;
     return {
-      playerId: r.playerId, name: r.name, table: r.table, status: r.status, isBye: r.isBye, result, games, legend: r.legend,
+      playerId: r.playerId, name: r.name, realName: r.realName, table: r.table, status: r.status, isBye: r.isBye, result, games, legend: r.legend,
       opponentId: r.opponentId, opponent: r.opponent, opponentLegend: r.opponentLegend, rank: r.rank, record: r.record,
     };
   });
@@ -233,19 +237,20 @@ export async function searchPlayers(q: string, limit = 50) {
   const db = getDb();
   if (!db || q.length < 2) return [];
   const rows = await db.execute(sql`
-    select p.id, p.name, p.country_code as country, count(distinct m.event_id)::int as events
+    select p.id, coalesce(p.nick, p.name) as name, p.name as "realName", p.country_code as country, count(distinct m.event_id)::int as events
     from player p join match m on m.player1_id = p.id or m.player2_id = p.id
-    where not p.hidden and p.name ilike ${`%${q}%`}
-    group by p.id order by events desc, p.name limit ${limit}
+    where not p.hidden and (p.name ilike ${`%${q}%`} or p.nick ilike ${`%${q}%`})
+    group by p.id order by events desc, name limit ${limit}
   `);
-  return rows as unknown as { id: number; name: string; country: string | null; events: number }[];
+  return rows as unknown as { id: number; name: string; realName: string; country: string | null; events: number }[];
 }
 
 export async function getPlayer(id: number) {
   const db = getDb();
   if (!db) return null;
   const [p] = await db.select().from(schema.player).where(eq(schema.player.id, id));
-  return p && !p.hidden ? p : null;
+  // `name` vira o nome mostrado (nick); o nome da UVS fica em `realName`.
+  return p && !p.hidden ? { ...p, name: p.nick ?? p.name, realName: p.name } : null;
 }
 
 /** Resultado do jogador em cada evento: lenda, posição final da primeira fase e campanha total. */
@@ -325,7 +330,7 @@ export async function getPlayerMatches(id: number, opts: { vs?: number; limit?: 
     select m.id, m.event_id as "eventId", e.name as "eventName", e.starts_at as "startsAt", r.phase_name as "phaseName", r.round_number as "roundNumber",
       case when m.player1_id = ${id} then m.legend1 else m.legend2 end as legend,
       case when m.player1_id = ${id} then m.player2_id else m.player1_id end as "opponentId",
-      o.name as opponent, o.hidden as "opponentHidden",
+      coalesce(o.nick, o.name) as opponent, o.hidden as "opponentHidden",
       case when m.player1_id = ${id} then m.legend2 else m.legend1 end as "opponentLegend",
       m.is_bye as "isBye", m.is_draw as "isDraw", m.winner_id as "winnerId", m.status, m.games_winner as "gamesWinner", m.games_loser as "gamesLoser"
     from match m
@@ -364,10 +369,10 @@ export async function getEventMeta(eventId: number) {
 export async function getStandings(roundId: number, opts: { q?: string; page: number; pageSize: number }) {
   const db = getDb();
   if (!db) return { rows: [], total: 0 };
-  const where = and(eq(schema.standing.roundId, roundId), opts.q ? ilike(schema.player.name, `%${opts.q}%`) : undefined);
+  const where = and(eq(schema.standing.roundId, roundId), opts.q ? or(ilike(schema.player.name, `%${opts.q}%`), ilike(schema.player.nick, `%${opts.q}%`)) : undefined);
   const [count] = await db.select({ n: sql<number>`count(*)::int` }).from(schema.standing).innerJoin(schema.player, eq(schema.player.id, schema.standing.playerId)).where(where);
   const rows = await db
-    .select({ s: schema.standing, name: schema.player.name, hidden: schema.player.hidden })
+    .select({ s: schema.standing, name: shownName, hidden: schema.player.hidden })
     .from(schema.standing)
     .innerJoin(schema.player, eq(schema.player.id, schema.standing.playerId))
     .where(where)
@@ -381,12 +386,12 @@ export async function getPairings(roundId: number, opts: { q?: string; page: num
   const db = getDb();
   if (!db) return { rows: [], total: 0 };
   const q = opts.q ? `%${opts.q}%` : null;
-  const filter = q ? sql`and (p1.name ilike ${q} or p2.name ilike ${q})` : sql``;
+  const filter = q ? sql`and (p1.name ilike ${q} or p1.nick ilike ${q} or p2.name ilike ${q} or p2.nick ilike ${q})` : sql``;
   const rows = (await db.execute(sql`
     select m.id, m.table_number as "table", m.status, m.is_bye as "isBye", m.is_draw as "isDraw", m.winner_id as "winnerId",
       m.games_winner as "gamesWinner", m.games_loser as "gamesLoser",
-      m.player1_id as "p1Id", p1.name as "p1Name", p1.hidden as "p1Hidden", m.legend1 as "l1",
-      m.player2_id as "p2Id", p2.name as "p2Name", p2.hidden as "p2Hidden", m.legend2 as "l2",
+      m.player1_id as "p1Id", coalesce(p1.nick, p1.name) as "p1Name", p1.hidden as "p1Hidden", m.legend1 as "l1",
+      m.player2_id as "p2Id", coalesce(p2.nick, p2.name) as "p2Name", p2.hidden as "p2Hidden", m.legend2 as "l2",
       count(*) over ()::int as total
     from match m left join player p1 on p1.id = m.player1_id left join player p2 on p2.id = m.player2_id
     where m.round_id = ${roundId} ${filter}
@@ -458,7 +463,7 @@ export async function getTopOpponents(id: number, limit = 10) {
       select case when m.player1_id = ${id} then m.player2_id else m.player1_id end as opp, m.is_draw, m.winner_id
       from match m where (m.player1_id = ${id} or m.player2_id = ${id}) and m.status = 'COMPLETE' and not m.is_bye
     )
-    select o.id, o.name, count(*)::int as matches,
+    select o.id, coalesce(o.nick, o.name) as name, count(*)::int as matches,
       count(*) filter (where not is_draw and winner_id = ${id})::int as wins,
       count(*) filter (where not is_draw and winner_id is distinct from ${id})::int as losses,
       count(*) filter (where is_draw)::int as draws

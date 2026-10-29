@@ -103,12 +103,28 @@ export function matchRow(m: UvsMatch, roundId: number, eventId: number, resolve:
   };
 }
 
-export function playersFromMatch(m: UvsMatch) {
-  return m.player_match_relationships.map((r) => ({
-    id: r.player.id,
-    name: r.player.best_identifier,
-    countryCode: r.player.country_code ?? null,
-  }));
+/** Nick da inscrição; vazio ou igual ao nome conta como sem nick. */
+export function nickOf(name: string, uvsNick: string | null | undefined): string | null {
+  const nick = uvsNick?.trim();
+  return nick && nick !== name.trim() ? nick : null;
+}
+
+export function playersFromMatch(m: UvsMatch, eventStart: Date) {
+  return m.player_match_relationships.map((r) => {
+    const nick = nickOf(r.player.best_identifier, r.user_event_status?.best_identifier);
+    return {
+      id: r.player.id,
+      name: r.player.best_identifier,
+      nick,
+      nickAt: nick ? eventStart : null,
+      countryCode: r.player.country_code ?? null,
+    };
+  });
+}
+
+export function playerFromStanding(s: UvsStanding, eventStart: Date) {
+  const nick = nickOf(s.player.best_identifier, s.user_event_status?.best_identifier);
+  return { id: s.player.id, name: s.player.best_identifier, nick, nickAt: nick ? eventStart : null };
 }
 
 /** "5-1-0" → vitórias, derrotas, empates. */

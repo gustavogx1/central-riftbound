@@ -44,6 +44,7 @@ export default async function PlayerPage({ params }: PageProps<"/[locale]/player
     <div className="mx-auto max-w-6xl px-4 py-10">
       <p className="text-sm text-muted"><Link href="/players" className="hover:text-text">{tp("title")}</Link></p>
       <h1 className="mt-2 font-display text-3xl font-bold md:text-4xl">{player.name}</h1>
+      {player.nick && <p className="mt-1 text-sm text-muted">{t("realName", { name: player.realName })}</p>}
 
       <dl className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
         {[

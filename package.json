@@ -19,6 +19,7 @@
     "track": "pnpm --filter @cr/ingest track",
     "suggest": "pnpm --filter @cr/ingest suggest",
     "ingest": "pnpm --filter @cr/ingest ingest",
+    "nicks": "pnpm --filter @cr/ingest nicks",
     "stats": "pnpm --filter @cr/ingest stats",
     "live": "pnpm --filter @cr/ingest live",
     "record": "pnpm --filter @cr/ingest record",

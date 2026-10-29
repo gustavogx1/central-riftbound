@@ -5,6 +5,10 @@ import { z } from "zod";
  * uma mensagem clara em vez de gravar dado errado (teste de contrato).
  */
 const deckDefiningCard = z.object({ name: z.string() }).nullable().optional();
+/** Inscrição do jogador no evento; `best_identifier` aqui é o nick que ele usou. */
+const userEventStatus = z
+  .object({ deck_defining_card: deckDefiningCard, best_identifier: z.string().nullable().optional() })
+  .nullable();
 
 export const uvsEvent = z.object({
   id: z.number(),
@@ -61,7 +65,7 @@ export const uvsMatch = z.object({
     z.object({
       player_order: z.number().nullable(),
       player: playerRef,
-      user_event_status: z.object({ deck_defining_card: deckDefiningCard }).nullable(),
+      user_event_status: userEventStatus,
     }),
   ),
 });
@@ -75,7 +79,7 @@ export const uvsStanding = z.object({
   opponent_match_win_percentage: z.number().nullable(),
   game_win_percentage: z.number().nullable(),
   opponent_game_win_percentage: z.number().nullable(),
-  user_event_status: z.object({ deck_defining_card: deckDefiningCard }).nullable(),
+  user_event_status: userEventStatus,
 });
 export type UvsStanding = z.infer<typeof uvsStanding>;
 

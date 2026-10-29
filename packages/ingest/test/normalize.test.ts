@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createLegendResolver, detectMetagame, matchRow, parseRecord, roundRows, standingRow } from "../src/normalize";
+import { createLegendResolver, detectMetagame, matchRow, nickOf, parseRecord, playerFromStanding, playersFromMatch, roundRows, standingRow } from "../src/normalize";
 import { page, uvsEvent, uvsMatch, uvsStanding } from "../src/uvs/schemas";
 import eventFixture from "./fixtures/event.json";
 import matchesFixture from "./fixtures/matches.json";
@@ -90,5 +90,24 @@ describe("metagame", () => {
   });
   it("ignora lenda com menos de 1% dos jogadores", () => {
     expect(detectMetagame(new Map([["nasus-curator-of-the-sands", 999], ["kennen-heart-of-the-tempest", 1]]), setOf)).toBe("SFD");
+  });
+});
+
+describe("nick dos jogadores", () => {
+  const start = new Date("2026-01-01T10:00:00Z");
+
+  it("pega o nick da inscrição, separado do nome", () => {
+    const m = page(uvsMatch).parse(matchesFixture).results[0]!;
+    const [a] = playersFromMatch(m, start);
+    expect(a).toMatchObject({ name: "Player A", nick: "Player B", nickAt: start });
+    const s = page(uvsStanding).parse(standingsFixture).results[0]!;
+    expect(playerFromStanding(s, start)).toMatchObject({ name: "Player A", nick: "Player B", nickAt: start });
+  });
+
+  it("trata vazio ou igual ao nome como sem nick", () => {
+    expect(nickOf("Marc R", "  Ruizo ")).toBe("Ruizo");
+    expect(nickOf("Marc R", "Marc R")).toBeNull();
+    expect(nickOf("Marc R", "  ")).toBeNull();
+    expect(nickOf("Marc R", null)).toBeNull();
   });
 });
