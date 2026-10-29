@@ -222,7 +222,14 @@
     "submitDeck": "Enviar decklist",
     "submitYours": "Jogou? Envie a sua lista.",
     "community": "Comunidade",
-    "communityHint": "Enviada pela comunidade e conferida pela moderação"
+    "communityHint": "Enviada pela comunidade e conferida pela moderação",
+    "score": "Placar",
+    "matchesThrough": "Partidas de {player} até a rodada {round}.",
+    "matchesOf": "Partidas de {player}.",
+    "loadingMatches": "Carregando partidas…",
+    "matchesError": "Não deu para carregar as partidas. Tente de novo.",
+    "noMatches": "Nenhuma partida registrada.",
+    "expandHint": "Clique num jogador para ver todas as partidas dele."
   },
   "Cards": {
     "title": "Cartas",
