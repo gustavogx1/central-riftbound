@@ -488,10 +488,7 @@
     "copyToBuilder": "Copiar para o deckbuilder",
     "delete": "Apagar",
     "description": "Descrição",
-    "saveDescription": "Salvar descrição",
-    "view": "Visualização do deck",
-    "viewList": "Lista",
-    "viewImages": "Imagens"
+    "saveDescription": "Salvar descrição"
   },
   "Complexity": {
     "title": "Complexidade ({set})",
@@ -522,5 +519,25 @@
     "copyToBuilder": "Abrir no deckbuilder",
     "onTopdeck": "Ver no TopDeck.gg",
     "credit": "Decklist publicada no <link>TopDeck.gg</link>."
+  },
+  "DeckView": {
+    "view": "Visualização do deck",
+    "viewList": "Lista",
+    "viewImages": "Visual",
+    "mainDeck": "Deck principal",
+    "export": "Exportar imagem",
+    "vertical": "Vertical (celular)",
+    "horizontal": "Horizontal (desktop)",
+    "format": "Formato",
+    "orientation": "Orientação",
+    "download": "Baixar",
+    "working": "Gerando…",
+    "exportError": "Não deu para gerar a imagem. Tente de novo.",
+    "stats": "Estatísticas",
+    "statsSub": "Deck principal, {count} cartas",
+    "energy": "Energia",
+    "power": "Poder",
+    "domains": "Domínios",
+    "types": "Tipos"
   }
 }

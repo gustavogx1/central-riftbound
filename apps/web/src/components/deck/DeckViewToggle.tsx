@@ -8,12 +8,13 @@ const listeners = new Set<() => void>();
 /** Escolha desta visita, para quando o navegador não deixa gravar. */
 let memory: View | null = null;
 
-function read(): View {
+function read(): View | null {
   try {
-    return localStorage.getItem(KEY) === "images" ? "images" : "list";
+    const v = localStorage.getItem(KEY);
+    return v === "images" || v === "list" ? v : null;
   } catch {
-    // Sem armazenamento local: fica na lista.
-    return "list";
+    // Sem armazenamento local: fica no padrão.
+    return null;
   }
 }
 
@@ -36,13 +37,23 @@ function write(v: View) {
   listeners.forEach((fn) => fn());
 }
 
-/** Alterna entre a lista em texto e a grade de imagens; a escolha fica lembrada neste navegador. */
-export function DeckViewToggle({ list, images, labels }: { list: ReactNode; images: ReactNode; labels: { view: string; list: string; images: string } }) {
-  const view = useSyncExternalStore(subscribe, () => memory ?? read(), () => "list" as View);
+/** Alterna entre a grade de imagens e a lista em texto; a escolha fica lembrada neste navegador. */
+export function DeckViewToggle({
+  list,
+  images,
+  defaultView = "images",
+  labels,
+}: {
+  list: ReactNode;
+  images: ReactNode;
+  defaultView?: View;
+  labels: { view: string; list: string; images: string };
+}) {
+  const view = useSyncExternalStore(subscribe, () => memory ?? read() ?? defaultView, () => defaultView);
   return (
     <div className="mt-8">
       <div role="group" aria-label={labels.view} className="inline-flex rounded-full border border-border p-0.5 text-sm">
-        {(["list", "images"] as const).map((v) => (
+        {(["images", "list"] as const).map((v) => (
           <button
             key={v}
             onClick={() => write(v)}
