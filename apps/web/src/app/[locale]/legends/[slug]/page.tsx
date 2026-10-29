@@ -173,7 +173,9 @@ export default async function LegendPage({ params, searchParams }: PageProps<"/[
                     {pilots.map((p, i) => (
                       <tr key={p.stats.playerId} className="border-t border-border">
                         <td className="px-3 py-2 text-muted">{i + 1}</td>
-                        <td className="px-3 py-2 font-semibold">{p.hidden ? tc("hiddenPlayer") : p.name}</td>
+                        <td className="px-3 py-2 font-semibold">
+                          {p.hidden ? tc("hiddenPlayer") : <Link href={`/players/${p.stats.playerId}`} className="hover:text-accent">{p.name}</Link>}
+                        </td>
                         <td className="px-3 py-2 text-right tabular-nums">{p.stats.wins}-{p.stats.losses}-{p.stats.draws}</td>
                         <td className="px-3 py-2 text-right tabular-nums">{f.pct(p.stats.wins / Math.max(1, p.stats.wins + p.stats.losses))}</td>
                         <td className="px-3 py-2 text-right tabular-nums">{p.stats.events}</td>
