@@ -153,11 +153,14 @@
     "entries": "Entries",
     "topCut": "Top 25% finishes",
     "publicDecks": "Public decks with this legend",
-    "buildDeck": "Build a deck"
+    "buildDeck": "Build a deck",
+    "eventDecksTitle": "Tournament decklists",
+    "eventDecksLead": "Top-finishing lists from Showdowns, Regionals and other big events, published on <link>TopDeck.gg</link>.",
+    "eventDeckPlace": "#{rank} · {event}"
   },
   "Events": {
     "title": "Events",
-    "lead": "Official events we follow (Regional Qualifiers and the Showdown Series), imported from the public results of the organized play platform.",
+    "lead": "Official events we follow (Regional Qualifiers and the Showdown Series), imported from the public results of the organized play platform. Decklists, and some events that aren't there, come from TopDeck.gg.",
     "date": "Date",
     "name": "Event",
     "kind": "Type",
@@ -184,7 +187,14 @@
     "points": "Points",
     "omw": "OMW",
     "omwHint": "Opponents' match win percentage",
-    "bestOf": "Best of {champion}: best finish with this legend at the event"
+    "bestOf": "Best of {champion}: best finish with this legend at the event",
+    "decks": "Decklists",
+    "decklist": "Decklist",
+    "viewDeck": "View deck",
+    "noDecks": "No decklists published for this event.",
+    "sourceTopdeck": "Source: public results and decklists from TopDeck.gg.",
+    "creditTopdeck": "Decklists: <link>TopDeck.gg</link>.",
+    "creditTopdeckOwn": "<link>See the event on TopDeck.gg</link>."
   },
   "Cards": {
     "title": "Cards",
@@ -502,5 +512,12 @@
     "overnumbered": "Overnumbered",
     "signed": "Signed",
     "special": "Special"
+  },
+  "EventDeck": {
+    "deckName": "{player} · {event}",
+    "placed": "#{rank} of {players}",
+    "copyToBuilder": "Open in deckbuilder",
+    "onTopdeck": "View on TopDeck.gg",
+    "credit": "Decklist published on <link>TopDeck.gg</link>."
   }
 }

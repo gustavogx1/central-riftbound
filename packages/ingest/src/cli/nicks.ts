@@ -20,9 +20,10 @@ const client = new UvsClient({ log: console.warn });
 
 const events = (await db.execute(sql`
   select e.id from event e
-  where ${values.all} or not exists (
+  -- Ids negativos são eventos só do TopDeck: não existem na UVS.
+  where e.id > 0 and (${values.all} or not exists (
     select 1 from standing s join player p on p.id = s.player_id where s.event_id = e.id and p.nick is not null
-  )
+  ))
   order by e.starts_at
 `)) as unknown as { id: number }[];
 

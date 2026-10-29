@@ -6,3 +6,7 @@ export * from "./recompute";
 export * from "./live";
 export * from "./replay";
 export * from "./showdown";
+export * from "./topdeck/client";
+export * from "./topdeck/schemas";
+export * from "./topdeck/normalize";
+export * from "./topdeck/import";

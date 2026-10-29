@@ -11,6 +11,7 @@ import { TierBadge } from "@/components/TierBadge";
 import { Link } from "@/i18n/navigation";
 import { makeFormat } from "@/lib/format";
 import { cardImage } from "@/lib/images";
+import { getLegendDecks } from "@/lib/event-decks";
 import { type LegendInfo, getLegend, getLegendCard, getLegendsBySlugs, getLegendStats, getMatchups, getTopPilots, METAGAMES } from "@/lib/queries";
 import { resolveScope } from "@/lib/scope";
 import { getComplexity } from "@/lib/votes";
@@ -73,7 +74,7 @@ export default async function LegendPage({ params, searchParams }: PageProps<"/[
       }
     }
   }
-  const [card, matchups, pilots] = await Promise.all([getLegendCard(legend.cardId), getMatchups(scope, slug), getTopPilots(scope, slug)]);
+  const [card, matchups, pilots, eventDecks] = await Promise.all([getLegendCard(legend.cardId), getMatchups(scope, slug), getTopPilots(scope, slug), getLegendDecks(slug)]);
   const s = all.find((x) => x.slug === slug);
   const opponents = await getLegendsBySlugs(matchups.map((m) => m.opponent));
   const rated = matchups
@@ -189,6 +190,26 @@ export default async function LegendPage({ params, searchParams }: PageProps<"/[
             )}
           </section>
         </>
+      )}
+
+      {eventDecks.length > 0 && (
+        <section className="mt-10" aria-labelledby="event-decks-h">
+          <h2 id="event-decks-h" className="font-display text-2xl font-semibold">{t("eventDecksTitle")}</h2>
+          <p className="mt-2 max-w-3xl text-sm text-muted">
+            {t.rich("eventDecksLead", { link: (c) => <a href="https://topdeck.gg" target="_blank" rel="noopener noreferrer" className="text-accent underline">{c}</a> })}
+          </p>
+          <ul className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+            {eventDecks.map((d) => (
+              <li key={`${d.eventId}-${d.topdeckPlayerId}`}>
+                <Link href={`/events/${d.eventId}/decks/${encodeURIComponent(d.topdeckPlayerId)}`} className="block rounded-lg border border-border bg-surface p-3 text-sm hover:border-accent">
+                  <span className="block font-semibold">{d.hidden ? tc("hiddenPlayer") : d.name}</span>
+                  <span className="mt-0.5 block truncate text-muted">{t("eventDeckPlace", { rank: d.rank ?? 0, event: d.eventName })}</span>
+                  <span className="mt-0.5 block text-xs text-muted">{f.date(new Date(d.startsAt))}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
       )}
     </div>
   );

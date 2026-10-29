@@ -18,7 +18,8 @@
     "stats": "tsx src/cli/stats.ts",
     "live": "tsx src/cli/live.ts",
     "record": "tsx src/cli/record.ts",
-    "simulate": "tsx src/cli/simulate.ts"
+    "simulate": "tsx src/cli/simulate.ts",
+    "topdeck": "tsx src/cli/topdeck.ts"
   },
   "dependencies": {
     "@cr/core": "workspace:*",

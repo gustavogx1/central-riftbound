@@ -1,7 +1,7 @@
 name: Importar torneios
 
-# Uma vez por dia: acha Showdowns novos na UVS, busca rodadas novas dos eventos acompanhados
-# e recalcula as estatísticas.
+# Uma vez por dia: acha Showdowns novos na UVS, busca rodadas novas dos eventos acompanhados,
+# recalcula as estatísticas e traz do TopDeck.gg as decklists dos eventos grandes.
 # Rodadas já completas e gravadas são puladas, então o job leva poucos minutos.
 on:
   schedule:
@@ -18,6 +18,8 @@ jobs:
     timeout-minutes: 45
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      # Opcional: sem a chave, o passo do TopDeck só avisa e segue.
+      TOPDECK_API_KEY: ${{ secrets.TOPDECK_API_KEY }}
     steps:
       - name: Sem banco configurado, nada a fazer
         if: env.DATABASE_URL == ''
@@ -40,6 +42,11 @@ jobs:
         if: env.DATABASE_URL != ''
       - run: pnpm ingest
         if: env.DATABASE_URL != ''
+      - name: Decklists e eventos grandes do TopDeck.gg (últimos 30 dias, só os novos)
+        run: pnpm topdeck
+        if: env.DATABASE_URL != ''
+        # Uma falha do TopDeck não pode travar o resto da importação.
+        continue-on-error: true
       - name: Preenche o nick dos eventos importados antes de existir nick (só os que faltam)
         run: pnpm nicks
         if: env.DATABASE_URL != ''
