@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { Bracket } from "@/components/Bracket";
 import { CrownIcon } from "@/components/Honors";
 import { LegendAvatar } from "@/components/LegendAvatar";
 import { LiveRefresher } from "@/components/live/LiveRefresher";
@@ -11,7 +12,7 @@ import { StandingRow } from "@/components/StandingRow";
 import { Link } from "@/i18n/navigation";
 import { getEventDecks, getTopdeckLink, topdeckDeckUrl, topdeckEventUrl } from "@/lib/event-decks";
 import { makeFormat } from "@/lib/format";
-import { getEvent, getEventBestOf, getEventMeta, getLegendsBySlugs, getPairings, getRoundPlayers, getStandings, type LegendInfo } from "@/lib/queries";
+import { getBracket, getEvent, getEventBestOf, getEventMeta, getLegendsBySlugs, getPairings, getRoundPlayers, getStandings, isEliminationPhase, type LegendInfo } from "@/lib/queries";
 
 const PAGE_SIZE = 50;
 
@@ -45,7 +46,13 @@ export default async function EventPage({ params, searchParams }: PageProps<"/[l
   const ts = await getTranslations("Sets");
   const f = makeFormat(locale);
 
-  const view = sp.view === "pairings" ? "pairings" : sp.view === "decks" ? "decks" : "standings";
+  const isLive = ev.live.on && ev.status !== "complete";
+  const currentRound = ev.rounds.at(-1);
+  const bracketRounds = ev.rounds.filter((r) => isEliminationPhase(r.phaseType));
+  // Ao vivo, com o top cut em andamento, a chave é o que todo mundo quer ver primeiro.
+  const defaultView = isLive && currentRound && isEliminationPhase(currentRound.phaseType) ? "bracket" : "standings";
+  const views = ["standings", "pairings", "decks", "bracket"] as const;
+  const view = views.find((v) => v === sp.view && (v !== "bracket" || bracketRounds.length > 0)) ?? defaultView;
   const q = typeof sp.q === "string" && sp.q.trim() ? sp.q.trim().slice(0, 60) : undefined;
   const page = Math.max(1, Number(sp.page) || 1);
   const pairingRounds = ev.rounds;
@@ -53,11 +60,10 @@ export default async function EventPage({ params, searchParams }: PageProps<"/[l
   const lastStanding = [...standingRounds].reverse()[0];
   const roundId = Number(sp.round) || (view === "pairings" ? [...pairingRounds].reverse()[0]?.id : lastStanding?.id);
   const round = ev.rounds.find((r) => r.id === roundId);
-  const isLive = ev.live.on && ev.status !== "complete";
-  const currentRound = ev.rounds.at(-1);
+  const seedRound = [...standingRounds].reverse().find((r) => !isEliminationPhase(r.phaseType));
   const roundLabel = (r: { phaseName: string; roundNumber: number }) => `${r.phaseName} · ${t("round")} ${r.roundNumber}`;
 
-  const [metaRows, standings, pairings, roundPlayers, bestOf, topdeck, decks] = await Promise.all([
+  const [metaRows, standings, pairings, roundPlayers, bestOf, topdeck, decks, bracket] = await Promise.all([
     getEventMeta(ev.id),
     view === "standings" && round ? getStandings(round.id, { q, page, pageSize: PAGE_SIZE }) : Promise.resolve({ rows: [], total: 0 }),
     view === "pairings" && round ? getPairings(round.id, { q, page, pageSize: PAGE_SIZE }) : Promise.resolve({ rows: [], total: 0 }),
@@ -66,6 +72,7 @@ export default async function EventPage({ params, searchParams }: PageProps<"/[l
     view === "standings" && ev.status === "complete" ? getEventBestOf(ev.id) : Promise.resolve(new Map<number, string>()),
     getTopdeckLink(ev.id),
     view === "decks" ? getEventDecks(ev.id, { q, page, pageSize: PAGE_SIZE }) : Promise.resolve({ rows: [], total: 0 }),
+    view === "bracket" ? getBracket(ev.id, bracketRounds.map((r) => r.id), seedRound?.id ?? null) : Promise.resolve({ matches: [], seeds: new Map<number, number>() }),
   ]);
   const slugs = new Set<string>(metaRows.map((m) => m.legend));
   standings.rows.forEach((r) => r.s.legend && slugs.add(r.s.legend));
@@ -73,6 +80,7 @@ export default async function EventPage({ params, searchParams }: PageProps<"/[l
   roundPlayers.forEach((r) => { if (r.legend) slugs.add(r.legend); });
   bestOf.forEach((legend) => slugs.add(legend));
   decks.rows.forEach((d) => d.legend && slugs.add(d.legend));
+  bracket.matches.forEach((m) => { if (m.l1) slugs.add(m.l1); if (m.l2) slugs.add(m.l2); });
   const legends = await getLegendsBySlugs([...slugs]);
   const legendsLite = Object.fromEntries([...legends].map(([k, l]) => [k, { champion: l.champion, cardId: l.cardId, domains: l.domains }]));
   const standingsUnofficial = round?.status !== "COMPLETE" && view === "standings";
@@ -153,6 +161,9 @@ export default async function EventPage({ params, searchParams }: PageProps<"/[l
         <div className="flex flex-wrap items-center gap-2">
           <Link href={{ pathname: `/events/${ev.id}`, query: { view: "standings" } }} className={tab(view === "standings")} aria-current={view === "standings" ? "page" : undefined}>{t("standings")}</Link>
           <Link href={{ pathname: `/events/${ev.id}`, query: { view: "pairings" } }} className={tab(view === "pairings")} aria-current={view === "pairings" ? "page" : undefined}>{t("pairings")}</Link>
+          {bracketRounds.length > 0 && (
+            <Link href={{ pathname: `/events/${ev.id}`, query: { view: "bracket" } }} className={tab(view === "bracket")} aria-current={view === "bracket" ? "page" : undefined}>{t("bracket")}</Link>
+          )}
           {(topdeck || ev.status === "complete") && (
             <Link href={{ pathname: `/events/${ev.id}`, query: { view: "decks" } }} className={tab(view === "decks")} aria-current={view === "decks" ? "page" : undefined}>{t("decks")}</Link>
           )}
@@ -161,7 +172,9 @@ export default async function EventPage({ params, searchParams }: PageProps<"/[l
           )}
         </div>
 
-        {view === "decks" ? (
+        {view === "bracket" ? (
+          <Bracket rounds={bracketRounds} matches={bracket.matches} seeds={bracket.seeds} legends={legends} />
+        ) : view === "decks" ? (
           <>
             <form className="mt-4 flex flex-wrap items-center gap-3" method="get">
               <input type="hidden" name="view" value="decks" />
