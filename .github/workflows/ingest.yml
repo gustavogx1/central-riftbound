@@ -1,6 +1,6 @@
 name: Importar torneios
 
-# Uma vez por dia: acha Showdowns novos na UVS, busca rodadas novas dos eventos acompanhados,
+# Uma vez por dia: acha Showdowns e Regionais novos na UVS, busca rodadas novas dos eventos acompanhados,
 # recalcula as estatísticas e traz do TopDeck.gg as decklists dos eventos grandes.
 # Rodadas já completas e gravadas são puladas, então o job leva poucos minutos.
 on:
@@ -37,12 +37,12 @@ jobs:
         if: env.DATABASE_URL != ''
       - run: pnpm db:migrate
         if: env.DATABASE_URL != ''
-      - name: Acompanha os Showdowns novos
+      - name: Acompanha os Showdowns e Regionais novos
         run: pnpm discover
         if: env.DATABASE_URL != ''
       - run: pnpm ingest
         if: env.DATABASE_URL != ''
-      - name: Decklists e eventos grandes do TopDeck.gg (últimos 30 dias, só os novos)
+      - name: Decklists e eventos grandes do TopDeck.gg (desde o lançamento, só os novos)
         run: pnpm topdeck
         if: env.DATABASE_URL != ''
         # Uma falha do TopDeck não pode travar o resto da importação.
