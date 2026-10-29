@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { decodeDeck, energyCurve, fullName, listName, mainCount, validateDeck, type DeckFormat, type PoolCard } from "@cr/core";
+import { decodeDeck, energyCurve, fullName, mainCount, validateDeck, type DeckFormat, type PoolCard } from "@cr/core";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { CopyButton } from "@/components/CopyButton";
+import { CardHover } from "@/components/deck/CardHover";
+import { cardName, DeckImages, type DeckRow as Row, type DeckSection } from "@/components/deck/DeckImages";
+import { DeckViewToggle } from "@/components/deck/DeckViewToggle";
 import { DomainDots } from "@/components/DomainDots";
 import { LegendAvatar } from "@/components/LegendAvatar";
 import { getPathname, Link } from "@/i18n/navigation";
@@ -11,6 +14,7 @@ import { getSessionUser } from "@/lib/auth/server";
 import { deleteDeckAction, describeDeckAction } from "@/lib/deck-actions";
 import { getUserDeck, MAX_DESCRIPTION, poolMap } from "@/lib/decks";
 import { makeFormat } from "@/lib/format";
+import { cardImage, hasImages } from "@/lib/images";
 import { getLegends } from "@/lib/queries";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/decks/[id]">): Promise<Metadata> {
@@ -20,9 +24,7 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/decks/[i
   return deck ? { title: deck.name, robots: deck.visibility === "public" ? undefined : { index: false } } : { robots: { index: false } };
 }
 
-type Row = readonly [PoolCard, number];
-
-function Block({ title, rows, total }: { title: string; rows: Row[]; total?: number }) {
+function Block({ title, rows, total }: DeckSection) {
   return (
     <section>
       <h2 className="flex justify-between border-b border-border pb-1 font-display text-sm font-semibold">
@@ -31,11 +33,13 @@ function Block({ title, rows, total }: { title: string; rows: Row[]; total?: num
       </h2>
       <ul className="mt-1 space-y-0.5 text-sm">
         {rows.map(([c, n]) => (
-          <li key={c.id} className="flex items-center gap-2" title={c.rulesText || undefined}>
+          <li key={c.id} className="flex items-center gap-2" title={hasImages ? undefined : c.rulesText || undefined}>
             <span className="w-5 text-right font-display font-bold tabular-nums">{n}</span>
             <span className="w-4 text-center text-xs text-muted">{c.energyCost ?? ""}</span>
             <DomainDots domains={c.domains} />
-            <span className="truncate">{c.type === "Legend" ? listName(c) : fullName(c)}</span>
+            <CardHover src={cardImage(c.id, 744)} lowSrc={cardImage(c.id)} landscape={c.type === "Battlefield"} className="truncate">
+              {cardName(c)}
+            </CardHover>
           </li>
         ))}
       </ul>
@@ -71,6 +75,54 @@ export default async function DeckPage({ params }: PageProps<"/[locale]/decks/[i
   const curve = energyCurve(deck, pool);
   const peak = Math.max(1, ...curve);
   const builderQuery = { code: row.code, name: row.name, fmt: row.format, ...(owner ? { deck: row.id, vis: row.visibility } : {}) };
+  const runes = rows(deck.runes);
+  const side = rows(deck.side);
+  const byType = (["Unit", "Spell", "Gear"] as const).flatMap((type): DeckSection[] => {
+    const r = main.filter(([c]) => c.type === type);
+    return r.length ? [{ id: type, title: tt(type), rows: r, total: sum(r) }] : [];
+  });
+  const top: DeckSection[] = [
+    { id: "legend", title: tb("legend"), rows: one([deck.legend]) },
+    ...(deck.extraLegends.length ? [{ id: "extra", title: tb("extraLegendsTitle"), rows: one(deck.extraLegends) }] : []),
+    { id: "champion", title: tb("champion"), rows: one([deck.champion]) },
+    { id: "battlefields", title: tb("battlefields"), rows: one(deck.battlefields), total: deck.battlefields.length },
+  ];
+  const tail: DeckSection[] = [
+    { id: "runes", title: tb("runes"), rows: runes, total: sum(runes) },
+    ...(side.length ? [{ id: "side", title: tb("side"), rows: side, total: sum(side) }] : []),
+  ];
+  // Na grade, lenda e campeão dividem uma linha; o resto segue a ordem da lista.
+  const imageSections: DeckSection[] = [
+    { id: "core", title: `${tb("legend")} · ${tb("champion")}`, rows: [...one([deck.legend]), ...one(deck.extraLegends), ...one([deck.champion])] },
+    top.at(-1)!,
+    ...byType,
+    ...tail,
+  ];
+
+  const list = (
+    <div className="grid gap-8 md:grid-cols-[1fr_1.4fr]">
+      <div className="space-y-5">
+        {[...top, ...tail].map((s) => (
+          <Block key={s.id} {...s} />
+        ))}
+      </div>
+      <div className="space-y-5">
+        <div aria-label={tb("curve")} role="img" className="flex h-24 items-end gap-1 rounded-xl border border-border bg-surface p-3">
+          {curve.map((n, cost) => (
+            <div key={cost} className="flex flex-1 flex-col items-center gap-0.5 text-[11px] text-muted">
+              <span>{n || ""}</span>
+              <span className="w-full rounded-t bg-accent/70" style={{ height: `${(n / peak) * 44}px` }} />
+              <span>{cost === 7 ? "7+" : cost}</span>
+            </div>
+          ))}
+        </div>
+        <p className="text-sm text-muted">{tb("printMainTotal", { count: mainCount(deck) })}</p>
+        {byType.map((s) => (
+          <Block key={s.id} {...s} />
+        ))}
+      </div>
+    </div>
+  );
   const btn = "rounded-md border border-border px-3 py-1.5 text-sm hover:border-accent";
 
   return (
@@ -124,32 +176,11 @@ export default async function DeckPage({ params }: PageProps<"/[locale]/decks/[i
         <p className="mt-3 text-sm text-bad">{tb(`issues.${issues[0]!.code}` as "issues.legendMissing", issues[0]!.params)}</p>
       )}
 
-      <div className="mt-8 grid gap-8 md:grid-cols-[1fr_1.4fr]">
-        <div className="space-y-5">
-          <Block title={tb("legend")} rows={one([deck.legend])} />
-          {deck.extraLegends.length > 0 && <Block title={tb("extraLegendsTitle")} rows={one(deck.extraLegends)} />}
-          <Block title={tb("champion")} rows={one([deck.champion])} />
-          <Block title={tb("battlefields")} rows={one(deck.battlefields)} total={deck.battlefields.length} />
-          <Block title={tb("runes")} rows={rows(deck.runes)} total={sum(rows(deck.runes))} />
-          {Object.keys(deck.side).length > 0 && <Block title={tb("side")} rows={rows(deck.side)} total={sum(rows(deck.side))} />}
-        </div>
-        <div className="space-y-5">
-          <div aria-label={tb("curve")} role="img" className="flex h-24 items-end gap-1 rounded-xl border border-border bg-surface p-3">
-            {curve.map((n, cost) => (
-              <div key={cost} className="flex flex-1 flex-col items-center gap-0.5 text-[11px] text-muted">
-                <span>{n || ""}</span>
-                <span className="w-full rounded-t bg-accent/70" style={{ height: `${(n / peak) * 44}px` }} />
-                <span>{cost === 7 ? "7+" : cost}</span>
-              </div>
-            ))}
-          </div>
-          <p className="text-sm text-muted">{tb("printMainTotal", { count: mainCount(deck) })}</p>
-          {(["Unit", "Spell", "Gear"] as const).map((type) => {
-            const r = main.filter(([c]) => c.type === type);
-            return r.length ? <Block key={type} title={tt(type)} rows={r} total={sum(r)} /> : null;
-          })}
-        </div>
-      </div>
+      {hasImages ? (
+        <DeckViewToggle list={list} images={<DeckImages sections={imageSections} />} labels={{ view: t("view"), list: t("viewList"), images: t("viewImages") }} />
+      ) : (
+        <div className="mt-8">{list}</div>
+      )}
       <p className="mt-8 font-mono text-[11px] break-all text-muted">{row.code}</p>
     </div>
   );

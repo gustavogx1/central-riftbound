@@ -488,7 +488,10 @@
     "copyToBuilder": "Copiar para o deckbuilder",
     "delete": "Apagar",
     "description": "Descrição",
-    "saveDescription": "Salvar descrição"
+    "saveDescription": "Salvar descrição",
+    "view": "Visualização do deck",
+    "viewList": "Lista",
+    "viewImages": "Imagens"
   },
   "Complexity": {
     "title": "Complexidade ({set})",
