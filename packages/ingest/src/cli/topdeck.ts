@@ -7,6 +7,7 @@
  *   pnpm topdeck --dry-run           # só lista
  *   pnpm topdeck --force             # reimporta os já importados
  *   pnpm topdeck <tid> …             # torneios específicos
+ *   pnpm topdeck --find Melbourne    # procura pelo nome, sem filtro de tamanho, e diz por que entra ou não
  * Precisa de TOPDECK_API_KEY. Correções à mão em topdeck-events.json:
  * "ignore" (tids que nunca entram) e "link" (tid → id do evento na UVS).
  */
@@ -28,6 +29,7 @@ const { positionals, values } = parseArgs({
     "dry-run": { type: "boolean", default: false },
     force: { type: "boolean", default: false },
     "no-stats": { type: "boolean", default: false },
+    find: { type: "string" },
   },
 });
 
@@ -42,6 +44,32 @@ const RIFTBOUND_LAUNCH = new Date("2025-10-01T00:00:00Z");
 
 const config = JSON.parse(readFileSync(new URL("../../topdeck-events.json", import.meta.url), "utf8")) as { ignore: string[]; link: Record<string, number> };
 const client = new TopdeckClient({ log: console.warn });
+
+if (values.find) {
+  // Diagnóstico: torneio de Riftbound construído com o texto no nome, de qualquer tamanho.
+  // A busca em massa do TopDeck exige o formato (sem ele responde 400).
+  const needle = values.find.toLowerCase();
+  const since = values.since ? new Date(values.since) : new Date(Date.now() - Number(values.days ?? 60) * 86_400_000);
+  const until = Math.floor(Date.now() / 1000);
+  let hits = 0;
+  for (let start = Math.floor(since.getTime() / 1000); start < until; start += 30 * 86_400) {
+    const res = await client.request("v2/tournaments", (d) => tdBulk.parse(d), {
+      game: "Riftbound",
+      format: "Constructed",
+      start,
+      end: Math.min(until, start + 30 * 86_400),
+      columns: ["id"],
+    });
+    for (const t of res.filter((t) => t.tournamentName.toLowerCase().includes(needle))) {
+      hits++;
+      const kind = classifyTopdeck(t.tournamentName, t.standings.length);
+      const day = new Date(t.startDate * 1000).toISOString().slice(0, 10);
+      console.log(`${t.TID}\t${day}\t${t.standings.length} jogadores\t${kind ?? "fica de fora"}\t${t.tournamentName}`);
+    }
+  }
+  console.log(`${hits} torneios com "${values.find}" no nome (${client.requests} requisições)`);
+  process.exit(0);
+}
 
 let majors: TopdeckMajor[];
 if (positionals.length) {

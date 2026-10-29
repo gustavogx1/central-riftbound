@@ -231,7 +231,14 @@
     "bracketTbd": "A definir",
     "bracketNotStarted": "O top cut ainda não começou.",
     "seedHint": "Posição no suíço",
-    "champion": "Campeão"
+    "champion": "Campeão",
+    "score": "Placar",
+    "matchesThrough": "Partidas de {player} até a rodada {round}.",
+    "matchesOf": "Partidas de {player}.",
+    "loadingMatches": "Carregando partidas…",
+    "matchesError": "Não deu para carregar as partidas. Tente de novo.",
+    "noMatches": "Nenhuma partida registrada.",
+    "expandHint": "Clique num jogador para ver todas as partidas dele."
   },
   "Cards": {
     "title": "Cartas",

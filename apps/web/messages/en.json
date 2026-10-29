@@ -231,7 +231,14 @@
     "bracketTbd": "TBD",
     "bracketNotStarted": "The top cut hasn't started yet.",
     "seedHint": "Swiss standing",
-    "champion": "Champion"
+    "champion": "Champion",
+    "score": "Score",
+    "matchesThrough": "Matches for {player} through round {round}.",
+    "matchesOf": "Matches for {player}.",
+    "loadingMatches": "Loading matches…",
+    "matchesError": "Couldn't load the matches. Try again.",
+    "noMatches": "No matches recorded.",
+    "expandHint": "Click a player to see all their matches."
   },
   "Cards": {
     "title": "Cards",
