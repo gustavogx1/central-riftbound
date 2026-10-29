@@ -47,6 +47,14 @@ describe("normalizeCatalog", () => {
     expect(c.cards.map((x) => x.domains)).toEqual([["Calm"], ["Body"], []]);
   });
 
+  it("usa o nome do campeão, não a tag de tribo, no nome da lenda", () => {
+    const c = normalizeCatalog([
+      raw({ id: "ven-155-166", name: "Heart of the Tempest", public_code: "VEN-155/166", type: "Legend", tags: "Yordle / Kennen" }),
+      raw({ id: "ogn-087-298", name: "Lecturing Yordle", public_code: "OGN-087/298", tags: "Yordle" }),
+    ]);
+    expect(c.legends.map((l) => [l.slug, l.champion])).toEqual([["kennen-heart-of-the-tempest", "Kennen"]]);
+  });
+
   it("conta impressões por set", () => {
     expect(catalog.sets).toEqual([{ id: "OGN", name: "Origins", printCount: 3 }]);
   });
