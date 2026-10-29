@@ -178,7 +178,8 @@
     "vs": "vs",
     "points": "Points",
     "omw": "OMW",
-    "omwHint": "Opponents' match win percentage"
+    "omwHint": "Opponents' match win percentage",
+    "bestOf": "Best of {champion}: best finish with this legend at the event"
   },
   "Cards": {
     "title": "Cards",
@@ -273,7 +274,11 @@
     "recentMatches": "Recent matches",
     "h2hSummary": "{matches, plural, one {# match} other {# matches}} in tracked events, {draws, plural, one {# draw} other {# draws}}",
     "neverMet": "These players have not faced each other in the tracked events.",
-    "realName": "Name on UVS: {name}"
+    "realName": "Name on UVS: {name}",
+    "honors": "Titles",
+    "won": "Champion",
+    "bestOf": "Best of {champion}",
+    "honorsNote": "Champion = 1st in the final standings. Best of = best finish with a legend at that event, among at least {min} players on it."
   },
   "PrintVersions": {
     "normal": "Standard",

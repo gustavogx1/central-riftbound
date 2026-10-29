@@ -37,6 +37,9 @@
   --good: #5ad19a;
   --bad: #ff7a8a;
 
+  /* Títulos (troféu e coroa) */
+  --gold: #f5c451;
+
   color-scheme: dark;
 }
 
@@ -53,6 +56,7 @@
   --color-live: var(--live);
   --color-good: var(--good);
   --color-bad: var(--bad);
+  --color-gold: var(--gold);
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-display), var(--font-inter), ui-sans-serif, sans-serif;
 }
