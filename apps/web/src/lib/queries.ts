@@ -453,6 +453,54 @@ export async function getPairings(roundId: number, opts: { q?: string; page: num
   return { rows, total: rows[0]?.total ?? 0 };
 }
 
+/** Fases de eliminação simples (UVS: "RANKED_SINGLE_ELIMINATION"; TopDeck: "SINGLE_ELIMINATION"). */
+export const isEliminationPhase = (phaseType: string) => phaseType.endsWith("SINGLE_ELIMINATION");
+
+export interface BracketMatch {
+  id: number;
+  roundId: number;
+  table: number | null;
+  status: string;
+  isBye: boolean;
+  isDraw: boolean;
+  winnerId: number | null;
+  gamesWinner: number;
+  gamesLoser: number;
+  p1: number | null;
+  p1Name: string | null;
+  p1Hidden: boolean | null;
+  l1: string | null;
+  p2: number | null;
+  p2Name: string | null;
+  p2Hidden: boolean | null;
+  l2: string | null;
+}
+
+/** Partidas do top cut (todas as rodadas de eliminação) e o seed de cada jogador no suíço. */
+export async function getBracket(eventId: number, roundIds: number[], seedRoundId: number | null) {
+  const db = getDb();
+  if (!db || roundIds.length === 0) return { matches: [] as BracketMatch[], seeds: new Map<number, number>() };
+  const matches = (await db.execute(sql`
+    select m.id, m.round_id as "roundId", m.table_number as "table", m.status, m.is_bye as "isBye", m.is_draw as "isDraw", m.winner_id as "winnerId",
+      m.games_winner as "gamesWinner", m.games_loser as "gamesLoser",
+      m.player1_id as "p1", coalesce(p1.nick, p1.name) as "p1Name", p1.hidden as "p1Hidden", m.legend1 as "l1",
+      m.player2_id as "p2", coalesce(p2.nick, p2.name) as "p2Name", p2.hidden as "p2Hidden", m.legend2 as "l2"
+    from match m left join player p1 on p1.id = m.player1_id left join player p2 on p2.id = m.player2_id
+    where m.event_id = ${eventId} and m.round_id in (${sql.join(roundIds.map((id) => sql`${id}`), sql`, `)})
+    order by m.table_number nulls last, m.id
+  `)) as unknown as BracketMatch[];
+  const players = [...new Set(matches.flatMap((m) => [m.p1, m.p2]).filter((p): p is number => p !== null))];
+  const seeds = new Map<number, number>();
+  if (seedRoundId !== null && players.length > 0) {
+    const rows = await db
+      .select({ playerId: schema.standing.playerId, rank: schema.standing.rank })
+      .from(schema.standing)
+      .where(and(eq(schema.standing.roundId, seedRoundId), inArray(schema.standing.playerId, players)));
+    for (const r of rows) seeds.set(r.playerId, r.rank);
+  }
+  return { matches, seeds };
+}
+
 /** Versões de impressão filtráveis no catálogo (o campo `variant` vem da galeria oficial). */
 export const PRINT_VERSIONS = ["normal", "altArt", "overnumbered", "signed", "special"] as const;
 export type PrintVersion = (typeof PRINT_VERSIONS)[number];

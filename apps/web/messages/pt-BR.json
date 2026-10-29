@@ -222,7 +222,16 @@
     "submitDeck": "Enviar decklist",
     "submitYours": "Jogou? Envie a sua lista.",
     "community": "Comunidade",
-    "communityHint": "Enviada pela comunidade e conferida pela moderação"
+    "communityHint": "Enviada pela comunidade e conferida pela moderação",
+    "bracket": "Playoffs",
+    "bracketFinal": "Final",
+    "bracketSemis": "Semifinal",
+    "bracketQuarters": "Quartas de final",
+    "bracketTop": "Top {count}",
+    "bracketTbd": "A definir",
+    "bracketNotStarted": "O top cut ainda não começou.",
+    "seedHint": "Posição no suíço",
+    "champion": "Campeão"
   },
   "Cards": {
     "title": "Cartas",

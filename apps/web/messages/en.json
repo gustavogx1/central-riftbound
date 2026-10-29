@@ -222,7 +222,16 @@
     "submitDeck": "Submit a decklist",
     "submitYours": "Played it? Submit your list.",
     "community": "Community",
-    "communityHint": "Sent by the community and checked by moderators"
+    "communityHint": "Sent by the community and checked by moderators",
+    "bracket": "Playoffs",
+    "bracketFinal": "Final",
+    "bracketSemis": "Semifinals",
+    "bracketQuarters": "Quarterfinals",
+    "bracketTop": "Top {count}",
+    "bracketTbd": "TBD",
+    "bracketNotStarted": "The top cut hasn't started yet.",
+    "seedHint": "Swiss standing",
+    "champion": "Champion"
   },
   "Cards": {
     "title": "Cards",
