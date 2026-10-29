@@ -8,6 +8,7 @@ import { RulesText } from "@/components/RulesText";
 import { Link } from "@/i18n/navigation";
 import { getCardTournamentUse } from "@/lib/card-stats";
 import { makeFormat } from "@/lib/format";
+import { priceLinks } from "@/lib/price-links";
 import { cardImage } from "@/lib/images";
 import { getCardByCode, getLegendsBySlugs, PRINT_VERSIONS, type PrintVersion } from "@/lib/queries";
 
@@ -85,6 +86,16 @@ export default async function CardPage({ params }: PageProps<"/[locale]/cards/[c
           <p className="mt-4 flex flex-wrap gap-3 text-sm">
             {legendSlug && <Link href={`/legends/${legendSlug}`} className="text-accent underline">{t("legendPage")}</Link>}
             <Link href={{ pathname: "/cards", query: { q: card.name } }} className="text-accent underline">{t("sameName")}</Link>
+          </p>
+
+          <h2 className="mt-8 font-display text-xl font-semibold">{t("pricesTitle")}</h2>
+          <p className="mt-1 text-sm text-muted">{t("pricesNote")}</p>
+          <p className="mt-2 flex flex-wrap gap-2 text-sm">
+            {priceLinks(card.name).map((l) => (
+              <a key={l.store} href={l.href} target="_blank" rel="noopener noreferrer nofollow" className="rounded-md border border-border bg-surface px-3 py-1.5 hover:border-accent">
+                {t("seePriceAt", { store: l.store })} ↗
+              </a>
+            ))}
           </p>
 
           <h2 className="mt-8 font-display text-xl font-semibold">{t("prints")}</h2>
