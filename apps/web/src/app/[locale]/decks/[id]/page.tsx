@@ -4,9 +4,11 @@ import { decodeDeck, validateDeck, type DeckFormat } from "@cr/core";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { CopyButton } from "@/components/CopyButton";
 import { DeckShowcase } from "@/components/deck/DeckShowcase";
+import { SpiceBadge } from "@/components/deck/SpiceBadge";
 import { getPathname, Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 import { getSessionUser } from "@/lib/auth/server";
+import { getDeckSpice } from "@/lib/card-stats";
 import { deleteDeckAction, describeDeckAction } from "@/lib/deck-actions";
 import { getUserDeck, MAX_DESCRIPTION, poolMap } from "@/lib/decks";
 import { makeFormat } from "@/lib/format";
@@ -32,6 +34,8 @@ export default async function DeckPage({ params }: PageProps<"/[locale]/decks/[i
   const { deck } = decodeDeck(row.code, pool);
   const legends = await getLegends();
   const legend = legends.find((l) => l.cardId === deck.legend);
+  // Comparado com as listas de torneio da lenda em todos os sets.
+  const spice = await getDeckSpice(deck, legend?.slug ?? null, null);
   const owner = user?.id === row.userId;
   const issues = validateDeck(deck, pool, row.format as DeckFormat);
   const builderQuery = { code: row.code, name: row.name, fmt: row.format, ...(owner ? { deck: row.id, vis: row.visibility } : {}) };
@@ -53,6 +57,7 @@ export default async function DeckPage({ params }: PageProps<"/[locale]/decks/[i
             <span className={`rounded px-1.5 py-0.5 ${row.legal ? "bg-good/15 text-good" : "bg-bad/15 text-bad"}`}>{row.legal ? t("legal") : t("notLegal")}</span>
             <span className="rounded bg-surface-2 px-1.5 py-0.5 text-muted">{tb(row.format === "casual" ? "casual" : "constructed")}</span>
             {owner && <span className="rounded bg-surface-2 px-1.5 py-0.5 text-muted">{t(`visibility.${row.visibility}`)}</span>}
+            {spice && <SpiceBadge value={spice.value} compared={spice.compared} />}
           </p>
         }
         actions={

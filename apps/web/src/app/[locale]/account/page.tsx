@@ -7,7 +7,10 @@ import { signOut } from "@/lib/auth/actions";
 import { getSessionUser } from "@/lib/auth/server";
 import { renameAction } from "@/lib/deck-actions";
 import { listMyDecks, MAX_DECKS_PER_USER } from "@/lib/decks";
+import { makeFormat } from "@/lib/format";
 import { getLegends } from "@/lib/queries";
+import { deleteSubmissionAction } from "@/lib/submission-actions";
+import { countPending, listMySubmissions } from "@/lib/submissions";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/account">): Promise<Metadata> {
   const { locale } = await params;
@@ -21,8 +24,11 @@ export default async function AccountPage({ params }: PageProps<"/[locale]/accou
   const user = await getSessionUser();
   if (!user) redirect({ href: { pathname: "/login", query: { next: "/account" } }, locale: locale as Locale });
   const t = await getTranslations("Account");
-  const [decks, legends] = await Promise.all([listMyDecks(user!.id), getLegends()]);
+  const ts = await getTranslations("Submit");
+  const f = makeFormat(locale);
+  const [decks, legends, submissions, pending] = await Promise.all([listMyDecks(user!.id), getLegends(), listMySubmissions(user!.id), user!.admin ? countPending() : Promise.resolve(0)]);
   const byCard = new Map(legends.map((l) => [l.cardId, l]));
+  const bySlug = new Map(legends.map((l) => [l.slug, l]));
   const here = getPathname({ href: "/account", locale: locale as Locale });
   const home = getPathname({ href: "/", locale: locale as Locale });
 
@@ -35,6 +41,12 @@ export default async function AccountPage({ params }: PageProps<"/[locale]/accou
           <button className="rounded-md border border-border px-3 py-1.5 text-sm hover:border-accent">{t("signOut")}</button>
         </form>
       </div>
+
+      {user!.admin && (
+        <p className="mt-4 text-sm">
+          <Link href="/admin" className="text-accent underline">{t("moderation", { count: pending })}</Link>
+        </p>
+      )}
 
       <form action={renameAction} className="mt-6 flex flex-wrap items-end gap-2 rounded-xl border border-border bg-surface p-4">
         <input type="hidden" name="next" value={here} />
@@ -59,6 +71,39 @@ export default async function AccountPage({ params }: PageProps<"/[locale]/accou
           {decks.map((d) => (
             <li key={d.id}>
               <DeckCardItem deck={d} legend={d.legendCardId ? byCard.get(d.legendCardId) : undefined} locale={locale} showVisibility />
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <h2 className="mt-10 font-display text-2xl font-semibold">{ts("mySubmissions")}</h2>
+      {submissions.length === 0 ? (
+        <p className="mt-4 rounded-xl border border-border bg-surface p-6 text-muted">
+          {t.rich("noSubmissions", { link: (c) => <Link href="/events" className="text-accent underline">{c}</Link> })}
+        </p>
+      ) : (
+        <ul className="mt-4 space-y-2">
+          {submissions.map((s) => (
+            <li key={s.id} className="flex flex-wrap items-center gap-3 rounded-xl border border-border bg-surface p-3 text-sm">
+              <div className="min-w-0 flex-1">
+                <Link href={`/events/${s.eventId}/decks/cr-${s.id}`} className="font-semibold hover:text-accent">
+                  {s.playerName} · {s.legend ? (bySlug.get(s.legend)?.champion ?? s.legend) : "—"}
+                </Link>
+                <p className="truncate text-muted">{s.eventName} · {f.date(s.createdAt)}</p>
+              </div>
+              <span
+                className={`rounded px-1.5 py-0.5 text-xs ${s.status === "approved" ? "bg-good/15 text-good" : s.status === "rejected" ? "bg-bad/15 text-bad" : "bg-surface-2 text-muted"}`}
+                title={s.rejectReason ? ts(`reasons.${s.rejectReason}`) : undefined}
+              >
+                {ts(`status.${s.status}`)}
+              </span>
+              {s.status !== "approved" && (
+                <form action={deleteSubmissionAction}>
+                  <input type="hidden" name="id" value={s.id} />
+                  <input type="hidden" name="next" value={here} />
+                  <button className="text-xs text-muted hover:text-bad">{ts("delete")}</button>
+                </form>
+              )}
             </li>
           ))}
         </ul>

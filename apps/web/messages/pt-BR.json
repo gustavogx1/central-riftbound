@@ -140,7 +140,7 @@
     "title": "Política de privacidade",
     "intro": "A Central Riftbound é um site de fãs, não oficial e sem fins comerciais, sobre o jogo de cartas Riftbound. Esta página explica o que guardamos sobre você e por quê.",
     "signIn": "Para navegar no site não é preciso conta. Se você entrar com Discord ou Google, esse serviço nos envia o ID da sua conta, e-mail, nome e avatar. Usamos esses dados só para identificar a sua conta e nunca mandamos e-mails.",
-    "stored": "Com uma conta, guardamos o seu nome de exibição, os decks que você salva e os seus votos de complexidade.",
+    "stored": "Com uma conta, guardamos o seu nome de exibição, os decks que você salva, os seus votos de complexidade e as decklists de torneio que você envia (com você como quem enviou).",
     "public": "Decks marcados como públicos ou não listados podem ser vistos por outras pessoas, junto com o seu nome de exibição. Decks privados só você vê.",
     "players": "Nomes e resultados de jogadores vêm dos resultados públicos de eventos oficiais. Qualquer jogador pode pedir para esconder o próprio nome no site.",
     "cookies": "Não mostramos anúncios, não vendemos nem compartilhamos seus dados e não usamos cookies de rastreamento. Os cookies servem só para manter você conectado e lembrar o idioma.",
@@ -179,7 +179,7 @@
     "publicDecks": "Decks públicos com esta lenda",
     "buildDeck": "Montar um deck",
     "eventDecksTitle": "Decklists de torneio",
-    "eventDecksLead": "Listas bem colocadas em Showdowns, Regionals e outros eventos grandes, publicadas no <link>TopDeck.gg</link>.",
+    "eventDecksLead": "Listas bem colocadas em Showdowns, Regionals e outros eventos grandes, publicadas no <link>TopDeck.gg</link> ou enviadas pela comunidade e moderadas.",
     "eventDeckPlace": "{rank}º · {event}"
   },
   "Events": {
@@ -218,7 +218,11 @@
     "noDecks": "Nenhuma decklist publicada para este evento.",
     "sourceTopdeck": "Fonte: resultados e decklists públicos do TopDeck.gg.",
     "creditTopdeck": "Decklists: <link>TopDeck.gg</link>.",
-    "creditTopdeckOwn": "<link>Ver o evento no TopDeck.gg</link>."
+    "creditTopdeckOwn": "<link>Ver o evento no TopDeck.gg</link>.",
+    "submitDeck": "Enviar decklist",
+    "submitYours": "Jogou? Envie a sua lista.",
+    "community": "Comunidade",
+    "communityHint": "Enviada pela comunidade e conferida pela moderação"
   },
   "Cards": {
     "title": "Cartas",
@@ -489,7 +493,9 @@
     "save": "Salvar",
     "myDecks": "Meus decks",
     "deckLimit": "{count} de {max}",
-    "noDecks": "Nenhum deck salvo ainda. Monte um no <link>deckbuilder</link>."
+    "noDecks": "Nenhum deck salvo ainda. Monte um no <link>deckbuilder</link>.",
+    "moderation": "Moderação de decklists ({count} pendentes)",
+    "noSubmissions": "Você ainda não enviou nenhuma decklist de torneio. Abra um <link>evento</link> que você jogou e use \"Enviar decklist\"."
   },
   "Decks": {
     "title": "Decks",
@@ -498,7 +504,7 @@
     "allLegends": "Todas as lendas",
     "count": "{count, plural, one {# deck} other {# decks}}",
     "empty": "Nenhum deck público ainda. Seja o primeiro: monte um deck e salve como público.",
-    "tournamentNote": "As listas de torneio (ligadas aos standings oficiais) chegam na próxima fase.",
+    "tournamentNote": "As decklists de torneio (ligadas à classificação oficial) ficam na aba Decklists de cada evento e nas páginas das lendas.",
     "noLegend": "Sem lenda",
     "by": "por {author}",
     "legal": "Válido",
@@ -542,7 +548,11 @@
     "placed": "{rank}º de {players}",
     "copyToBuilder": "Abrir no deckbuilder",
     "onTopdeck": "Ver no TopDeck.gg",
-    "credit": "Decklist publicada no <link>TopDeck.gg</link>."
+    "credit": "Decklist publicada no <link>TopDeck.gg</link>.",
+    "pending": "Esta lista está aguardando moderação. Só você e a moderação conseguem vê-la.",
+    "rejected": "Esta lista foi recusada pela moderação e não é pública.",
+    "creditCommunity": "Decklist enviada pela comunidade e conferida pela moderação com os resultados oficiais.",
+    "creditCommunitySource": "Decklist enviada pela comunidade e conferida pela moderação. <link>Fonte original</link>."
   },
   "DeckView": {
     "view": "Visualização do deck",
@@ -563,5 +573,109 @@
     "power": "Poder",
     "domains": "Domínios",
     "types": "Tipos"
+  },
+  "Submit": {
+    "title": "Enviar decklist",
+    "lead": "Jogou este evento? Encontre seu nome na classificação final e cole a sua lista. Ela vai para a fila de moderação e, depois de aprovada, aparece no evento, na página da lenda e nas estatísticas por carta.",
+    "notComplete": "Dá para enviar decklists quando o evento acaba e a classificação final sai.",
+    "step1": "1. Encontre o jogador",
+    "step2": "2. Cole a lista",
+    "noEntrants": "Nenhum jogador com esse nome neste evento.",
+    "pick": "Escolher",
+    "hiddenNote": "Jogadores que pediram para ocultar o nome não aparecem aqui.",
+    "notEntrant": "Este jogador não está na classificação deste evento.",
+    "changePlayer": "Escolher outro jogador",
+    "entrantLine": "Terminou em {rank}º de {players} · lenda registrada: {legend}",
+    "rankShort": "{rank}º",
+    "alreadyPublished": "Este jogador já tem decklist publicada neste evento.",
+    "seeDecks": "Ver as decklists",
+    "fromMyDecks": "Usar um dos meus decks salvos",
+    "pickDeck": "Escolha um deck…",
+    "listLabel": "Decklist (texto ou código de deck)",
+    "listPlaceholder": "Legend:\n1 Jinx, Loose Cannon\n\nChampion:\n1 Jinx, Rebel\n\nMain Deck:\n3 …",
+    "listHelp": "O mesmo formato da importação do deckbuilder: código de deck do Piltover Archive ou lista em texto com seções. A lista precisa ser válida para torneio e usar a lenda registrada para o jogador.",
+    "sourceLabel": "Onde esta lista foi publicada? (opcional)",
+    "sourceHelp": "Se você não é o jogador, coloque o link de onde a lista foi divulgada (organizador, Riot, redes sociais).",
+    "noteLabel": "Recado para a moderação (opcional)",
+    "moderationNote": "Alguém da moderação confere cada lista antes de ela ir ao ar. Guardamos o seu nome de exibição como quem enviou.",
+    "adminNote": "Você é moderador: esta lista é publicada na hora.",
+    "send": "Enviar",
+    "sending": "Enviando…",
+    "donePending": "Valeu! Sua lista está na fila de moderação.",
+    "doneApproved": "Lista publicada.",
+    "openSubmission": "Ver a lista",
+    "mySubmissions": "Minhas decklists enviadas",
+    "delete": "Apagar",
+    "status": {
+      "pending": "Aguardando moderação",
+      "approved": "Aprovada",
+      "rejected": "Recusada"
+    },
+    "reasons": {
+      "wrongPlayer": "Não é a lista deste jogador",
+      "wrongList": "A lista não bate com o que foi jogado",
+      "duplicate": "Duplicada",
+      "spam": "Spam",
+      "other": "Outro motivo"
+    },
+    "errors": {
+      "login": "Entre na sua conta para enviar.",
+      "unavailable": "O envio não está disponível agora. Tente mais tarde.",
+      "notComplete": "Este evento ainda não acabou.",
+      "notEntrant": "Este jogador não está na classificação deste evento.",
+      "empty": "Cole uma decklist ou um código de deck.",
+      "alreadyPublished": "Este jogador já tem decklist publicada neste evento.",
+      "limit": "Você tem listas demais esperando moderação. Aguarde antes de enviar mais.",
+      "badUrl": "O link precisa começar com https:// ou http://.",
+      "unknownCards": "Não conseguimos ler estas linhas: {lines}",
+      "invalid": "A lista não é válida para torneio: {issue}",
+      "legendMismatch": "A lista usa {list}, mas os resultados oficiais registraram {registered} para este jogador."
+    }
+  },
+  "Admin": {
+    "title": "Moderação de decklists",
+    "lead": "Listas enviadas pela comunidade. Confira se a lista bate com o jogador e com a lenda registrada nos resultados oficiais antes de aprovar.",
+    "empty": "Nada por aqui.",
+    "rank": "{rank}º",
+    "registered": "registrada: {legend}",
+    "notRegistered": "sem lenda registrada nos resultados",
+    "sentBy": "Enviada por {author} em {date}",
+    "deletedUser": "conta apagada",
+    "source": "Fonte",
+    "preview": "Pré-visualizar",
+    "showList": "Mostrar lista",
+    "approve": "Aprovar",
+    "reject": "Recusar",
+    "unpublish": "Tirar do ar",
+    "reason": "Motivo",
+    "errors": {
+      "notFound": "Envio não encontrado.",
+      "duplicate": "Este jogador já tem lista publicada neste evento."
+    },
+    "tabs": {
+      "pending": "Pendentes",
+      "approved": "Aprovadas",
+      "rejected": "Recusadas"
+    }
+  },
+  "CardStats": {
+    "title": "Estatísticas por carta",
+    "lead": "Com base em {count, plural, one {# decklist de torneio} other {# decklists de torneio}} ({set}). Win rate = campanha de quem jogou com a carta naquele evento; o número ao lado é a diferença para a média da lenda.",
+    "none": "Ainda não há decklists de torneio desta lenda neste set.",
+    "zones": {
+      "main": "Deck principal",
+      "battlefields": "Campos de batalha",
+      "side": "Sideboard"
+    },
+    "card": "Carta",
+    "inclusion": "Nas listas",
+    "copies": "Cópias (média)",
+    "winRate": "Win rate",
+    "winRateHint": "Aparece com {min}+ partidas",
+    "staple": "Staple",
+    "stapleHint": "Em pelo menos {pct} das listas",
+    "ofDecks": "{count}/{total}",
+    "spice": "Tempero {value}/100",
+    "spiceHint": "Quanto esta lista foge de {count, plural, one {# outra lista} other {# outras listas}} de torneio da mesma lenda: 0 = só staples, 100 = nada em comum"
   }
 }

@@ -152,8 +152,11 @@ export default async function EventPage({ params, searchParams }: PageProps<"/[l
         <div className="flex flex-wrap items-center gap-2">
           <Link href={{ pathname: `/events/${ev.id}`, query: { view: "standings" } }} className={tab(view === "standings")} aria-current={view === "standings" ? "page" : undefined}>{t("standings")}</Link>
           <Link href={{ pathname: `/events/${ev.id}`, query: { view: "pairings" } }} className={tab(view === "pairings")} aria-current={view === "pairings" ? "page" : undefined}>{t("pairings")}</Link>
-          {topdeck && (
+          {(topdeck || ev.status === "complete") && (
             <Link href={{ pathname: `/events/${ev.id}`, query: { view: "decks" } }} className={tab(view === "decks")} aria-current={view === "decks" ? "page" : undefined}>{t("decks")}</Link>
+          )}
+          {ev.status === "complete" && (
+            <Link href={`/events/${ev.id}/submit`} className="ml-auto rounded-md border border-border px-3 py-1.5 text-sm hover:border-accent">{t("submitDeck")}</Link>
           )}
         </div>
 
@@ -168,7 +171,15 @@ export default async function EventPage({ params, searchParams }: PageProps<"/[l
               <button className="rounded-md bg-accent px-4 py-1.5 text-sm font-semibold text-accent-ink">{tc("search")}</button>
             </form>
             {decks.rows.length === 0 ? (
-              <p className="mt-6 text-muted">{t("noDecks")}</p>
+              <p className="mt-6 text-muted">
+                {t("noDecks")}
+                {ev.status === "complete" && (
+                  <>
+                    {" "}
+                    <Link href={`/events/${ev.id}/submit`} className="text-accent underline">{t("submitYours")}</Link>
+                  </>
+                )}
+              </p>
             ) : (
               <div className="mt-4 overflow-x-auto rounded-xl border border-border">
                 <table className="w-full min-w-[560px] text-sm">
@@ -182,16 +193,21 @@ export default async function EventPage({ params, searchParams }: PageProps<"/[l
                   </thead>
                   <tbody>
                     {decks.rows.map((d) => (
-                      <tr key={d.topdeckPlayerId} className="border-t border-border">
+                      <tr key={d.key} className="border-t border-border">
                         <td className="px-3 py-2 tabular-nums text-muted">{d.rank ?? "—"}</td>
-                        <td className="px-3 py-2 font-medium">{playerLink(d.playerId, d.name, d.hidden)}</td>
+                        <td className="px-3 py-2 font-medium">
+                          <span className="flex items-center gap-2">
+                            {playerLink(d.playerId, d.name, d.hidden)}
+                            {d.source === "community" && <span className="rounded bg-surface-2 px-1.5 py-0.5 text-xs font-normal text-muted" title={t("communityHint")}>{t("community")}</span>}
+                          </span>
+                        </td>
                         <td className="px-3 py-2"><LegendCell slug={d.legend} legends={legends} /></td>
                         <td className="px-3 py-2 text-right">
                           {d.code ? (
-                            <Link href={`/events/${ev.id}/decks/${encodeURIComponent(d.topdeckPlayerId)}`} className="text-accent hover:underline">{t("viewDeck")}</Link>
-                          ) : (
-                            <a href={topdeckDeckUrl(d.tid, d.topdeckPlayerId)} target="_blank" rel="noopener noreferrer" className="text-muted hover:text-text">TopDeck.gg ↗</a>
-                          )}
+                            <Link href={`/events/${ev.id}/decks/${encodeURIComponent(d.key)}`} className="text-accent hover:underline">{t("viewDeck")}</Link>
+                          ) : d.tid ? (
+                            <a href={topdeckDeckUrl(d.tid, d.key)} target="_blank" rel="noopener noreferrer" className="text-muted hover:text-text">TopDeck.gg ↗</a>
+                          ) : null}
                         </td>
                       </tr>
                     ))}

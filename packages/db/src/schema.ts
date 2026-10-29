@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { boolean, index, integer, pgEnum, pgSequence, pgTable, primaryKey, real, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { boolean, index, integer, pgEnum, pgSequence, pgTable, primaryKey, real, text, timestamp, uniqueIndex, uuid } from "drizzle-orm/pg-core";
 
 export const domainEnum = pgEnum("domain", ["Fury", "Calm", "Mind", "Body", "Chaos", "Order"]);
 export const cardTypeEnum = pgEnum("card_type", ["Legend", "Unit", "Spell", "Gear", "Rune", "Battlefield"]);
@@ -382,4 +382,52 @@ export const complexityVote = pgTable(
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [primaryKey({ columns: [t.userId, t.legend, t.metagame] }), index("complexity_vote_legend_idx").on(t.metagame, t.legend)],
+);
+
+// ---------------------------------------------------------------------------
+// Decklists enviadas pela comunidade, ligadas à classificação importada.
+// Entram como pendentes e só aparecem no site depois da moderação.
+// ---------------------------------------------------------------------------
+
+export const submissionStatusEnum = pgEnum("submission_status", ["pending", "approved", "rejected"]);
+export type SubmissionStatus = (typeof submissionStatusEnum.enumValues)[number];
+
+/**
+ * Decklist de um jogador num evento, enviada por um usuário logado. `legend` é a lenda da
+ * lista; `expectedLegend` é a que a UVS registrou para o jogador (o envio só passa se baterem).
+ * `rank` = posição final quando o envio foi feito. `sourceUrl` = onde a lista foi publicada,
+ * quando quem envia não é o próprio jogador.
+ */
+export const deckSubmission = pgTable(
+  "deck_submission",
+  {
+    id: text("id").primaryKey(),
+    eventId: integer("event_id")
+      .notNull()
+      .references(() => event.id, { onDelete: "cascade" }),
+    playerId: integer("player_id")
+      .notNull()
+      .references(() => player.id, { onDelete: "cascade" }),
+    userId: uuid("user_id").references(() => profile.userId, { onDelete: "set null" }),
+    code: text("code").notNull(),
+    legend: text("legend"),
+    expectedLegend: text("expected_legend"),
+    rank: integer("rank"),
+    sourceUrl: text("source_url"),
+    note: text("note").notNull().default(""),
+    status: submissionStatusEnum("status").notNull().default("pending"),
+    rejectReason: text("reject_reason"),
+    reviewedBy: uuid("reviewed_by"),
+    reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index("deck_submission_status_idx").on(t.status, t.createdAt),
+    index("deck_submission_event_idx").on(t.eventId, t.playerId),
+    index("deck_submission_user_idx").on(t.userId, t.createdAt),
+    index("deck_submission_legend_idx").on(t.legend),
+    // Uma lista aprovada por jogador e evento.
+    uniqueIndex("deck_submission_approved_uq").on(t.eventId, t.playerId).where(sql`status = 'approved'`),
+  ],
 );
