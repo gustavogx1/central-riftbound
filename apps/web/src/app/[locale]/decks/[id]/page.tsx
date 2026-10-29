@@ -37,7 +37,7 @@ function Block({ title, rows, total }: DeckSection) {
             <span className="w-5 text-right font-display font-bold tabular-nums">{n}</span>
             <span className="w-4 text-center text-xs text-muted">{c.energyCost ?? ""}</span>
             <DomainDots domains={c.domains} />
-            <CardHover src={cardImage(c.id, 744)} landscape={c.type === "Battlefield"} className="truncate">
+            <CardHover src={cardImage(c.id, 744)} lowSrc={cardImage(c.id)} landscape={c.type === "Battlefield"} className="truncate">
               {cardName(c)}
             </CardHover>
           </li>

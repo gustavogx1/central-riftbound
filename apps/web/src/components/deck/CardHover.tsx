@@ -9,7 +9,20 @@ const GAP = 18;
  * Mostra a imagem da carta flutuando ao lado do mouse enquanto ele está em cima de `children`.
  * Só com mouse: no toque a imagem cobriria a lista e não haveria como fechar.
  */
-export function CardHover({ src, landscape = false, className, children }: { src: string | null; landscape?: boolean; className?: string; children: ReactNode }) {
+export function CardHover({
+  src,
+  lowSrc,
+  landscape = false,
+  className,
+  children,
+}: {
+  src: string | null;
+  /** Versão pequena (já em cache), mostrada enquanto a grande carrega. */
+  lowSrc?: string | null;
+  landscape?: boolean;
+  className?: string;
+  children: ReactNode;
+}) {
   const [pos, setPos] = useState<{ x: number; y: number } | null>(null);
   if (!src) return <span className={className}>{children}</span>;
   const w = landscape ? Math.round(W * 1.4) : W;
@@ -31,7 +44,7 @@ export function CardHover({ src, landscape = false, className, children }: { src
           width={w}
           height={h}
           className="pointer-events-none fixed z-50 rounded-xl shadow-2xl shadow-black/60"
-          style={{ left: pos.x, top: pos.y, width: w, height: h }}
+          style={{ left: pos.x, top: pos.y, width: w, height: h, backgroundImage: lowSrc ? `url(${lowSrc})` : undefined, backgroundSize: "cover" }}
         />
       )}
     </span>

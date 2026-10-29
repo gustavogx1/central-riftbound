@@ -29,7 +29,7 @@ function Tile({ card, count }: { card: PoolCard; count: number }) {
           style={{ top: (stack - 1 - i) * 5, right: (stack - 1 - i) * 5, bottom: (i + 1) * 5, left: (i + 1) * 5 }}
         />
       ))}
-      <CardHover src={cardImage(card.id, 744)} landscape={landscape} className="relative block">
+      <CardHover src={cardImage(card.id, 744)} lowSrc={img} landscape={landscape} className="relative block">
         {img ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={img} alt={name} width={372} height={landscape ? 266 : 519} loading="lazy" className="block w-full rounded-lg" />
