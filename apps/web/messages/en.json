@@ -35,7 +35,7 @@
     "featureMetaTitle": "Computed meta chart",
     "featureMetaBody": "Every legend placed by power and popularity or community-voted complexity, recalculated from real matches.",
     "featureLiveTitle": "Live events",
-    "featureLiveBody": "Pairings and standings of Regional Qualifiers that refresh on their own while the event runs.",
+    "featureLiveBody": "Pairings and standings of Regional Qualifiers and Showdowns that refresh on their own while the event runs.",
     "featureLegendsTitle": "Legends and pilots",
     "featureLegendsBody": "Win rate, conversion, matchups and the best players of each legend, with confidence intervals.",
     "featureToolsTitle": "Deckbuilder",
@@ -98,7 +98,8 @@
     "trendFlat": "No change",
     "seeAll": "See all",
     "basedOn": "Based on {matches} matches from {events} events",
-    "player": "Player"
+    "player": "Player",
+    "showdownOnly": "Showdowns"
   },
   "Meta": {
     "title": "Meta",
@@ -156,7 +157,7 @@
   },
   "Events": {
     "title": "Events",
-    "lead": "Official events we follow, imported from the public results of the organized play platform.",
+    "lead": "Official events we follow (Regional Qualifiers and the Showdown Series), imported from the public results of the organized play platform.",
     "date": "Date",
     "name": "Event",
     "kind": "Type",
@@ -164,7 +165,8 @@
     "main": "Regional Qualifier",
     "side": "Side event",
     "community": "Community",
-    "live": "Live"
+    "live": "Live",
+    "showdown": "Showdown Series"
   },
   "Event": {
     "standings": "Standings",
@@ -195,7 +197,8 @@
     "might": "Might",
     "noResults": "No card matches these filters.",
     "syntaxHint": "Supports <link>search syntax</link>: t:unit d:fury c<=3 o:\"draw\".",
-    "syntaxErrors": "Ignored: {terms}"
+    "syntaxErrors": "Ignored: {terms}",
+    "version": "Version"
   },
   "Types": {
     "Legend": "Legend",
@@ -211,7 +214,8 @@
     "Mind": "Mind",
     "Body": "Body",
     "Chaos": "Chaos",
-    "Order": "Order"
+    "Order": "Order",
+    "Colorless": "Colorless"
   },
   "Sets": {
     "OGN": "Origins",
@@ -485,5 +489,12 @@
       "4": "4",
       "5": "5: very complex"
     }
+  },
+  "PrintVersions": {
+    "normal": "Standard",
+    "altArt": "Alt art",
+    "overnumbered": "Overnumbered",
+    "signed": "Signed",
+    "special": "Special"
   }
 }

@@ -5,3 +5,4 @@ export * from "./ingest-event";
 export * from "./recompute";
 export * from "./live";
 export * from "./replay";
+export * from "./showdown";

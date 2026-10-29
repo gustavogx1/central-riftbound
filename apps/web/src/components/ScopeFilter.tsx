@@ -1,6 +1,8 @@
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 
+const KIND_LABEL = { main: "mainOnly", showdown: "showdownOnly", all: "allEvents" } as const;
+
 /** Filtros de set e tipo de evento como links (todo filtro vira URL compartilhável). */
 export function ScopeFilter({ pathname, metagames, meta, kind, extra = {} }: { pathname: string; metagames: string[]; meta: string; kind: string; extra?: Record<string, string> }) {
   const t = useTranslations("Common");
@@ -18,9 +20,9 @@ export function ScopeFilter({ pathname, metagames, meta, kind, extra = {} }: { p
         ))}
       </div>
       <div className="flex flex-wrap items-center gap-2" role="group" aria-label={t("events")}>
-        {(["main", "all"] as const).map((k) => (
+        {(["main", "showdown", "all"] as const).map((k) => (
           <Link key={k} href={href(meta, k)} className={pill(k === kind)} aria-current={k === kind ? "true" : undefined}>
-            {k === "main" ? t("mainOnly") : t("allEvents")}
+            {t(KIND_LABEL[k])}
           </Link>
         ))}
       </div>

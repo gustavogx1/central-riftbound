@@ -42,7 +42,7 @@ export default async function EventsPage({ params }: PageProps<"/[locale]/events
                     <span className="block font-semibold">{e.name}</span>
                     <span className="mt-0.5 flex flex-wrap gap-2 text-xs text-muted">
                       {live && <span className="rounded bg-live px-1.5 py-px font-semibold text-bg">{t("live")}</span>}
-                      <span className={`rounded px-1.5 py-px ${e.kind === "main" ? "bg-accent text-accent-ink" : "bg-surface-2"}`}>{t(e.kind as "main")}</span>
+                      <span className={`rounded px-1.5 py-px ${e.kind === "main" ? "bg-accent text-accent-ink" : e.kind === "showdown" ? "bg-accent-2 text-bg" : "bg-surface-2"}`}>{t(e.kind as "main")}</span>
                       {e.metagame && <span>{ts(e.metagame as "all")}</span>}
                       <span>{f.num(e.playerCount)} {tc("players").toLowerCase()}</span>
                     </span>
