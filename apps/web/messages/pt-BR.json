@@ -188,7 +188,8 @@
     "results": "{count, plural, one {# carta} other {# cartas}}",
     "energy": "Energia",
     "might": "Might",
-    "noResults": "Nenhuma carta com esses filtros."
+    "noResults": "Nenhuma carta com esses filtros.",
+    "version": "Versão"
   },
   "Types": {
     "Legend": "Legend",
@@ -204,7 +205,8 @@
     "Mind": "Mind",
     "Body": "Body",
     "Chaos": "Chaos",
-    "Order": "Order"
+    "Order": "Order",
+    "Colorless": "Incolor"
   },
   "Sets": {
     "OGN": "Origins",
@@ -269,5 +271,12 @@
     "recentMatches": "Partidas recentes",
     "h2hSummary": "{matches, plural, one {# partida} other {# partidas}} nos eventos acompanhados, {draws, plural, one {# empate} other {# empates}}",
     "neverMet": "Esses jogadores ainda não se enfrentaram nos eventos acompanhados."
+  },
+  "PrintVersions": {
+    "normal": "Padrão",
+    "altArt": "Arte alternativa",
+    "overnumbered": "Overnumbered",
+    "signed": "Assinada",
+    "special": "Especial"
   }
 }

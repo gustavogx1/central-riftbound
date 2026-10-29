@@ -15,6 +15,25 @@ import {
 const SUPERTYPES = ["Champion", "Signature", "Basic", "Token"];
 const SAME_CARD_THRESHOLD = 0.85;
 
+/**
+ * Cartas de Radiance que a galeria oficial publica sem domínio (campo vazio na origem).
+ * Domínio conferido pela cor e pelo ícone na imagem de cada carta. Só vale enquanto a
+ * galeria mandar o campo vazio: se a Riot corrigir, o valor da origem prevalece.
+ */
+const MISSING_DOMAINS: Record<string, Domain[]> = {
+  "RAD-006/167": ["Fury"], // Scorched Earth
+  "RAD-009/167": ["Fury"], // Antagonistic Apparatus
+  "RAD-022/167": ["Fury"], // Whirling Twirligig
+  "RAD-026/167": ["Calm"], // Entrenched Boar
+  "RAD-041/167": ["Calm"], // Hush
+  "RAD-047/167": ["Mind"], // Fanfare
+  "RAD-049/167": ["Mind"], // Industrious Mechsmith
+  "RAD-104/167": ["Chaos"], // Pitiless Stalker
+  "RAD-121/167": ["Order"], // One-Two Punch
+  "RAD-123/167": ["Order"], // Protector's Shield
+  "RAD-134/167": ["Order"], // Raucous Anthem
+};
+
 /** Texto de regras sem lembretes entre parênteses, setas e espaços extras. */
 function canonicalText(text: string): string {
   return text
@@ -122,7 +141,7 @@ export function normalizeCatalog(rows: RawCard[], now = new Date()): Catalog {
         type: toType(base.type),
         supertypes: subtypes.filter((s) => SUPERTYPES.includes(s)),
         tags: splitList(base.tags),
-        domains: toDomains(base.domains),
+        domains: base.domains.length ? toDomains(base.domains) : (MISSING_DOMAINS[base.public_code] ?? []),
         energyCost: toInt(base.energy_cost),
         powerCost: toInt(base.power_cost),
         might: toInt(base.might),
