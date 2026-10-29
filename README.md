@@ -99,6 +99,15 @@ Cada rodada passa por quatro passos: pairings saem, metade dos resultados, todos
 - `/cards` aceita sintaxe (`t:unit d:fury c<=3 o:"draw" -is:signature`, `or`); a ajuda fica em `/cards/syntax`. A mesma busca roda no deckbuilder.
 - Regras e banidas ficam em `packages/core/src/deck/rules.ts`, com a fonte de cada número.
 
+## Contas, decks salvos e votos
+
+- Login pelo Supabase Auth (Discord e/ou Google, em `NEXT_PUBLIC_AUTH_PROVIDERS`). Sem `NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` o site roda igual, sem o botão de entrar.
+- As páginas continuam estáticas: o cabeçalho pergunta quem está logado em `/api/me`. O `proxy.ts` só renova a sessão de quem já tem cookie do Supabase.
+- Tabelas `profile`, `user_deck` e `complexity_vote`. O site grava nelas só pelo servidor, que relê o código do deck e confere dono, limites (200 decks por conta) e validade.
+- **RLS ligado em todas as tabelas** (migração 0003), sem políticas: a API pública do Supabase não lê nem grava nada. Tabela nova precisa de `ENABLE ROW LEVEL SECURITY` na migração.
+- `/decks` lista decks públicos e válidos; `/decks/[id]` mostra o deck (privado só para o dono, não listado só com o link); `/account` tem os decks e o nome de exibição.
+- Complexidade: voto 1–5 por lenda e por set na página da lenda. No gráfico do meta, a lenda aparece no eixo de complexidade com 10+ votos (média puxada para 3 com poucos votos).
+
 ## Colocar no ar
 
 Tudo em plano grátis e sem cartão: Supabase (banco e Storage das imagens) e Vercel Hobby (site).

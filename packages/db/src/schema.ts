@@ -1,4 +1,4 @@
-import { boolean, index, integer, pgEnum, pgTable, primaryKey, real, text, timestamp } from "drizzle-orm/pg-core";
+import { boolean, index, integer, pgEnum, pgTable, primaryKey, real, text, timestamp, uuid } from "drizzle-orm/pg-core";
 
 export const domainEnum = pgEnum("domain", ["Fury", "Calm", "Mind", "Body", "Chaos", "Order"]);
 export const cardTypeEnum = pgEnum("card_type", ["Legend", "Unit", "Spell", "Gear", "Rune", "Battlefield"]);
@@ -259,4 +259,56 @@ export const powerSnapshot = pgTable(
     tier: text("tier").notNull(),
   },
   (t) => [primaryKey({ columns: [t.scope, t.legend, t.takenAt] })],
+);
+
+// ---------------------------------------------------------------------------
+// Contas (login pelo Supabase Auth). O site fala com estas tabelas só pelo
+// servidor; a API pública do Supabase fica bloqueada por RLS (migração 0003).
+// ---------------------------------------------------------------------------
+
+/** Perfil público. `userId` é o id de auth.users; a linha nasce no primeiro login. */
+export const profile = pgTable("profile", {
+  userId: uuid("user_id").primaryKey(),
+  displayName: text("display_name").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const deckVisibilityEnum = pgEnum("deck_visibility", ["private", "unlisted", "public"]);
+
+/** Deck salvo por um usuário. O conteúdo é o código de deck (formato do Piltover Archive). */
+export const userDeck = pgTable(
+  "user_deck",
+  {
+    id: text("id").primaryKey(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => profile.userId, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    legendCardId: text("legend_card_id").references(() => card.id),
+    code: text("code").notNull(),
+    format: text("format").notNull().default("constructed"),
+    legal: boolean("legal").notNull().default(false),
+    visibility: deckVisibilityEnum("visibility").notNull().default("private"),
+    description: text("description").notNull().default(""),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("user_deck_user_idx").on(t.userId, t.updatedAt), index("user_deck_public_idx").on(t.visibility, t.updatedAt), index("user_deck_legend_idx").on(t.legendCardId)],
+);
+
+/** Voto de complexidade (1–5) por lenda e por set. Um voto por conta; pode mudar. */
+export const complexityVote = pgTable(
+  "complexity_vote",
+  {
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => profile.userId, { onDelete: "cascade" }),
+    legend: text("legend")
+      .notNull()
+      .references(() => legend.slug),
+    metagame: text("metagame").notNull(),
+    value: integer("value").notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.legend, t.metagame] }), index("complexity_vote_legend_idx").on(t.metagame, t.legend)],
 );

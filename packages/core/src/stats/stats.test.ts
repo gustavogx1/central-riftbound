@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { complexityScore, MIN_COMPLEXITY_VOTES } from "./complexity";
 import { conversionRate, shrunkConversion } from "./conversion";
 import { computePower, tierFor } from "./power";
 import { designEffect, pilotScore, shrunkWinRate, wilson, winRate } from "./winrate";
@@ -97,5 +98,13 @@ describe("poder e tiers", () => {
 
   it("faixas de tier", () => {
     expect([95, 90, 89, 70, 40, 39, 15, 14, 0].map((v) => tierFor(v))).toEqual(["S", "S", "A", "A", "B", "C", "C", "D", "D"]);
+  });
+});
+
+describe("complexidade por voto", () => {
+  it("só aparece com votos suficientes e puxa a média para o meio", () => {
+    expect(complexityScore(45, MIN_COMPLEXITY_VOTES - 1)).toBeNull();
+    expect(complexityScore(50, 10)).toBeCloseTo((50 + 15) / 15);
+    expect(complexityScore(5000, 1000)).toBeCloseTo(5, 1);
   });
 });

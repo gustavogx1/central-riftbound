@@ -105,7 +105,7 @@
     "lead": "Every legend placed by power, calculated from tournament results. Power mixes adjusted win rate and how often the legend reaches the top 25% of an event.",
     "xAxis": "Horizontal axis",
     "xShare": "Popularity",
-    "xComplexity": "Complexity (community vote, coming soon)",
+    "xComplexity": "Complexity (community vote)",
     "yAxis": "Power",
     "chartLabel": "Meta chart: power by popularity for each legend",
     "tableTitle": "All legends",
@@ -116,7 +116,10 @@
     "methodology": "How we calculate",
     "pilots": "Pilots",
     "trend": "Trend",
-    "mobileHint": "Tap a legend to see its details."
+    "mobileHint": "Tap a legend to see its details.",
+    "xComplexityOff": "Complexity (needs {min} votes per legend)",
+    "complexity": "Complexity",
+    "missingVotes": "{count, plural, one {# legend} other {# legends}} without {min} votes yet."
   },
   "Methodology": {
     "title": "How we calculate",
@@ -147,7 +150,9 @@
     "domains": "Domains",
     "rulesText": "Legend ability",
     "entries": "Entries",
-    "topCut": "Top 25% finishes"
+    "topCut": "Top 25% finishes",
+    "publicDecks": "Public decks with this legend",
+    "buildDeck": "Build a deck"
   },
   "Events": {
     "title": "Events",
@@ -369,7 +374,33 @@
       "extraLegends": "This deck must choose {size} additional legends with different names (now {count}).",
       "extraLegendsUnused": "Additional legends only count when a card asks for them."
     },
-    "legalShort": "Legal"
+    "legalShort": "Legal",
+    "saveTitle": "Save to your account",
+    "saveLogin": "<link>Sign in</link> to save this deck to your account.",
+    "visibilityLabel": "Who can see it",
+    "visibility": {
+      "private": "Private",
+      "unlisted": "Unlisted (link only)",
+      "public": "Public"
+    },
+    "visibilityHelp": {
+      "private": "Only you can see it.",
+      "unlisted": "Anyone with the link can see it; it doesn't show in the library.",
+      "public": "Shows in the deck library when it's legal."
+    },
+    "save": "Save",
+    "saveChanges": "Save changes",
+    "saveCopy": "Save as copy",
+    "saving": "Saving…",
+    "saved": "Saved.",
+    "openSaved": "Open the saved deck",
+    "saveError": {
+      "login": "Your session ended. Sign in again.",
+      "invalid": "Add some cards before saving.",
+      "limit": "You reached the deck limit. Delete an old deck first.",
+      "notFound": "That deck no longer exists.",
+      "unavailable": "Saving is unavailable right now."
+    }
   },
   "Syntax": {
     "title": "Search syntax",
@@ -398,6 +429,61 @@
       "banned": "Banned in Constructed.",
       "negate": "Everything except spells.",
       "or": "Zaun or Piltover cards."
+    }
+  },
+  "Account": {
+    "signIn": "Sign in",
+    "signOut": "Sign out",
+    "myAccount": "My account",
+    "signInLead": "Sign in to save decks, publish them and vote on legend complexity.",
+    "signInError": "Sign-in didn't work. Try again.",
+    "continueWith": "Continue with {provider}",
+    "disabled": "Sign-in isn't available yet.",
+    "privacy": "We only keep your display name and the decks and votes you create. You can delete your decks at any time.",
+    "displayName": "Display name",
+    "displayNameHelp": "Shown as the author of your public decks.",
+    "save": "Save",
+    "myDecks": "My decks",
+    "deckLimit": "{count} of {max}",
+    "noDecks": "No saved decks yet. Build one in the <link>deckbuilder</link>."
+  },
+  "Decks": {
+    "title": "Decks",
+    "lead": "Community decks, built and checked in the deckbuilder. Only public decks that are legal for tournament play show up here.",
+    "newDeck": "New deck",
+    "allLegends": "All legends",
+    "count": "{count, plural, one {# deck} other {# decks}}",
+    "empty": "No public decks yet. Be the first: build a deck and save it as public.",
+    "tournamentNote": "Tournament decklists (linked to official standings) arrive in the next phase.",
+    "noLegend": "No legend",
+    "by": "by {author}",
+    "legal": "Legal",
+    "notLegal": "Not legal",
+    "visibility": {
+      "private": "Private",
+      "unlisted": "Unlisted",
+      "public": "Public"
+    },
+    "edit": "Edit in deckbuilder",
+    "copyToBuilder": "Copy to deckbuilder",
+    "delete": "Delete",
+    "description": "Description",
+    "saveDescription": "Save description"
+  },
+  "Complexity": {
+    "title": "Complexity ({set})",
+    "summary": "Average {average} from {count, plural, one {# vote} other {# votes}}",
+    "noVotes": "No votes yet",
+    "needMore": "Needs {min} votes to appear on the meta chart.",
+    "yourVote": "Your vote:",
+    "scaleHint": "1 simple · 5 very complex",
+    "login": "<link>Sign in</link> to vote.",
+    "scale": {
+      "1": "1: simple",
+      "2": "2",
+      "3": "3: average",
+      "4": "4",
+      "5": "5: very complex"
     }
   }
 }

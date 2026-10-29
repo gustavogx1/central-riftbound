@@ -16,12 +16,19 @@ export interface ChartPoint {
   avatar: string | null;
   domains: string[];
   href: string;
+  /** Complexidade votada (1–5, média bayesiana); null sem votos suficientes. */
+  complexity: number | null;
 }
 
 interface Labels {
   chart: string;
   yAxis: string;
-  xAxis: string;
+  xLabel: string;
+  xShare: string;
+  xComplexity: string;
+  xComplexityOff: string;
+  complexity: string;
+  missingVotes: string;
   share: string;
   winRate: string;
   matches: string;
@@ -82,29 +89,47 @@ function relax(nodes: { x: number; y: number; r: number; ox: number; oy: number 
 
 export function MetaChart({ points, labels, locale }: { points: ChartPoint[]; labels: Labels; locale: string }) {
   const [active, setActive] = useState<string | null>(null);
+  const [mode, setMode] = useState<"share" | "complexity">("share");
   const pct = (v: number, digits = 1) => new Intl.NumberFormat(locale, { style: "percent", minimumFractionDigits: digits, maximumFractionDigits: digits }).format(v);
+  const dec = (v: number) => new Intl.NumberFormat(locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(v);
+  const voted = points.filter((p) => p.complexity !== null);
+  const missing = points.length - voted.length;
 
   const { nodes, xTicks } = useMemo(() => {
-    const maxShare = Math.max(0.05, ...points.map((p) => p.share)) * 1.08;
-    // Escala raiz: separa as lendas com pouca presença sem esmagar as populares.
-    const sx = (s: number) => M.left + Math.sqrt(s / maxShare) * (W - M.left - M.right);
+    const shown = mode === "complexity" ? points.filter((p) => p.complexity !== null) : points;
+    const maxShare = Math.max(0.05, ...shown.map((p) => p.share)) * 1.08;
+    const span = W - M.left - M.right;
+    // Popularidade em escala raiz: separa as lendas com pouca presença sem esmagar as populares.
+    // Complexidade em escala linear de 1 a 5.
+    const sx = mode === "complexity" ? (c: number) => M.left + ((c - 1) / 4) * span : (s: number) => M.left + Math.sqrt(s / maxShare) * span;
     const sy = (p: number) => M.top + (1 - p / 100) * (H - M.top - M.bottom);
-    const maxMatches = Math.max(1, ...points.map((p) => p.matches));
-    const ns = points.map((p) => {
-      const x = sx(p.share);
+    const maxMatches = Math.max(1, ...shown.map((p) => p.matches));
+    const ns = shown.map((p) => {
+      const x = sx(mode === "complexity" ? p.complexity! : p.share);
       const y = sy(p.power);
       return { ...p, x, y, ox: x, oy: y, r: 13 + 11 * Math.sqrt(p.matches / maxMatches) };
     });
     relax(ns);
-    const ticks = [0.01, 0.02, 0.05, 0.1, 0.15, 0.2, 0.3].filter((t) => t < maxShare).map((t) => ({ t, x: sx(t) }));
-    return { nodes: ns, xTicks: ticks, sy };
-  }, [points]);
+    const ticks =
+      mode === "complexity"
+        ? [1, 2, 3, 4, 5].map((t) => ({ t, x: sx(t), label: String(t) }))
+        : [0.01, 0.02, 0.05, 0.1, 0.15, 0.2, 0.3].filter((t) => t < maxShare).map((t) => ({ t, x: sx(t), label: new Intl.NumberFormat(locale, { style: "percent", maximumFractionDigits: 0 }).format(t) }));
+    return { nodes: ns, xTicks: ticks };
+  }, [points, mode, locale]);
 
   const sy = (p: number) => M.top + (1 - p / 100) * (H - M.top - M.bottom);
   const current = nodes.find((n) => n.slug === active);
 
   return (
     <div className="relative">
+      <div className="mb-2 flex flex-wrap items-center justify-end gap-2 text-sm">
+        {mode === "complexity" && missing > 0 && <span className="mr-auto text-xs text-muted">{labels.missingVotes}</span>}
+        <label htmlFor="x-axis" className="text-muted">{labels.xLabel}</label>
+        <select id="x-axis" className="rounded-md border border-border bg-surface-2 px-2 py-1" value={mode} onChange={(e) => setMode(e.target.value === "complexity" ? "complexity" : "share")}>
+          <option value="share">{labels.xShare}</option>
+          <option value="complexity" disabled={voted.length === 0}>{voted.length ? labels.xComplexity : labels.xComplexityOff}</option>
+        </select>
+      </div>
       <svg viewBox={`0 0 ${W} ${H}`} className="w-full" role="img" aria-label={labels.chart}>
         <defs>
           {nodes.map((n) => (
@@ -124,13 +149,13 @@ export function MetaChart({ points, labels, locale }: { points: ChartPoint[]; la
           </g>
         ))}
 
-        {xTicks.map(({ t, x }) => (
+        {xTicks.map(({ t, x, label }) => (
           <g key={t}>
             <line x1={x} x2={x} y1={M.top} y2={H - M.bottom} stroke="var(--border)" opacity={0.5} />
-            <text x={x} y={H - M.bottom + 20} textAnchor="middle" fontSize={13} fill="var(--muted)">{pct(t, 0)}</text>
+            <text x={x} y={H - M.bottom + 20} textAnchor="middle" fontSize={13} fill="var(--muted)">{label}</text>
           </g>
         ))}
-        <text x={(W + M.left) / 2} y={H - 10} textAnchor="middle" fontSize={14} fill="var(--muted)">{labels.xAxis}</text>
+        <text x={(W + M.left) / 2} y={H - 10} textAnchor="middle" fontSize={14} fill="var(--muted)">{mode === "complexity" ? labels.xComplexity : labels.xShare}</text>
         <text x={16} y={(H - M.bottom + M.top) / 2} textAnchor="middle" fontSize={14} fill="var(--muted)" transform={`rotate(-90 16 ${(H - M.bottom + M.top) / 2})`}>
           {labels.yAxis}
         </text>
@@ -178,6 +203,11 @@ export function MetaChart({ points, labels, locale }: { points: ChartPoint[]; la
             <dt className="text-muted">{labels.winRate}</dt><dd className="text-right font-semibold">{current.winRate === null ? "—" : pct(current.winRate)}</dd>
             <dt className="text-muted">{labels.share}</dt><dd className="text-right font-semibold">{pct(current.share)}</dd>
             <dt className="text-muted">{labels.matches}</dt><dd className="text-right font-semibold">{new Intl.NumberFormat(locale).format(current.matches)}</dd>
+            {current.complexity !== null && (
+              <>
+                <dt className="text-muted">{labels.complexity}</dt><dd className="text-right font-semibold">{dec(current.complexity)}</dd>
+              </>
+            )}
           </dl>
         </div>
       )}

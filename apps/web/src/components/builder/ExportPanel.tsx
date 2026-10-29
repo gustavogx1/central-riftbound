@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { decodeDeck, deckToText, emptyDeck, encodeDeck, textToDeck, type PoolCard } from "@cr/core";
 import { getPathname } from "@/i18n/navigation";
+import { SavePanel } from "./SavePanel";
 import type { Draft, DraftStore } from "./store";
 
 async function copy(text: string): Promise<boolean> {
@@ -64,7 +65,7 @@ export function ExportPanel({ draft, pool, store, legal }: { draft: Draft; pool:
         setImportMsg({ ok: false, text: t("importNothing") });
         return;
       }
-      store.set((s) => ({ ...s, deck }));
+      store.set((s) => ({ ...s, deck, savedId: null }));
       setInput("");
       setImportMsg({ ok: true, text: unknown.length ? t("importPartial", { lines: unknown.slice(0, 5).join(", "), count: unknown.length }) : t("importOk") });
     } catch {
@@ -75,6 +76,7 @@ export function ExportPanel({ draft, pool, store, legal }: { draft: Draft; pool:
   const btn = "rounded-md border border-border px-3 py-1.5 text-sm hover:border-accent disabled:opacity-50";
   return (
     <div className="space-y-4 rounded-xl border border-border bg-surface p-4">
+      <SavePanel draft={draft} store={store} code={code} />
       <section>
         <h3 className="font-display text-sm font-semibold">{t("export")}</h3>
         {!legal && code && <p className="mt-1 text-xs text-muted">{t("exportIllegal")}</p>}
@@ -122,7 +124,7 @@ export function ExportPanel({ draft, pool, store, legal }: { draft: Draft; pool:
           <button
             className={`${btn} text-bad`}
             onClick={() => {
-              if (window.confirm(t("clearConfirm"))) store.set((s) => ({ ...s, name: "", deck: emptyDeck() }));
+              if (window.confirm(t("clearConfirm"))) store.set((s) => ({ ...s, name: "", deck: emptyDeck(), savedId: null }));
             }}
           >
             {t("clear")}
