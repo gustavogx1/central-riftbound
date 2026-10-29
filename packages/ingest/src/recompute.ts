@@ -42,7 +42,8 @@ const rec = (): Rec => ({ wins: 0, losses: 0, draws: 0 });
 
 export function scopesFor(metagame: string | null, kind: string): string[] {
   const metas = metagame ? [metagame, "all"] : ["all"];
-  const kinds = kind === "main" ? ["main", "all"] : ["all"];
+  // RQs e Showdowns têm escopo próprio; paralelos e comunidade só entram em "all".
+  const kinds = kind === "main" || kind === "showdown" ? [kind, "all"] : ["all"];
   return metas.flatMap((m) => kinds.map((k) => `${m}:${k}`));
 }
 

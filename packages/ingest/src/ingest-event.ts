@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { eq, sql } from "drizzle-orm";
-import { type Db, schema } from "@cr/db";
+import { type Db, type EventKind, schema } from "@cr/db";
 import {
   createLegendResolver,
   detectMetagame,
@@ -47,7 +47,7 @@ function chunks<T>(rows: T[]): T[][] {
 const ex = (col: string) => sql.raw(`excluded.${col}`);
 
 export interface IngestOptions {
-  kind: "main" | "side" | "community";
+  kind: EventKind;
   metagameOverride?: string | null;
   /** Rodadas já completas e gravadas são puladas, a menos que force=true. */
   force?: boolean;

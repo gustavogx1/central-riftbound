@@ -9,6 +9,7 @@ describe("scopesFor", () => {
   it("evento principal entra no metagame e no total, nos dois filtros de tipo", () => {
     expect(scopesFor("VEN", "main")).toEqual(["VEN:main", "VEN:all", "all:main", "all:all"]);
     expect(scopesFor(null, "side")).toEqual(["all:all"]);
+    expect(scopesFor("RAD", "showdown")).toEqual(["RAD:showdown", "RAD:all", "all:showdown", "all:all"]);
   });
 });
 

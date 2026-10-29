@@ -18,6 +18,7 @@
     "db:seed": "pnpm --filter @cr/db seed",
     "track": "pnpm --filter @cr/ingest track",
     "suggest": "pnpm --filter @cr/ingest suggest",
+    "discover": "pnpm --filter @cr/ingest discover",
     "ingest": "pnpm --filter @cr/ingest ingest",
     "stats": "pnpm --filter @cr/ingest stats",
     "live": "pnpm --filter @cr/ingest live",

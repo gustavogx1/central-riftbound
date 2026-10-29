@@ -1,3 +1,4 @@
+import type { EventKind } from "@cr/db";
 import type { UvsEvent, UvsMatch, UvsStanding } from "./uvs/schemas";
 
 /** Sets na ordem de lançamento. OGS (Proving Grounds) saiu junto com Origins. */
@@ -41,7 +42,7 @@ export function createLegendResolver(legends: LegendRef[]) {
 
 export type LegendResolver = ReturnType<typeof createLegendResolver>;
 
-export function eventRow(e: UvsEvent, kind: "main" | "side" | "community", metagame: string | null) {
+export function eventRow(e: UvsEvent, kind: EventKind, metagame: string | null) {
   return {
     id: e.id,
     name: e.name,

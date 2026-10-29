@@ -12,6 +12,7 @@
     "test": "vitest run",
     "track": "tsx src/cli/track.ts",
     "suggest": "tsx src/cli/suggest.ts",
+    "discover": "tsx src/cli/discover.ts",
     "ingest": "tsx src/cli/ingest.ts",
     "stats": "tsx src/cli/stats.ts",
     "live": "tsx src/cli/live.ts",
