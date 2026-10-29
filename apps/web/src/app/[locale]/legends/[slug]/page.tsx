@@ -219,7 +219,7 @@ export default async function LegendPage({ params, searchParams }: PageProps<"/[
           <p className="mt-2 max-w-3xl text-sm text-muted">
             {t.rich("eventDecksLead", { link: (c) => <a href="https://topdeck.gg" target="_blank" rel="noopener noreferrer" className="text-accent underline">{c}</a> })}
           </p>
-          <ul className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+          <ul className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
             {eventDecks.map((d) => (
               <li key={`${d.eventId}-${d.key}`}>
                 <Link href={`/events/${d.eventId}/decks/${encodeURIComponent(d.key)}`} className="block rounded-lg border border-border bg-surface p-3 text-sm hover:border-accent">

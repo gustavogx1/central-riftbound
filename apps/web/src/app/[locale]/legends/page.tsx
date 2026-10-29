@@ -38,7 +38,7 @@ export default async function LegendsPage({ params, searchParams }: PageProps<"/
       {legends.length === 0 ? (
         <p className="mt-12 rounded-xl border border-border bg-surface p-6 text-muted">{tc("noData")}</p>
       ) : (
-        <ul className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <ul className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {sorted.map((l) => {
             const s = bySlug.get(l.slug);
             return (

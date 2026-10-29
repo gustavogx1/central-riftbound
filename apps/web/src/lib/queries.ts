@@ -28,13 +28,12 @@ export async function getLegends(): Promise<LegendInfo[]> {
     .orderBy(asc(schema.legend.champion), asc(schema.legend.title));
 }
 
-/** Metagames que têm estatística calculada, do mais novo ao mais antigo. */
-export async function getAvailableMetagames(): Promise<string[]> {
+/** Escopos com estatística calculada ("RAD:showdown", "all:main"...). */
+export async function getStatScopes(): Promise<Set<string>> {
   const db = getDb();
-  if (!db) return [];
+  if (!db) return new Set();
   const rows = await db.selectDistinct({ scope: schema.legendStats.scope }).from(schema.legendStats);
-  const metas = new Set(rows.map((r) => r.scope.split(":")[0]!));
-  return METAGAMES.filter((m) => metas.has(m));
+  return new Set(rows.map((r) => r.scope));
 }
 
 export type LegendStatRow = typeof schema.legendStats.$inferSelect & LegendInfo & { prevPower: number | null };

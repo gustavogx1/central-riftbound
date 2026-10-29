@@ -72,7 +72,7 @@ export default async function PlayerPage({ params }: PageProps<"/[locale]/player
         <section className="mt-10" aria-labelledby="pl-honors">
           <h2 id="pl-honors" className="font-display text-xl font-semibold">{t("honors")}</h2>
           {wins.length > 0 && (
-            <ul className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <ul className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {wins.map((h) => {
                 const l = h.legend ? legends.get(h.legend) : undefined;
                 return (
