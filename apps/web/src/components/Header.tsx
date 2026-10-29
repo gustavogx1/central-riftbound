@@ -1,5 +1,6 @@
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import { AccountButton } from "./AccountButton";
 import { LocaleSwitcher } from "./LocaleSwitcher";
 import { Logo } from "./Logo";
 import { SECTIONS } from "./nav";
@@ -27,7 +28,8 @@ export function Header() {
             ))}
           </ul>
         </nav>
-        <div className="ml-auto md:ml-2">
+        <div className="ml-auto flex items-center gap-2 md:ml-2">
+          <AccountButton />
           <LocaleSwitcher />
         </div>
       </div>

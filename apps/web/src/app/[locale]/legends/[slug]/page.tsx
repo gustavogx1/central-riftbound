@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { MIN_PILOT_MATCHES } from "@cr/core";
+import { MIN_COMPLEXITY_VOTES, MIN_PILOT_MATCHES } from "@cr/core";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { ComplexityVote } from "@/components/ComplexityVote";
 import { DomainDots } from "@/components/DomainDots";
 import { LegendAvatar } from "@/components/LegendAvatar";
 import { RulesText } from "@/components/RulesText";
@@ -10,8 +11,9 @@ import { TierBadge } from "@/components/TierBadge";
 import { Link } from "@/i18n/navigation";
 import { makeFormat } from "@/lib/format";
 import { cardImage } from "@/lib/images";
-import { type LegendInfo, getLegend, getLegendCard, getLegendsBySlugs, getLegendStats, getMatchups, getTopPilots } from "@/lib/queries";
+import { type LegendInfo, getLegend, getLegendCard, getLegendsBySlugs, getLegendStats, getMatchups, getTopPilots, METAGAMES } from "@/lib/queries";
 import { resolveScope } from "@/lib/scope";
+import { getComplexity } from "@/lib/votes";
 
 export const revalidate = 3600;
 const MATCHUP_MIN = 20;
@@ -81,6 +83,9 @@ export default async function LegendPage({ params, searchParams }: PageProps<"/[
   const best = rated.slice(0, 5);
   const worst = [...rated].reverse().slice(0, 5);
   const img = cardImage(legend.cardId, 372);
+  // Voto por set; em "todos os sets" vale o set mais novo.
+  const voteSet = meta === "all" ? (metagames[0] ?? METAGAMES[0]) : meta;
+  const complexity = (await getComplexity(voteSet)).get(slug);
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10">
@@ -104,6 +109,12 @@ export default async function LegendPage({ params, searchParams }: PageProps<"/[
               <RulesText text={card.rulesText} />
             </p>
           )}
+          <ComplexityVote legend={slug} metagame={voteSet} votes={complexity?.votes ?? 0} average={complexity?.average ?? null} min={MIN_COMPLEXITY_VOTES} />
+          <p className="mt-3 text-sm">
+            <Link href={{ pathname: "/decks", query: { legend: slug } }} className="text-accent underline">{t("publicDecks")}</Link>
+            {" · "}
+            <Link href="/builder" className="text-accent underline">{t("buildDeck")}</Link>
+          </p>
         </div>
       </div>
 

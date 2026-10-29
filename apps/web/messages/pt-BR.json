@@ -106,7 +106,7 @@
     "lead": "Cada lenda posicionada pelo poder, calculado a partir de resultados de torneio. O poder combina win rate ajustado e a frequência com que a lenda chega ao top 25% de um evento.",
     "xAxis": "Eixo horizontal",
     "xShare": "Popularidade",
-    "xComplexity": "Complexidade (voto da comunidade, em breve)",
+    "xComplexity": "Complexidade (voto da comunidade)",
     "yAxis": "Poder",
     "chartLabel": "Gráfico do meta: poder por popularidade de cada lenda",
     "tableTitle": "Todas as lendas",
@@ -117,7 +117,10 @@
     "methodology": "Como calculamos",
     "pilots": "Pilotos",
     "trend": "Tendência",
-    "mobileHint": "Toque numa lenda para ver os detalhes."
+    "mobileHint": "Toque numa lenda para ver os detalhes.",
+    "xComplexityOff": "Complexidade (precisa de {min} votos por lenda)",
+    "complexity": "Complexidade",
+    "missingVotes": "{count, plural, one {# lenda} other {# lendas}} ainda sem {min} votos."
   },
   "Methodology": {
     "title": "Como calculamos",
@@ -148,7 +151,9 @@
     "domains": "Domínios",
     "rulesText": "Habilidade da lenda",
     "entries": "Entradas",
-    "topCut": "Chegadas ao top 25%"
+    "topCut": "Chegadas ao top 25%",
+    "publicDecks": "Decks públicos com esta lenda",
+    "buildDeck": "Montar um deck"
   },
   "Events": {
     "title": "Eventos",
@@ -379,7 +384,33 @@
       "extraLegends": "Este deck precisa escolher {size} lendas extras com nomes diferentes (agora {count}).",
       "extraLegendsUnused": "Lendas extras só valem quando uma carta pede."
     },
-    "legalShort": "Válido"
+    "legalShort": "Válido",
+    "saveTitle": "Salvar na sua conta",
+    "saveLogin": "<link>Entre</link> para salvar este deck na sua conta.",
+    "visibilityLabel": "Quem pode ver",
+    "visibility": {
+      "private": "Privado",
+      "unlisted": "Não listado (só com o link)",
+      "public": "Público"
+    },
+    "visibilityHelp": {
+      "private": "Só você vê.",
+      "unlisted": "Quem tiver o link vê; não aparece na biblioteca.",
+      "public": "Aparece na biblioteca de decks quando estiver válido."
+    },
+    "save": "Salvar",
+    "saveChanges": "Salvar alterações",
+    "saveCopy": "Salvar como cópia",
+    "saving": "Salvando…",
+    "saved": "Salvo.",
+    "openSaved": "Abrir o deck salvo",
+    "saveError": {
+      "login": "Sua sessão acabou. Entre de novo.",
+      "invalid": "Adicione cartas antes de salvar.",
+      "limit": "Você chegou ao limite de decks. Apague um antigo antes.",
+      "notFound": "Esse deck não existe mais.",
+      "unavailable": "Não dá para salvar agora."
+    }
   },
   "Syntax": {
     "title": "Sintaxe de busca",
@@ -408,6 +439,61 @@
       "banned": "Banidas no Constructed.",
       "negate": "Tudo menos feitiços.",
       "or": "Cartas de Zaun ou Piltover."
+    }
+  },
+  "Account": {
+    "signIn": "Entrar",
+    "signOut": "Sair",
+    "myAccount": "Minha conta",
+    "signInLead": "Entre para salvar decks, publicar e votar na complexidade das lendas.",
+    "signInError": "O login não deu certo. Tente de novo.",
+    "continueWith": "Continuar com {provider}",
+    "disabled": "O login ainda não está disponível.",
+    "privacy": "Guardamos só o seu nome de exibição e os decks e votos que você criar. Você pode apagar seus decks quando quiser.",
+    "displayName": "Nome de exibição",
+    "displayNameHelp": "Aparece como autor dos seus decks públicos.",
+    "save": "Salvar",
+    "myDecks": "Meus decks",
+    "deckLimit": "{count} de {max}",
+    "noDecks": "Nenhum deck salvo ainda. Monte um no <link>deckbuilder</link>."
+  },
+  "Decks": {
+    "title": "Decks",
+    "lead": "Decks da comunidade, montados e conferidos no deckbuilder. Aqui só aparecem decks públicos e válidos para torneio.",
+    "newDeck": "Novo deck",
+    "allLegends": "Todas as lendas",
+    "count": "{count, plural, one {# deck} other {# decks}}",
+    "empty": "Nenhum deck público ainda. Seja o primeiro: monte um deck e salve como público.",
+    "tournamentNote": "As listas de torneio (ligadas aos standings oficiais) chegam na próxima fase.",
+    "noLegend": "Sem lenda",
+    "by": "por {author}",
+    "legal": "Válido",
+    "notLegal": "Inválido",
+    "visibility": {
+      "private": "Privado",
+      "unlisted": "Não listado",
+      "public": "Público"
+    },
+    "edit": "Editar no deckbuilder",
+    "copyToBuilder": "Copiar para o deckbuilder",
+    "delete": "Apagar",
+    "description": "Descrição",
+    "saveDescription": "Salvar descrição"
+  },
+  "Complexity": {
+    "title": "Complexidade ({set})",
+    "summary": "Média {average} de {count, plural, one {# voto} other {# votos}}",
+    "noVotes": "Nenhum voto ainda",
+    "needMore": "Precisa de {min} votos para aparecer no gráfico do meta.",
+    "yourVote": "Seu voto:",
+    "scaleHint": "1 simples · 5 muito complexa",
+    "login": "<link>Entre</link> para votar.",
+    "scale": {
+      "1": "1: simples",
+      "2": "2",
+      "3": "3: média",
+      "4": "4",
+      "5": "5: muito complexa"
     }
   },
   "PrintVersions": {

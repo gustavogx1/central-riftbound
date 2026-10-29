@@ -1,14 +1,18 @@
 import { decodeDeck, emptyDeck, type DeckFormat, type DeckList, type PoolCard } from "@cr/core";
 
-/** Rascunho do deckbuilder. Fica no navegador (localStorage); nada vai para o servidor. */
+/** Rascunho do deckbuilder. Fica no navegador (localStorage); só vai para o servidor quando o usuário salva. */
 export interface Draft {
   name: string;
   format: DeckFormat;
   deck: DeckList;
+  /** Id do deck salvo na conta que este rascunho edita, se houver. */
+  savedId: string | null;
+  visibility: "private" | "unlisted" | "public";
 }
 
 const KEY = "cr:deck";
-const blank = (): Draft => ({ name: "", format: "constructed", deck: emptyDeck() });
+const blank = (): Draft => ({ name: "", format: "constructed", deck: emptyDeck(), savedId: null, visibility: "private" });
+const VIS = ["private", "unlisted", "public"] as const;
 
 let current: Draft | null = null;
 const listeners = new Set<() => void>();
@@ -19,8 +23,18 @@ function load(pool: Map<string, PoolCard>): Draft {
   if (code) {
     try {
       const { deck } = decodeDeck(code, pool);
-      const name = new URLSearchParams(window.location.search).get("name") ?? "";
-      const draft = { ...blank(), name: name.slice(0, 80), deck };
+      const params = new URLSearchParams(window.location.search);
+      const name = params.get("name") ?? "";
+      const savedId = params.get("deck");
+      const vis = params.get("vis");
+      const draft: Draft = {
+        ...blank(),
+        name: name.slice(0, 80),
+        deck,
+        format: params.get("fmt") === "casual" ? "casual" : "constructed",
+        savedId: savedId && /^[a-z0-9]{6,20}$/.test(savedId) ? savedId : null,
+        visibility: VIS.includes(vis as never) ? (vis as Draft["visibility"]) : "private",
+      };
       save(draft);
       window.history.replaceState(null, "", window.location.pathname);
       return draft;
@@ -39,6 +53,8 @@ function load(pool: Map<string, PoolCard>): Draft {
       return {
         name: typeof d.name === "string" ? d.name : "",
         format: d.format === "casual" ? "casual" : "constructed",
+        savedId: typeof d.savedId === "string" ? d.savedId : null,
+        visibility: VIS.includes(d.visibility as never) ? d.visibility! : "private",
         deck: {
           legend: known(deck.legend),
           champion: known(deck.champion),

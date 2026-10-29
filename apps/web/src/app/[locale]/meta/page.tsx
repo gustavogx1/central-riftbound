@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { MIN_COMPLEXITY_VOTES } from "@cr/core";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { LegendAvatar } from "@/components/LegendAvatar";
 import { MetaChart, type ChartPoint } from "@/components/MetaChart";
@@ -9,8 +10,9 @@ import { getPathname, Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 import { makeFormat } from "@/lib/format";
 import { legendAvatar } from "@/lib/images";
-import { getLegendStats, getMatchups, getScopeTotals } from "@/lib/queries";
+import { getLegendStats, getMatchups, getScopeTotals, METAGAMES } from "@/lib/queries";
 import { resolveScope } from "@/lib/scope";
+import { getComplexity } from "@/lib/votes";
 
 export const revalidate = 3600;
 const MATRIX_SIZE = 14;
@@ -30,7 +32,8 @@ export default async function MetaPage({ params, searchParams }: PageProps<"/[lo
   const tc = await getTranslations("Common");
   const f = makeFormat(locale);
   const { metagames, meta, kind, scope } = await resolveScope(sp);
-  const [stats, totals, matchups] = await Promise.all([getLegendStats(scope), getScopeTotals(scope), getMatchups(scope)]);
+  const voteSet = meta === "all" ? (metagames[0] ?? METAGAMES[0]) : meta;
+  const [stats, totals, matchups, complexity] = await Promise.all([getLegendStats(scope), getScopeTotals(scope), getMatchups(scope), getComplexity(voteSet)]);
 
   const legendHref = (slug: string) => getPathname({ locale: locale as Locale, href: { pathname: `/legends/${slug}`, query: { set: meta, kind } } });
   const points: ChartPoint[] = stats.map((s) => ({
@@ -47,6 +50,7 @@ export default async function MetaPage({ params, searchParams }: PageProps<"/[lo
     avatar: legendAvatar(s.cardId),
     domains: s.domains,
     href: legendHref(s.slug),
+    complexity: complexity.get(s.slug)?.score ?? null,
   }));
 
   const matrixLegends = [...stats].sort((a, b) => b.share - a.share).slice(0, MATRIX_SIZE);
@@ -72,17 +76,23 @@ export default async function MetaPage({ params, searchParams }: PageProps<"/[lo
           </p>
 
           <section className="mt-6 hidden rounded-xl border border-border bg-surface p-4 md:block" aria-label={t("chartLabel")}>
-            <div className="mb-2 flex items-center justify-end gap-2 text-sm">
-              <label htmlFor="x-axis" className="text-muted">{t("xAxis")}</label>
-              <select id="x-axis" className="rounded-md border border-border bg-surface-2 px-2 py-1" defaultValue="share">
-                <option value="share">{t("xShare")}</option>
-                <option value="complexity" disabled>{t("xComplexity")}</option>
-              </select>
-            </div>
             <MetaChart
               points={points}
               locale={locale}
-              labels={{ chart: t("chartLabel"), yAxis: t("yAxis"), xAxis: t("xShare"), share: tc("share"), winRate: tc("winRate"), matches: tc("matches"), power: tc("power") }}
+              labels={{
+                chart: t("chartLabel"),
+                yAxis: t("yAxis"),
+                xLabel: t("xAxis"),
+                xShare: t("xShare"),
+                xComplexity: t("xComplexity"),
+                xComplexityOff: t("xComplexityOff", { min: MIN_COMPLEXITY_VOTES }),
+                complexity: t("complexity"),
+                missingVotes: t("missingVotes", { count: points.filter((p) => p.complexity === null).length, min: MIN_COMPLEXITY_VOTES }),
+                share: tc("share"),
+                winRate: tc("winRate"),
+                matches: tc("matches"),
+                power: tc("power"),
+              }}
             />
           </section>
           <p className="mt-6 text-sm text-muted md:hidden">{t("mobileHint")}</p>
