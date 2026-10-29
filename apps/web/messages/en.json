@@ -572,7 +572,13 @@
     "energy": "Energy",
     "power": "Power",
     "domains": "Domains",
-    "types": "Types"
+    "types": "Types",
+    "close": "Close",
+    "cardsCol": "Cards",
+    "powerCol": "Power",
+    "or": " or ",
+    "anyDomain": "Any domain",
+    "hybridNote": "Dual-domain cards can pay their power with either domain; domainless cards take power of any domain."
   },
   "Submit": {
     "title": "Submit a decklist",
