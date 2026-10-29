@@ -1,6 +1,7 @@
 import "server-only";
 import { and, asc, desc, eq, ilike, inArray, or, sql, type SQL } from "drizzle-orm";
 import { schema } from "@cr/db";
+import type { PoolCard } from "@cr/core";
 import { getDb } from "./db";
 
 /** Nome que o site mostra: o nick da inscrição mais recente, ou o nome da UVS. */
@@ -417,6 +418,8 @@ export interface CardFilters {
   domain?: string;
   set?: string;
   version?: PrintVersion;
+  /** Cartas base já filtradas pela busca com sintaxe; substitui o filtro por texto. */
+  cardIds?: string[];
   page: number;
   pageSize: number;
 }
@@ -437,7 +440,10 @@ export async function searchCards(f: CardFilters) {
   const db = getDb();
   if (!db) return { rows: [], total: 0 };
   const where: SQL[] = [];
-  if (f.q) {
+  if (f.cardIds) {
+    if (!f.cardIds.length) return { rows: [], total: 0 };
+    where.push(inArray(schema.card.id, f.cardIds));
+  } else if (f.q) {
     const like = `%${f.q}%`;
     where.push(or(ilike(schema.card.name, like), ilike(schema.card.rulesText, like), ilike(schema.card.subtitle, like))!);
   }
@@ -498,3 +504,30 @@ export async function getTopOpponents(id: number, limit = 10) {
   `);
   return rows as unknown as { id: number; name: string; matches: number; wins: number; losses: number; draws: number }[];
 }
+
+const poolCache = globalThis as unknown as { crPool?: { at: number; cards: PoolCard[] } };
+const POOL_TTL_MS = 60 * 60 * 1000;
+
+/** Todas as cartas jogáveis (sem fichas), com os códigos das impressões. Fica em memória por 1 h. */
+export async function getCardPool(): Promise<PoolCard[]> {
+  const hit = poolCache.crPool;
+  if (hit && Date.now() - hit.at < POOL_TTL_MS) return hit.cards;
+  const db = getDb();
+  if (!db) return [];
+  const rows = await db.execute(sql`
+    select c.id, c.name, c.subtitle, c.type, c.supertypes, c.tags, c.domains::text[] as domains,
+      c.energy_cost as "energyCost", c.power_cost as "powerCost", c.might, c.rules_text as "rulesText",
+      b.code, b.set_id as "setId", b.collector_number as "number", b.rarity,
+      array_agg(p.code order by p.code) as codes
+    from card c
+    join card_print b on b.id = c.id
+    join card_print p on p.card_id = c.id
+    where c.type is not null and not ('Token' = any(c.supertypes))
+    group by c.id, b.code, b.set_id, b.collector_number, b.rarity
+    order by b.set_id, b.collector_number
+  `);
+  const cards = rows as unknown as PoolCard[];
+  poolCache.crPool = { at: Date.now(), cards };
+  return cards;
+}
+

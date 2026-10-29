@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
-import { CARD_TYPES, DOMAINS } from "@cr/core";
+import { CARD_TYPES, DOMAINS, matchCard, parseCardQuery } from "@cr/core";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
 import { DomainDots } from "@/components/DomainDots";
 import { Pagination } from "@/components/Pagination";
 import { RulesText } from "@/components/RulesText";
 import { makeFormat } from "@/lib/format";
 import { cardImage } from "@/lib/images";
-import { COLORLESS, PRINT_VERSIONS, getSets, searchCards, type PrintVersion } from "@/lib/queries";
+import { COLORLESS, PRINT_VERSIONS, getCardPool, getSets, searchCards, type PrintVersion } from "@/lib/queries";
 
 export const revalidate = 3600;
 const PAGE_SIZE = 36;
@@ -23,7 +24,7 @@ function variantKey(v: string): PrintVersion {
   return (PRINT_VERSIONS as readonly string[]).includes(v) ? (v as PrintVersion) : "special";
 }
 
-const str = (v: string | string[] | undefined) => (typeof v === "string" && v.trim() ? v.trim().slice(0, 80) : undefined);
+const str = (v: string | string[] | undefined, max = 80) => (typeof v === "string" && v.trim() ? v.trim().slice(0, max) : undefined);
 
 export default async function CardsPage({ params, searchParams }: PageProps<"/[locale]/cards">) {
   const { locale } = await params;
@@ -37,7 +38,7 @@ export default async function CardsPage({ params, searchParams }: PageProps<"/[l
   const tv = await getTranslations("PrintVersions");
   const f = makeFormat(locale);
 
-  const q = str(sp.q);
+  const q = str(sp.q, 200);
   const type = (CARD_TYPES as readonly string[]).includes(str(sp.type) ?? "") ? str(sp.type) : undefined;
   const domainOptions = [...DOMAINS, COLORLESS] as const;
   const domain = (domainOptions as readonly string[]).includes(str(sp.domain) ?? "") ? str(sp.domain) : undefined;
@@ -45,7 +46,10 @@ export default async function CardsPage({ params, searchParams }: PageProps<"/[l
   const set = sets.some((s) => s.id === str(sp.set)) ? str(sp.set) : undefined;
   const version = (PRINT_VERSIONS as readonly string[]).includes(str(sp.version) ?? "") ? (str(sp.version) as PrintVersion) : undefined;
   const page = Math.max(1, Number(sp.page) || 1);
-  const { rows, total } = await searchCards({ q, type, domain, set, version, page, pageSize: PAGE_SIZE });
+  // A busca com sintaxe roda sobre as cartas base; os outros filtros e a listagem por impressão ficam no banco.
+  const parsed = parseCardQuery(q ?? "");
+  const cardIds = parsed.groups.length ? (await getCardPool()).filter((c) => matchCard(c, parsed)).map((c) => c.id) : undefined;
+  const { rows, total } = await searchCards({ q, type, domain, set, version, cardIds, page, pageSize: PAGE_SIZE });
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10">
@@ -76,6 +80,12 @@ export default async function CardsPage({ params, searchParams }: PageProps<"/[l
         <button className="rounded-md bg-accent px-4 py-2 text-sm font-semibold text-accent-ink">{tc("search")}</button>
       </form>
 
+      <p className="mt-2 text-sm text-muted">
+        {t.rich("syntaxHint", { link: (chunks) => <Link href="/cards/syntax" className="text-accent underline">{chunks}</Link> })}
+      </p>
+      {parsed.errors.length > 0 && (
+        <p role="status" className="mt-2 text-sm text-bad">{t("syntaxErrors", { terms: parsed.errors.join(" ") })}</p>
+      )}
       <p className="mt-4 text-sm text-muted">{t("results", { count: total })}</p>
 
       {rows.length === 0 ? (
