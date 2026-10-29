@@ -100,3 +100,20 @@ export const uvsEventList = page(
     display_status: z.string(),
   }),
 );
+
+/** Resultado da busca por nome, com o que a descoberta de Showdowns precisa. */
+export const uvsEventSearch = page(
+  z.object({
+    id: z.number(),
+    name: z.string(),
+    start_datetime: z.string(),
+    starting_player_count: z.number().nullable(),
+    registered_user_count: z.number().nullable().optional(),
+    capacity: z.number().nullable().optional(),
+    display_status: z.string(),
+    game_type: z.string().nullable().optional(),
+    is_test_event: z.boolean().nullable().optional(),
+    gameplay_format: z.object({ name: z.string() }).nullable().optional(),
+  }),
+);
+export type UvsEventSummary = z.infer<typeof uvsEventSearch>["results"][number];

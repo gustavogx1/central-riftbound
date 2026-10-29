@@ -1,5 +1,5 @@
 {
-  "id": "86ed627b-a724-46de-9c5d-273bfb076d68",
+  "id": "1e5bd534-531e-4407-994d-174d37b23375",
   "prevId": "92430fc5-e8bc-44c3-8994-d00926dc25d6",
   "version": "7",
   "dialect": "postgresql",
@@ -1223,18 +1223,6 @@
           "primaryKey": false,
           "notNull": true
         },
-        "nick": {
-          "name": "nick",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "nick_at": {
-          "name": "nick_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
         "country_code": {
           "name": "country_code",
           "type": "text",
@@ -1575,7 +1563,8 @@
       "values": [
         "main",
         "side",
-        "community"
+        "community",
+        "showdown"
       ]
     }
   },

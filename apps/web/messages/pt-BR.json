@@ -35,7 +35,7 @@
     "featureMetaTitle": "Gráfico do meta calculado",
     "featureMetaBody": "Cada lenda posicionada por poder e popularidade ou complexidade votada pela comunidade, recalculada com partidas reais.",
     "featureLiveTitle": "Eventos ao vivo",
-    "featureLiveBody": "Pairings e standings dos Regional Qualifiers que se atualizam sozinhos enquanto o evento acontece.",
+    "featureLiveBody": "Pairings e standings dos Regional Qualifiers e Showdowns que se atualizam sozinhos enquanto o evento acontece.",
     "featureLegendsTitle": "Lendas e pilotos",
     "featureLegendsBody": "Win rate, conversão, matchups e os melhores jogadores de cada lenda, com intervalo de confiança.",
     "featureToolsTitle": "Deckbuilder",
@@ -72,6 +72,7 @@
     "noData": "Ainda não há dados de torneio. Os resultados aparecem aqui depois da primeira importação.",
     "allSets": "Todos os sets",
     "mainOnly": "Regional Qualifiers",
+    "showdownOnly": "Showdowns",
     "allEvents": "Todos os eventos",
     "set": "Set",
     "events": "Eventos",
@@ -151,13 +152,14 @@
   },
   "Events": {
     "title": "Eventos",
-    "lead": "Eventos oficiais que acompanhamos, importados dos resultados públicos da plataforma de jogo organizado.",
+    "lead": "Eventos oficiais que acompanhamos (Regional Qualifiers e o Showdown Series), importados dos resultados públicos da plataforma de jogo organizado.",
     "date": "Data",
     "name": "Evento",
     "kind": "Tipo",
     "winner": "Campeão",
     "main": "Regional Qualifier",
     "side": "Evento paralelo",
+    "showdown": "Showdown Series",
     "community": "Comunidade",
     "live": "Ao vivo"
   },
@@ -188,7 +190,8 @@
     "results": "{count, plural, one {# carta} other {# cartas}}",
     "energy": "Energia",
     "might": "Might",
-    "noResults": "Nenhuma carta com esses filtros."
+    "noResults": "Nenhuma carta com esses filtros.",
+    "version": "Versão"
   },
   "Types": {
     "Legend": "Legend",
@@ -204,7 +207,8 @@
     "Mind": "Mind",
     "Body": "Body",
     "Chaos": "Chaos",
-    "Order": "Order"
+    "Order": "Order",
+    "Colorless": "Incolor"
   },
   "Sets": {
     "OGN": "Origins",
@@ -270,5 +274,12 @@
     "h2hSummary": "{matches, plural, one {# partida} other {# partidas}} nos eventos acompanhados, {draws, plural, one {# empate} other {# empates}}",
     "neverMet": "Esses jogadores ainda não se enfrentaram nos eventos acompanhados.",
     "realName": "Nome na UVS: {name}"
+  },
+  "PrintVersions": {
+    "normal": "Padrão",
+    "altArt": "Arte alternativa",
+    "overnumbered": "Overnumbered",
+    "signed": "Assinada",
+    "special": "Especial"
   }
 }

@@ -35,7 +35,7 @@
     "featureMetaTitle": "Computed meta chart",
     "featureMetaBody": "Every legend placed by power and popularity or community-voted complexity, recalculated from real matches.",
     "featureLiveTitle": "Live events",
-    "featureLiveBody": "Pairings and standings of Regional Qualifiers that refresh on their own while the event runs.",
+    "featureLiveBody": "Pairings and standings of Regional Qualifiers and Showdowns that refresh on their own while the event runs.",
     "featureLegendsTitle": "Legends and pilots",
     "featureLegendsBody": "Win rate, conversion, matchups and the best players of each legend, with confidence intervals.",
     "featureToolsTitle": "Deckbuilder",
@@ -72,6 +72,7 @@
     "noData": "No tournament data yet. Results appear here after the first import.",
     "allSets": "All sets",
     "mainOnly": "Regional Qualifiers",
+    "showdownOnly": "Showdowns",
     "allEvents": "All events",
     "set": "Set",
     "events": "Events",
@@ -151,13 +152,14 @@
   },
   "Events": {
     "title": "Events",
-    "lead": "Official events we follow, imported from the public results of the organized play platform.",
+    "lead": "Official events we follow (Regional Qualifiers and the Showdown Series), imported from the public results of the organized play platform.",
     "date": "Date",
     "name": "Event",
     "kind": "Type",
     "winner": "Winner",
     "main": "Regional Qualifier",
     "side": "Side event",
+    "showdown": "Showdown Series",
     "community": "Community",
     "live": "Live"
   },
@@ -188,7 +190,8 @@
     "results": "{count, plural, one {# card} other {# cards}}",
     "energy": "Energy",
     "might": "Might",
-    "noResults": "No card matches these filters."
+    "noResults": "No card matches these filters.",
+    "version": "Version"
   },
   "Types": {
     "Legend": "Legend",
@@ -204,7 +207,8 @@
     "Mind": "Mind",
     "Body": "Body",
     "Chaos": "Chaos",
-    "Order": "Order"
+    "Order": "Order",
+    "Colorless": "Colorless"
   },
   "Sets": {
     "OGN": "Origins",
@@ -270,5 +274,12 @@
     "h2hSummary": "{matches, plural, one {# match} other {# matches}} in tracked events, {draws, plural, one {# draw} other {# draws}}",
     "neverMet": "These players have not faced each other in the tracked events.",
     "realName": "Name on UVS: {name}"
+  },
+  "PrintVersions": {
+    "normal": "Standard",
+    "altArt": "Alt art",
+    "overnumbered": "Overnumbered",
+    "signed": "Signed",
+    "special": "Special"
   }
 }

@@ -6,7 +6,7 @@ import { Pagination } from "@/components/Pagination";
 import { RulesText } from "@/components/RulesText";
 import { makeFormat } from "@/lib/format";
 import { cardImage } from "@/lib/images";
-import { getSets, searchCards } from "@/lib/queries";
+import { COLORLESS, PRINT_VERSIONS, getSets, searchCards, type PrintVersion } from "@/lib/queries";
 
 export const revalidate = 3600;
 const PAGE_SIZE = 36;
@@ -15,6 +15,12 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/cards">)
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "Cards" });
   return { title: t("title"), description: t("lead") };
+}
+
+/** Converte o `variant` da galeria ("alt art", "overnumbered", "signed", "special") na chave de tradução. */
+function variantKey(v: string): PrintVersion {
+  if (v === "alt art") return "altArt";
+  return (PRINT_VERSIONS as readonly string[]).includes(v) ? (v as PrintVersion) : "special";
 }
 
 const str = (v: string | string[] | undefined) => (typeof v === "string" && v.trim() ? v.trim().slice(0, 80) : undefined);
@@ -28,30 +34,34 @@ export default async function CardsPage({ params, searchParams }: PageProps<"/[l
   const td = await getTranslations("Domains");
   const ts = await getTranslations("Sets");
   const tc = await getTranslations("Common");
+  const tv = await getTranslations("PrintVersions");
   const f = makeFormat(locale);
 
   const q = str(sp.q);
   const type = (CARD_TYPES as readonly string[]).includes(str(sp.type) ?? "") ? str(sp.type) : undefined;
-  const domain = (DOMAINS as readonly string[]).includes(str(sp.domain) ?? "") ? str(sp.domain) : undefined;
+  const domainOptions = [...DOMAINS, COLORLESS] as const;
+  const domain = (domainOptions as readonly string[]).includes(str(sp.domain) ?? "") ? str(sp.domain) : undefined;
   const sets = await getSets();
   const set = sets.some((s) => s.id === str(sp.set)) ? str(sp.set) : undefined;
+  const version = (PRINT_VERSIONS as readonly string[]).includes(str(sp.version) ?? "") ? (str(sp.version) as PrintVersion) : undefined;
   const page = Math.max(1, Number(sp.page) || 1);
-  const { rows, total } = await searchCards({ q, type, domain, set, page, pageSize: PAGE_SIZE });
+  const { rows, total } = await searchCards({ q, type, domain, set, version, page, pageSize: PAGE_SIZE });
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10">
       <h1 className="font-display text-3xl font-bold md:text-4xl">{t("title")}</h1>
       <p className="mt-3 text-muted">{t("lead")}</p>
 
-      <form method="get" className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr_auto]">
+      <form method="get" className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr_1fr_auto]">
         <label className="text-sm">
           <span className="sr-only">{tc("search")}</span>
           <input name="q" defaultValue={q} placeholder={t("placeholder")} className="w-full rounded-md border border-border bg-surface px-3 py-2" />
         </label>
         {[
           ["type", t("type"), CARD_TYPES.map((v) => [v, tt(v)]), type],
-          ["domain", t("domain"), DOMAINS.map((v) => [v, td(v)]), domain],
+          ["domain", t("domain"), domainOptions.map((v) => [v, td(v)]), domain],
           ["set", tc("set"), sets.map((s) => [s.id, ts(s.id as "all")]), set],
+          ["version", t("version"), PRINT_VERSIONS.map((v) => [v, tv(v)]), version],
         ].map(([name, label, options, value]) => (
           <label key={name as string} className="text-sm">
             <span className="sr-only">{label as string}</span>
@@ -69,13 +79,13 @@ export default async function CardsPage({ params, searchParams }: PageProps<"/[l
       <p className="mt-4 text-sm text-muted">{t("results", { count: total })}</p>
 
       {rows.length === 0 ? (
-        <p className="mt-8 rounded-xl border border-border bg-surface p-6 text-muted">{total === 0 && !q && !type && !domain && !set ? tc("noData") : t("noResults")}</p>
+        <p className="mt-8 rounded-xl border border-border bg-surface p-6 text-muted">{total === 0 && !q && !type && !domain && !set && !version ? tc("noData") : t("noResults")}</p>
       ) : (
         <ul className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
           {rows.map(({ card, print }) => {
             const img = cardImage(print.id);
             return (
-              <li key={card.id} className="overflow-hidden rounded-xl border border-border bg-surface">
+              <li key={print.id} className="overflow-hidden rounded-xl border border-border bg-surface">
                 {img ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={img} alt={`${card.name}${card.rulesText ? `: ${card.rulesText}` : ""}`} width={372} height={519} loading="lazy" className="w-full" />
@@ -93,13 +103,16 @@ export default async function CardsPage({ params, searchParams }: PageProps<"/[l
                     {card.rulesText && <p className="mt-2 text-xs leading-relaxed"><RulesText text={card.rulesText} /></p>}
                   </div>
                 )}
-                <p className="border-t border-border px-3 py-1.5 text-[11px] text-muted">{print.publicCode} · {f.num(print.collectorNumber)}</p>
+                <p className="border-t border-border px-3 py-1.5 text-[11px] text-muted">
+                  {print.publicCode} · {f.num(print.collectorNumber)}
+                  {print.variant && <> · {print.variant.split(",").map((v) => tv(variantKey(v.trim()))).join(", ")}</>}
+                </p>
               </li>
             );
           })}
         </ul>
       )}
-      <Pagination pathname="/cards" query={{ q, type, domain, set }} page={page} total={total} pageSize={PAGE_SIZE} />
+      <Pagination pathname="/cards" query={{ q, type, domain, set, version }} page={page} total={total} pageSize={PAGE_SIZE} />
     </div>
   );
 }

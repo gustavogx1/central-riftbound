@@ -1,6 +1,7 @@
 name: Importar torneios
 
-# Uma vez por dia: busca rodadas novas dos eventos acompanhados e recalcula as estatísticas.
+# Uma vez por dia: acha Showdowns novos na UVS, busca rodadas novas dos eventos acompanhados
+# e recalcula as estatísticas.
 # Rodadas já completas e gravadas são puladas, então o job leva poucos minutos.
 on:
   schedule:
@@ -33,6 +34,9 @@ jobs:
       - run: pnpm install --frozen-lockfile
         if: env.DATABASE_URL != ''
       - run: pnpm db:migrate
+        if: env.DATABASE_URL != ''
+      - name: Acompanha os Showdowns novos
+        run: pnpm discover
         if: env.DATABASE_URL != ''
       - run: pnpm ingest
         if: env.DATABASE_URL != ''

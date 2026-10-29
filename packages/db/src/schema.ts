@@ -61,9 +61,11 @@ export const legend = pgTable("legend", {
 // Torneios (fonte: API pública da UVS/Spicerack)
 // ---------------------------------------------------------------------------
 
-export const eventKindEnum = pgEnum("event_kind", ["main", "side", "community"]);
+/** main = Regional Qualifier; showdown = Showdown Series (torneios de terceiros chancelados pela Riot). */
+export const eventKindEnum = pgEnum("event_kind", ["main", "side", "community", "showdown"]);
+export type EventKind = (typeof eventKindEnum.enumValues)[number];
 
-/** Eventos acompanhados, cadastrados à mão (ou aceitos da lista de sugestões). */
+/** Eventos acompanhados, cadastrados à mão ou achados por `pnpm discover` (Showdowns). */
 export const trackedEvent = pgTable("tracked_event", {
   uvsEventId: integer("uvs_event_id").primaryKey(),
   displayName: text("display_name"),
