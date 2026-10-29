@@ -1,17 +1,14 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { CrownIcon } from "@/components/Honors";
 import { LegendAvatar } from "@/components/LegendAvatar";
 import { LiveRefresher } from "@/components/live/LiveRefresher";
 import { MyMatch } from "@/components/live/MyMatch";
 import { RoundTimer } from "@/components/live/RoundTimer";
 import { Pagination } from "@/components/Pagination";
-import { StandingRow } from "@/components/StandingRow";
 import { Link } from "@/i18n/navigation";
-import { getEventDecks, getTopdeckLink, topdeckDeckUrl, topdeckEventUrl } from "@/lib/event-decks";
 import { makeFormat } from "@/lib/format";
-import { getEvent, getEventBestOf, getEventMeta, getLegendsBySlugs, getPairings, getRoundPlayers, getStandings, type LegendInfo } from "@/lib/queries";
+import { getEvent, getEventMeta, getLegendsBySlugs, getPairings, getRoundPlayers, getStandings, type LegendInfo } from "@/lib/queries";
 
 const PAGE_SIZE = 50;
 
@@ -45,7 +42,7 @@ export default async function EventPage({ params, searchParams }: PageProps<"/[l
   const ts = await getTranslations("Sets");
   const f = makeFormat(locale);
 
-  const view = sp.view === "pairings" ? "pairings" : sp.view === "decks" ? "decks" : "standings";
+  const view = sp.view === "pairings" ? "pairings" : "standings";
   const q = typeof sp.q === "string" && sp.q.trim() ? sp.q.trim().slice(0, 60) : undefined;
   const page = Math.max(1, Number(sp.page) || 1);
   const pairingRounds = ev.rounds;
@@ -57,22 +54,16 @@ export default async function EventPage({ params, searchParams }: PageProps<"/[l
   const currentRound = ev.rounds.at(-1);
   const roundLabel = (r: { phaseName: string; roundNumber: number }) => `${r.phaseName} · ${t("round")} ${r.roundNumber}`;
 
-  const [metaRows, standings, pairings, roundPlayers, bestOf, topdeck, decks] = await Promise.all([
+  const [metaRows, standings, pairings, roundPlayers] = await Promise.all([
     getEventMeta(ev.id),
     view === "standings" && round ? getStandings(round.id, { q, page, pageSize: PAGE_SIZE }) : Promise.resolve({ rows: [], total: 0 }),
     view === "pairings" && round ? getPairings(round.id, { q, page, pageSize: PAGE_SIZE }) : Promise.resolve({ rows: [], total: 0 }),
     isLive && currentRound ? getRoundPlayers(ev.id, currentRound.id, lastStanding?.id ?? null) : Promise.resolve([]),
-    // "Best of" só existe com a classificação final fechada.
-    view === "standings" && ev.status === "complete" ? getEventBestOf(ev.id) : Promise.resolve(new Map<number, string>()),
-    getTopdeckLink(ev.id),
-    view === "decks" ? getEventDecks(ev.id, { q, page, pageSize: PAGE_SIZE }) : Promise.resolve({ rows: [], total: 0 }),
   ]);
   const slugs = new Set<string>(metaRows.map((m) => m.legend));
   standings.rows.forEach((r) => r.s.legend && slugs.add(r.s.legend));
   pairings.rows.forEach((r) => { if (r.l1) slugs.add(r.l1); if (r.l2) slugs.add(r.l2); });
   roundPlayers.forEach((r) => { if (r.legend) slugs.add(r.legend); });
-  bestOf.forEach((legend) => slugs.add(legend));
-  decks.rows.forEach((d) => d.legend && slugs.add(d.legend));
   const legends = await getLegendsBySlugs([...slugs]);
   const legendsLite = Object.fromEntries([...legends].map(([k, l]) => [k, { champion: l.champion, cardId: l.cardId, domains: l.domains }]));
   const standingsUnofficial = round?.status !== "COMPLETE" && view === "standings";
@@ -85,17 +76,6 @@ export default async function EventPage({ params, searchParams }: PageProps<"/[l
     ) : (
       name(n, hidden)
     );
-  const bestOfLabel = (pid: number) => {
-    const slug = bestOf.get(pid);
-    if (!slug) return null;
-    const label = t("bestOf", { champion: legends.get(slug)?.champion ?? slug });
-    return (
-      <span title={label} className="inline-flex">
-        <CrownIcon size={15} />
-        <span className="sr-only">{label}</span>
-      </span>
-    );
-  };
   const tab = (active: boolean) => `rounded-md px-3 py-1.5 text-sm ${active ? "bg-surface-2 text-text" : "text-muted hover:text-text"}`;
 
   return (
@@ -133,7 +113,7 @@ export default async function EventPage({ params, searchParams }: PageProps<"/[l
       {metaRows.length > 0 && (
         <section className="mt-8" aria-labelledby="ev-meta">
           <h2 id="ev-meta" className="font-display text-xl font-semibold">{t("meta")}</h2>
-          <ul className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
+          <ul className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
             {metaRows.slice(0, 12).map((m) => {
               const l = legends.get(m.legend);
               if (!l) return null;
@@ -153,72 +133,9 @@ export default async function EventPage({ params, searchParams }: PageProps<"/[l
         <div className="flex flex-wrap items-center gap-2">
           <Link href={{ pathname: `/events/${ev.id}`, query: { view: "standings" } }} className={tab(view === "standings")} aria-current={view === "standings" ? "page" : undefined}>{t("standings")}</Link>
           <Link href={{ pathname: `/events/${ev.id}`, query: { view: "pairings" } }} className={tab(view === "pairings")} aria-current={view === "pairings" ? "page" : undefined}>{t("pairings")}</Link>
-          {(topdeck || ev.status === "complete") && (
-            <Link href={{ pathname: `/events/${ev.id}`, query: { view: "decks" } }} className={tab(view === "decks")} aria-current={view === "decks" ? "page" : undefined}>{t("decks")}</Link>
-          )}
-          {ev.status === "complete" && (
-            <Link href={`/events/${ev.id}/submit`} className="ml-auto rounded-md border border-border px-3 py-1.5 text-sm hover:border-accent">{t("submitDeck")}</Link>
-          )}
         </div>
 
-        {view === "decks" ? (
-          <>
-            <form className="mt-4 flex flex-wrap items-center gap-3" method="get">
-              <input type="hidden" name="view" value="decks" />
-              <label className="flex flex-1 items-center gap-2 text-sm">
-                <span className="sr-only">{tc("searchPlayer")}</span>
-                <input name="q" defaultValue={q} placeholder={tc("searchPlayer")} className="w-full max-w-xs rounded-md border border-border bg-surface px-3 py-1.5" />
-              </label>
-              <button className="rounded-md bg-accent px-4 py-1.5 text-sm font-semibold text-accent-ink">{tc("search")}</button>
-            </form>
-            {decks.rows.length === 0 ? (
-              <p className="mt-6 text-muted">
-                {t("noDecks")}
-                {ev.status === "complete" && (
-                  <>
-                    {" "}
-                    <Link href={`/events/${ev.id}/submit`} className="text-accent underline">{t("submitYours")}</Link>
-                  </>
-                )}
-              </p>
-            ) : (
-              <div className="mt-4 overflow-x-auto rounded-xl border border-border">
-                <table className="w-full min-w-[560px] text-sm">
-                  <thead className="bg-surface text-left text-muted">
-                    <tr>
-                      <th className="px-3 py-2 font-medium">{tc("rank")}</th>
-                      <th className="px-3 py-2 font-medium">{tc("player")}</th>
-                      <th className="px-3 py-2 font-medium">{tc("legend")}</th>
-                      <th className="px-3 py-2 text-right font-medium">{t("decklist")}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {decks.rows.map((d) => (
-                      <tr key={d.key} className="border-t border-border">
-                        <td className="px-3 py-2 tabular-nums text-muted">{d.rank ?? "—"}</td>
-                        <td className="px-3 py-2 font-medium">
-                          <span className="flex items-center gap-2">
-                            {playerLink(d.playerId, d.name, d.hidden)}
-                            {d.source === "community" && <span className="rounded bg-surface-2 px-1.5 py-0.5 text-xs font-normal text-muted" title={t("communityHint")}>{t("community")}</span>}
-                          </span>
-                        </td>
-                        <td className="px-3 py-2"><LegendCell slug={d.legend} legends={legends} /></td>
-                        <td className="px-3 py-2 text-right">
-                          {d.code ? (
-                            <Link href={`/events/${ev.id}/decks/${encodeURIComponent(d.key)}`} className="text-accent hover:underline">{t("viewDeck")}</Link>
-                          ) : d.tid ? (
-                            <a href={topdeckDeckUrl(d.tid, d.key)} target="_blank" rel="noopener noreferrer" className="text-muted hover:text-text">TopDeck.gg ↗</a>
-                          ) : null}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-            <Pagination pathname={`/events/${ev.id}`} query={{ view, q }} page={page} total={decks.total} pageSize={PAGE_SIZE} />
-          </>
-        ) : ev.rounds.length === 0 ? (
+        {ev.rounds.length === 0 ? (
           <p className="mt-6 text-muted">{t("noRounds")}</p>
         ) : (
           <>
@@ -240,7 +157,6 @@ export default async function EventPage({ params, searchParams }: PageProps<"/[l
             </form>
 
             {standingsUnofficial && round && <p className="mt-3 text-sm text-muted">{tl("unofficial")}</p>}
-            {view === "standings" && standings.rows.length > 0 && <p className="mt-3 text-sm text-muted">{t("expandHint")}</p>}
             {view === "standings" ? (
               <div className="mt-4 overflow-x-auto rounded-xl border border-border">
                 <table className="w-full min-w-[620px] text-sm">
@@ -256,29 +172,14 @@ export default async function EventPage({ params, searchParams }: PageProps<"/[l
                   </thead>
                   <tbody>
                     {standings.rows.map((r) => (
-                      <StandingRow
-                        key={r.s.playerId}
-                        eventId={ev.id}
-                        playerId={r.s.playerId}
-                        playerName={name(r.name, r.hidden)}
-                        roundId={round?.id}
-                        roundNumber={round?.roundNumber}
-                        multiPhase={new Set(ev.rounds.map((x) => x.phaseName)).size > 1}
-                        cols={6}
-                        expandable={!r.hidden}
-                      >
+                      <tr key={r.s.playerId} className="border-t border-border">
                         <td className="px-3 py-2 tabular-nums text-muted">{r.s.rank}</td>
-                        <td className="px-3 py-2 font-medium">
-                          <span className="flex items-center gap-1.5">
-                            {playerLink(r.s.playerId, r.name, r.hidden)}
-                            {bestOfLabel(r.s.playerId)}
-                          </span>
-                        </td>
+                        <td className="px-3 py-2 font-medium">{playerLink(r.s.playerId, r.name, r.hidden)}</td>
                         <td className="px-3 py-2"><LegendCell slug={r.s.legend} legends={legends} /></td>
                         <td className="px-3 py-2 text-right tabular-nums">{r.s.wins}-{r.s.losses}-{r.s.draws}</td>
                         <td className="px-3 py-2 text-right tabular-nums">{r.s.points}</td>
                         <td className="px-3 py-2 text-right tabular-nums">{f.pct(r.s.omw)}</td>
-                      </StandingRow>
+                      </tr>
                     ))}
                   </tbody>
                 </table>
@@ -330,19 +231,7 @@ export default async function EventPage({ params, searchParams }: PageProps<"/[l
             />
           </>
         )}
-        <p className="mt-6 text-xs text-muted">
-          {topdeck?.own ? t("sourceTopdeck") : t("source")}
-          {topdeck && (
-            <>
-              {" "}
-              {t.rich(topdeck.own ? "creditTopdeckOwn" : "creditTopdeck", {
-                link: (c) => (
-                  <a href={topdeckEventUrl(topdeck.tid)} target="_blank" rel="noopener noreferrer" className="text-accent underline">{c}</a>
-                ),
-              })}
-            </>
-          )}
-        </p>
+        <p className="mt-6 text-xs text-muted">{t("source")}</p>
       </section>
     </div>
   );
