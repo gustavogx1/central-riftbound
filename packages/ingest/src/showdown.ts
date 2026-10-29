@@ -30,16 +30,20 @@ export const REGIONAL_MIN_PLAYERS = 256;
 const REGIONAL_MAIN = /regional (qualifier|championship)/i;
 /** Pre-Regional Challenge e Regional Rebound, no mesmo fim de semana. */
 const REGIONAL_SIDE = /pre-?regional|regional rebound/i;
+/** Os outros construídos do fim de semana: "Super Nexus Night - RQ Los Angeles" etc. */
+const RQ_SIDE = /\s-\s+RQ\s/;
+/** Eventos em dupla ou trio não entram: as estatísticas são de 1 contra 1. */
+const TEAM = /2v2|team|trios/i;
 /** "Road to Regionals" e afins são eventos de loja. */
 const REGIONAL_STORE = /road to/i;
 
 /** "main" (Regional), "side" (paralelo do Regional) ou null (fora). */
 export function classifyRegional(e: UvsEventSummary): "main" | "side" | null {
   if (e.game_type !== "RIFTBOUND" || e.is_test_event) return null;
-  if (LIMITED.test(e.name) || REGIONAL_STORE.test(e.name)) return null;
+  if (LIMITED.test(e.name) || TEAM.test(e.name) || REGIONAL_STORE.test(e.name)) return null;
   if (e.gameplay_format && e.gameplay_format.name !== "Constructed") return null;
   const size = showdownSize(e);
-  if (REGIONAL_SIDE.test(e.name)) return size >= SHOWDOWN_SIDE_MIN_PLAYERS ? "side" : null;
+  if (REGIONAL_SIDE.test(e.name) || RQ_SIDE.test(e.name)) return size >= SHOWDOWN_SIDE_MIN_PLAYERS ? "side" : null;
   if (REGIONAL_MAIN.test(e.name)) return size >= REGIONAL_MIN_PLAYERS ? "main" : null;
   return null;
 }
@@ -60,10 +64,11 @@ type MajorKind = "showdown" | "main" | "side";
 const SEARCHES: [string, (e: UvsEventSummary) => MajorKind | null][] = [
   ["Showdown", classifyShowdown],
   ["Regional", classifyRegional],
+  ["RQ", classifyRegional],
 ];
 
 /**
- * Busca na UVS os eventos com "Showdown" ou "Regional" no nome (são poucas
+ * Busca na UVS os eventos com "Showdown", "Regional" ou "RQ" no nome (são poucas
  * centenas, de todos os jogos, então 1 ou 2 requisições por termo) e devolve os
  * que entram: Showdowns, Regionais e os paralelos deles.
  */

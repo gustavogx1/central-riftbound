@@ -10,6 +10,7 @@ import { Pagination } from "@/components/Pagination";
 import { StandingRow } from "@/components/StandingRow";
 import { Link } from "@/i18n/navigation";
 import { getEventDecks, getTopdeckLink, topdeckDeckUrl, topdeckEventUrl } from "@/lib/event-decks";
+import { eventTag } from "@/lib/event-tag";
 import { makeFormat } from "@/lib/format";
 import { getEvent, getEventBestOf, getEventMeta, getLegendsBySlugs, getPairings, getRoundPlayers, getStandings, type LegendInfo } from "@/lib/queries";
 
@@ -105,7 +106,7 @@ export default async function EventPage({ params, searchParams }: PageProps<"/[l
       </p>
       <h1 className="mt-2 font-display text-3xl font-bold">{ev.name}</h1>
       <p className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted">
-        <span>{te(ev.kind as "main")}</span>
+        <span>{te(eventTag(ev.kind, ev.name))}</span>
         {ev.metagame && <span>{ts(ev.metagame as "all")}</span>}
         <span>{f.num(ev.playerCount)} {tc("players").toLowerCase()}</span>
         {ev.address && <span>{ev.address}</span>}
