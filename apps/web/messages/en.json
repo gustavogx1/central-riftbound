@@ -62,7 +62,8 @@
   "Footer": {
     "disclaimer": "Central Riftbound is an unofficial fan project and is not endorsed by Riot Games. Riftbound and all related names and images are trademarks of Riot Games.",
     "methodology": "How we calculate",
-    "privacy": "Privacy"
+    "privacy": "Privacy",
+    "terms": "Terms"
   },
   "NotFound": {
     "title": "Page not found",
@@ -131,6 +132,29 @@
     "pilots": "Best pilots are ranked by the lower bound of the 95% Wilson interval, with the sample size reduced by Kish's design effect, because matches from the same event are not fully independent.",
     "minimum": "A legend needs at least {min} pilots in the selected set to enter the chart.",
     "source": "Data comes from the public pages of official events on the organized play platform (UVS). The legend of each player is the one registered there; full decklists are not public."
+  },
+  "Legal": {
+    "updated": "Last updated: October 29, 2026."
+  },
+  "Privacy": {
+    "title": "Privacy policy",
+    "intro": "Central Riftbound is an unofficial, non-commercial fan site about the Riftbound trading card game. This page explains what we keep about you and why.",
+    "signIn": "Browsing the site needs no account. If you sign in with Discord or Google, that service sends us your account ID, e-mail address, name and avatar. We use them only to identify your account and never send you e-mails.",
+    "stored": "With an account, we store your display name, the decks you save and your complexity votes.",
+    "public": "Decks you mark as public or unlisted can be seen by others, together with your display name. Private decks are visible only to you.",
+    "players": "Player names and results come from the public results of official events. Any player can ask to have their name hidden from this site.",
+    "cookies": "We don't show ads, sell or share your data, or use tracking cookies. We only use cookies to keep you signed in and to remember your language.",
+    "services": "Data is stored with Supabase (database and sign-in), and the site is hosted by Vercel.",
+    "delete": "To delete your account and all its data, or to hide your name, contact {contact}. You can delete your saved decks yourself at any time."
+  },
+  "Terms": {
+    "title": "Terms of use",
+    "intro": "By using Central Riftbound you agree to these terms.",
+    "free": "The site is free and provided as is. Statistics are computed from public tournament results and may contain errors; we don't guarantee that the site will always be available.",
+    "conduct": "Don't use the site to harass anyone, post offensive deck names or descriptions, or flood it with automated requests. We may remove content or accounts that break these rules.",
+    "content": "The decks you create are yours. By making a deck public or unlisted, you allow it to be shown on the site.",
+    "riot": "Central Riftbound is not endorsed by Riot Games. Riftbound, its card names and images are trademarks and property of Riot Games.",
+    "changes": "We may update these terms; the date at the top shows the latest version. Questions: {contact}."
   },
   "Legends": {
     "title": "Legends",

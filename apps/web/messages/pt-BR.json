@@ -62,7 +62,8 @@
   "Footer": {
     "disclaimer": "A Central Riftbound é um projeto de fã não oficial e não é endossada pela Riot Games. Riftbound e todos os nomes e imagens relacionados são marcas da Riot Games.",
     "methodology": "Como calculamos",
-    "privacy": "Privacidade"
+    "privacy": "Privacidade",
+    "terms": "Termos"
   },
   "NotFound": {
     "title": "Página não encontrada",
@@ -131,6 +132,29 @@
     "pilots": "Os melhores pilotos são ordenados pelo limite inferior do intervalo de Wilson a 95%, com o tamanho da amostra reduzido pelo efeito de desenho de Kish, porque partidas do mesmo evento não são totalmente independentes.",
     "minimum": "Uma lenda precisa de pelo menos {min} pilotos no set escolhido para entrar no gráfico.",
     "source": "Os dados vêm das páginas públicas dos eventos oficiais na plataforma de jogo organizado (UVS). A lenda de cada jogador é a registrada lá; as listas completas não são públicas."
+  },
+  "Legal": {
+    "updated": "Atualizado em 29 de outubro de 2026."
+  },
+  "Privacy": {
+    "title": "Política de privacidade",
+    "intro": "A Central Riftbound é um site de fãs, não oficial e sem fins comerciais, sobre o jogo de cartas Riftbound. Esta página explica o que guardamos sobre você e por quê.",
+    "signIn": "Para navegar no site não é preciso conta. Se você entrar com Discord ou Google, esse serviço nos envia o ID da sua conta, e-mail, nome e avatar. Usamos esses dados só para identificar a sua conta e nunca mandamos e-mails.",
+    "stored": "Com uma conta, guardamos o seu nome de exibição, os decks que você salva e os seus votos de complexidade.",
+    "public": "Decks marcados como públicos ou não listados podem ser vistos por outras pessoas, junto com o seu nome de exibição. Decks privados só você vê.",
+    "players": "Nomes e resultados de jogadores vêm dos resultados públicos de eventos oficiais. Qualquer jogador pode pedir para esconder o próprio nome no site.",
+    "cookies": "Não mostramos anúncios, não vendemos nem compartilhamos seus dados e não usamos cookies de rastreamento. Os cookies servem só para manter você conectado e lembrar o idioma.",
+    "services": "Os dados ficam no Supabase (banco e login), e o site é hospedado na Vercel.",
+    "delete": "Para apagar a sua conta e todos os dados dela, ou para esconder o seu nome, fale com {contact}. Você mesmo pode apagar os decks salvos quando quiser."
+  },
+  "Terms": {
+    "title": "Termos de uso",
+    "intro": "Ao usar a Central Riftbound, você concorda com estes termos.",
+    "free": "O site é grátis e oferecido como está. As estatísticas vêm de resultados públicos de torneios e podem ter erros; não garantimos que o site estará sempre no ar.",
+    "conduct": "Não use o site para assediar ninguém, publicar nomes ou descrições ofensivas de decks ou mandar requisições automáticas em excesso. Podemos remover conteúdo ou contas que quebrem estas regras.",
+    "content": "Os decks que você cria são seus. Ao deixar um deck público ou não listado, você permite que ele apareça no site.",
+    "riot": "A Central Riftbound não é endossada pela Riot Games. Riftbound, os nomes e as imagens das cartas são marcas e propriedade da Riot Games.",
+    "changes": "Podemos atualizar estes termos; a data no topo mostra a versão mais recente. Dúvidas: {contact}."
   },
   "Legends": {
     "title": "Lendas",
