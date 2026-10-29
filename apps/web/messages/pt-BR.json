@@ -20,7 +20,9 @@
   "Locale": {
     "label": "Idioma",
     "en": "English",
-    "pt-BR": "Português (Brasil)"
+    "pt-BR": "Português (Brasil)",
+    "shortEn": "EN",
+    "shortPtBR": "PT"
   },
   "Home": {
     "eyebrow": "Central de Riftbound feita por fãs",

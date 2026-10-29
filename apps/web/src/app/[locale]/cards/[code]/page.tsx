@@ -147,7 +147,7 @@ export default async function CardPage({ params }: PageProps<"/[locale]/cards/[c
             </div>
 
             <h3 className="mt-8 font-display text-lg font-semibold">{t("recentDecks")}</h3>
-            <ul className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+            <ul className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
               {use.recent.map((d) => {
                 const l = d.legend ? legends.get(d.legend) : undefined;
                 return (

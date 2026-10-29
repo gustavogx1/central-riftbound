@@ -20,7 +20,9 @@
   "Locale": {
     "label": "Language",
     "en": "English",
-    "pt-BR": "Português (Brasil)"
+    "pt-BR": "Português (Brasil)",
+    "shortEn": "EN",
+    "shortPtBR": "PT"
   },
   "Home": {
     "eyebrow": "Fan-made Riftbound hub",

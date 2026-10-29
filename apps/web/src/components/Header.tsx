@@ -15,7 +15,7 @@ export function Header() {
       <div className="mx-auto flex max-w-6xl items-center gap-4 px-4 py-3">
         <Link href="/" className="flex shrink-0 items-center gap-2 font-display text-lg font-semibold tracking-wide">
           <Logo className="size-8" />
-          <span>Central Riftbound</span>
+          <span className="max-[359px]:sr-only">Central Riftbound</span>
         </Link>
         <nav aria-label={t("menu")} className="ml-auto hidden md:block">
           <ul className="flex items-center gap-1 text-sm">

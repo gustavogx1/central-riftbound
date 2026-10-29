@@ -133,7 +133,7 @@ export default async function EventPage({ params, searchParams }: PageProps<"/[l
       {metaRows.length > 0 && (
         <section className="mt-8" aria-labelledby="ev-meta">
           <h2 id="ev-meta" className="font-display text-xl font-semibold">{t("meta")}</h2>
-          <ul className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+          <ul className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
             {metaRows.slice(0, 12).map((m) => {
               const l = legends.get(m.legend);
               if (!l) return null;
