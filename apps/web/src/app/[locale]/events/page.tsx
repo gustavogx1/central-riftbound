@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { LegendAvatar } from "@/components/LegendAvatar";
 import { Link } from "@/i18n/navigation";
+import { eventTag } from "@/lib/event-tag";
 import { makeFormat } from "@/lib/format";
 import { getEvents, getLegendsBySlugs } from "@/lib/queries";
 
@@ -32,6 +33,7 @@ export default async function EventsPage({ params }: PageProps<"/[locale]/events
       ) : (
         <ul className="mt-8 divide-y divide-border overflow-hidden rounded-xl border border-border">
           {events.map((e) => {
+            const tag = eventTag(e.kind, e.name);
             const live = e.live && e.status !== "complete";
             const w = e.status === "complete" && e.winnerLegend ? legends.get(e.winnerLegend) : undefined;
             return (
@@ -42,7 +44,7 @@ export default async function EventsPage({ params }: PageProps<"/[locale]/events
                     <span className="block font-semibold">{e.name}</span>
                     <span className="mt-0.5 flex flex-wrap gap-2 text-xs text-muted">
                       {live && <span className="rounded bg-live px-1.5 py-px font-semibold text-bg">{t("live")}</span>}
-                      <span className={`rounded px-1.5 py-px ${e.kind === "main" ? "bg-accent text-accent-ink" : e.kind === "showdown" ? "bg-accent-2 text-bg" : "bg-surface-2"}`}>{t(e.kind as "main")}</span>
+                      <span className={`rounded px-1.5 py-px ${tag === "championship" ? "bg-text text-bg" : tag === "main" ? "bg-accent text-accent-ink" : tag === "showdown" ? "bg-accent-2 text-bg" : "bg-surface-2"}`}>{t(tag)}</span>
                       {e.metagame && <span>{ts(e.metagame as "all")}</span>}
                       <span>{f.num(e.playerCount)} {tc("players").toLowerCase()}</span>
                     </span>

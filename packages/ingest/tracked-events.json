@@ -126,5 +126,9 @@
   {
     "uvsEventId": 1222298,
     "kind": "showdown"
+  },
+  {
+    "uvsEventId": 291931,
+    "kind": "main"
   }
 ]

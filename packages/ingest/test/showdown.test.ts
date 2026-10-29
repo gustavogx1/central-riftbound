@@ -51,6 +51,8 @@ describe("classifyRegional", () => {
     expect(classifyRegional(ev("Regional Rebound - RQ Las Vegas", 418))).toBe("side");
     expect(classifyRegional(ev("Pre-Regional Challenge - RQ Sydney Friday 1pm", 714))).toBe("side");
     expect(classifyRegional(ev("Secretlab Regional Rebound - RQ Barcelona Sunday 11am", 1003))).toBe("side");
+    expect(classifyRegional(ev("Super Nexus Night - RQ Los Angeles Friday 8pm", 1972))).toBe("side");
+    expect(classifyRegional(ev("Super Saturday Standard Challenge - RQ Hartford Saturday 10am", 432))).toBe("side");
   });
   it("aceita o Regional que ainda vai começar pelo total de inscritos", () => {
     expect(classifyRegional(ev("Riftbound Regional Championship: Europe", 311, { display_status: "upcoming", capacity: 8 }))).toBe("main");
@@ -59,6 +61,9 @@ describe("classifyRegional", () => {
     expect(classifyRegional(ev("Road to Regionals: Testing Tournament 1/2 @Damnation 2026", 81))).toBeNull();
     expect(classifyRegional(ev("Store Regional Championship", 40))).toBeNull();
     expect(classifyRegional(ev("Lorcana Regional Qualifier", 900, { game_type: "LORCANA" }))).toBeNull();
+    expect(classifyRegional(ev("2v2 Champions of the Rift - RQ Los Angeles Sunday 10am", 543))).toBeNull();
+    expect(classifyRegional(ev("Sealed Deck Challenge - RQ Singapore Sunday 2pm", 280))).toBeNull();
+    expect(classifyRegional(ev("Champion Deck Trial - RQ Los Angeles Sunday 3pm", 26, { gameplay_format: { name: "Modified Champion Deck" } }))).toBeNull();
     expect(classifyRegional(ev("Riftbound Regional Qualifier - Sealed", 900, { gameplay_format: { name: "Sealed" } }))).toBeNull();
   });
 });

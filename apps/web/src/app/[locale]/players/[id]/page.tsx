@@ -6,6 +6,7 @@ import { CrownIcon, TrophyIcon } from "@/components/Honors";
 import { LegendAvatar } from "@/components/LegendAvatar";
 import { PlayerMatches, recordOf } from "@/components/PlayerMatches";
 import { getPathname, Link } from "@/i18n/navigation";
+import { eventTag } from "@/lib/event-tag";
 import { makeFormat } from "@/lib/format";
 import { getLegendsBySlugs, getPlayer, getPlayerEvents, getPlayerHonors, getPlayerLegends, getPlayerMatches, getTopOpponents } from "@/lib/queries";
 
@@ -136,7 +137,7 @@ export default async function PlayerPage({ params }: PageProps<"/[locale]/player
                     <span className="w-24 shrink-0 text-sm tabular-nums text-muted">{f.date(e.startsAt)}</span>
                     <span className="min-w-0 flex-1">
                       <span className="block truncate font-medium">{e.name}</span>
-                      <span className="text-xs text-muted">{te(e.kind as "main")}</span>
+                      <span className="text-xs text-muted">{te(eventTag(e.kind, e.name))}</span>
                     </span>
                     {l && (
                       <span className="flex items-center gap-2 text-sm">
