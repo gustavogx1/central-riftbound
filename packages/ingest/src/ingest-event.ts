@@ -6,6 +6,7 @@ import {
   detectMetagame,
   eventRow,
   matchRow,
+  playerFromStanding,
   playersFromMatch,
   roundRows,
   standingRow,
@@ -46,6 +47,13 @@ function chunks<T>(rows: T[]): T[][] {
 
 const ex = (col: string) => sql.raw(`excluded.${col}`);
 
+/** Só troca o nick se este evento for o mais recente em que ele apareceu. */
+const newerNick = sql`excluded.nick is not null and (player.nick_at is null or excluded.nick_at >= player.nick_at)`;
+export const nickSet = {
+  nick: sql`case when ${newerNick} then excluded.nick else player.nick end`,
+  nickAt: sql`case when ${newerNick} then excluded.nick_at else player.nick_at end`,
+};
+
 export interface IngestOptions {
   kind: EventKind;
   metagameOverride?: string | null;
@@ -66,6 +74,7 @@ export async function ingestEvent(db: Db, client: UvsClient, uvsEventId: number,
     return slug;
   };
 
+  const startsAt = new Date(ev.start_datetime);
   const rounds = roundRows(ev);
   // Resumo de tudo o que a tela mostra; se mudar, o pulso ao vivo sobe de versão.
   const fp = createHash("sha1");
@@ -105,9 +114,12 @@ export async function ingestEvent(db: Db, client: UvsClient, uvsEventId: number,
 
     if (r.pairingsReady) {
       const matches = await fetchAll(client, `tournament-rounds/${r.id}/matches/paginated/`, (d) => page(uvsMatch).parse(d));
-      const players = new Map(matches.flatMap(playersFromMatch).map((p) => [p.id, p]));
+      const players = new Map(matches.flatMap((m) => playersFromMatch(m, startsAt)).map((p) => [p.id, p]));
       for (const rows of chunks([...players.values()])) {
-        await db.insert(schema.player).values(rows).onConflictDoUpdate({ target: schema.player.id, set: { name: ex("name"), countryCode: ex("country_code") } });
+        await db
+          .insert(schema.player)
+          .values(rows)
+          .onConflictDoUpdate({ target: schema.player.id, set: { name: ex("name"), countryCode: ex("country_code"), ...nickSet } });
       }
       const rows = matches.map((m) => matchRow(m, r.id, ev.id, resolveTracking));
       // Rodada fechada já entra no resumo pelo status; só a aberta precisa dos detalhes.
@@ -131,9 +143,9 @@ export async function ingestEvent(db: Db, client: UvsClient, uvsEventId: number,
 
     if (lastOfPhase.get(r.phaseId) === r.id) {
       const standings = await fetchAll(client, `tournament-rounds/${r.id}/standings/paginated/`, (d) => page(uvsStanding).parse(d));
-      const players = new Map(standings.map((s) => [s.player.id, { id: s.player.id, name: s.player.best_identifier, countryCode: null }]));
+      const players = new Map(standings.map((s) => [s.player.id, playerFromStanding(s, startsAt)]));
       for (const rows of chunks([...players.values()])) {
-        await db.insert(schema.player).values(rows).onConflictDoUpdate({ target: schema.player.id, set: { name: ex("name") } });
+        await db.insert(schema.player).values(rows).onConflictDoUpdate({ target: schema.player.id, set: { name: ex("name"), ...nickSet } });
       }
       const rows = standings.map((s) => standingRow(s, r.id, ev.id, resolveTracking));
       if (r.status !== "COMPLETE") for (const s of rows) fp.update(`|s${s.playerId}:${s.rank}:${s.points}`);

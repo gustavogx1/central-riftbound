@@ -45,7 +45,10 @@ export default async function PlayersPage({ params, searchParams }: PageProps<"/
                   href={vs && vs !== p.id ? `/players/${vs}/vs/${p.id}` : `/players/${p.id}`}
                   className="flex items-center justify-between gap-3 bg-surface px-4 py-3 hover:bg-surface-2"
                 >
-                  <span className="font-medium">{p.name}</span>
+                  <span className="min-w-0 truncate">
+                    <span className="font-medium">{p.name}</span>
+                    {p.name !== p.realName && <span className="ml-2 text-sm text-muted">{p.realName}</span>}
+                  </span>
                   <span className="text-sm text-muted">{t("eventsCount", { n: f.num(p.events) })}</span>
                 </Link>
               </li>

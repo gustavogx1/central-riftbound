@@ -42,7 +42,7 @@ export function MyMatch({ rows, legends, round }: { rows: MyMatchRow[]; legends:
   const matches = useMemo(() => {
     const needle = q.trim().toLowerCase();
     if (needle.length < 2) return [];
-    return rows.filter((r) => r.name.toLowerCase().includes(needle)).slice(0, 8);
+    return rows.filter((r) => r.name.toLowerCase().includes(needle) || r.realName.toLowerCase().includes(needle)).slice(0, 8);
   }, [q, rows]);
 
   const pick = (id: number | null) => {

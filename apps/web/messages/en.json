@@ -248,9 +248,9 @@
   },
   "Players": {
     "title": "Players",
-    "lead": "Search a player by the name shown in official events to see their results, legends and head-to-head records.",
+    "lead": "Search a player by nickname or by the name shown in official events to see their results, legends and head-to-head records.",
     "pickOpponent": "Choose the opponent",
-    "none": "No player found with that name.",
+    "none": "No player found with that nickname or name.",
     "eventsCount": "{n} events",
     "privacy": "Names come from the public results of official events. Any player can ask to have their name hidden from this site."
   },
@@ -272,7 +272,8 @@
     "compareWith": "Compare with another player",
     "recentMatches": "Recent matches",
     "h2hSummary": "{matches, plural, one {# match} other {# matches}} in tracked events, {draws, plural, one {# draw} other {# draws}}",
-    "neverMet": "These players have not faced each other in the tracked events."
+    "neverMet": "These players have not faced each other in the tracked events.",
+    "realName": "Name on UVS: {name}"
   },
   "PrintVersions": {
     "normal": "Standard",

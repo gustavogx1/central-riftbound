@@ -14,6 +14,7 @@
     "suggest": "tsx src/cli/suggest.ts",
     "discover": "tsx src/cli/discover.ts",
     "ingest": "tsx src/cli/ingest.ts",
+    "nicks": "tsx src/cli/nicks.ts",
     "stats": "tsx src/cli/stats.ts",
     "live": "tsx src/cli/live.ts",
     "record": "tsx src/cli/record.ts",
