@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { MIN_COMPLEXITY_VOTES } from "@cr/core";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { LegendAvatar } from "@/components/LegendAvatar";
+import { MatchupMatrix, type MatrixLegend } from "@/components/MatchupMatrix";
 import { MetaChart, type ChartPoint } from "@/components/MetaChart";
 import { ScopeFilter } from "@/components/ScopeFilter";
 import { TierBadge } from "@/components/TierBadge";
@@ -15,7 +16,6 @@ import { resolveScope } from "@/lib/scope";
 import { getComplexity } from "@/lib/votes";
 
 export const revalidate = 3600;
-const MATRIX_SIZE = 14;
 const MATRIX_MIN = 30;
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/meta">): Promise<Metadata> {
@@ -53,8 +53,13 @@ export default async function MetaPage({ params, searchParams }: PageProps<"/[lo
     complexity: complexity.get(s.slug)?.score ?? null,
   }));
 
-  const matrixLegends = [...stats].sort((a, b) => b.share - a.share).slice(0, MATRIX_SIZE);
-  const mu = new Map(matchups.map((m) => [`${m.legend}|${m.opponent}`, m]));
+  // Todas as lendas do gráfico e da tabela entram na matriz; os filtros ficam no cliente.
+  const matrixLegends: MatrixLegend[] = stats.map((s) => ({
+    slug: s.slug, champion: s.champion, title: s.title, cardId: s.cardId, domains: s.domains,
+    share: s.share, power: s.power, winRate: s.winRate, href: legendHref(s.slug),
+  }));
+  const cells: Record<string, [number, number]> = {};
+  for (const m of matchups) cells[`${m.legend}|${m.opponent}`] = [m.wins, m.losses];
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10">
@@ -144,49 +149,11 @@ export default async function MetaPage({ params, searchParams }: PageProps<"/[lo
             </div>
           </section>
 
-          {matrixLegends.length > 1 && (
+          {stats.length > 1 && (
             <section className="mt-12" aria-labelledby="mu-h">
               <h2 id="mu-h" className="font-display text-2xl font-semibold">{t("matchupsTitle")}</h2>
-              <p className="mt-2 text-sm text-muted">{t("matchupsLead", { min: MATRIX_MIN })}</p>
-              <div className="mt-4 overflow-x-auto rounded-xl border border-border">
-                <table className="text-xs">
-                  <thead>
-                    <tr>
-                      <th className="sticky left-0 z-10 bg-surface p-2" />
-                      {matrixLegends.map((c) => (
-                        <th key={c.slug} className="bg-surface p-2" title={`${c.champion}, ${c.title}`}>
-                          <span className="flex justify-center"><LegendAvatar cardId={c.cardId} champion={c.champion} domains={c.domains} size={28} /></span>
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {matrixLegends.map((r) => (
-                      <tr key={r.slug}>
-                        <th className="sticky left-0 z-10 whitespace-nowrap bg-surface px-3 py-1.5 text-left font-medium">{r.champion}</th>
-                        {matrixLegends.map((c) => {
-                          if (r.slug === c.slug) return <td key={c.slug} className="border-l border-t border-border px-2 py-1.5 text-center text-muted">—</td>;
-                          const m = mu.get(`${r.slug}|${c.slug}`);
-                          const n = m ? m.wins + m.losses : 0;
-                          const wr = n ? m!.wins / n : null;
-                          const strength = wr === null ? 0 : Math.min(1, Math.abs(wr - 0.5) * 4);
-                          const bg = wr === null ? "transparent" : wr >= 0.5 ? `color-mix(in oklab, var(--tier-c) ${strength * 55}%, transparent)` : `color-mix(in oklab, var(--tier-s) ${strength * 55}%, transparent)`;
-                          return (
-                            <td
-                              key={c.slug}
-                              className="border-l border-t border-border px-2 py-1.5 text-center tabular-nums"
-                              style={{ background: bg, opacity: n < MATRIX_MIN ? 0.45 : 1 }}
-                              title={`${r.champion} vs ${c.champion}: ${f.pct(wr)} (${f.num(n)})`}
-                            >
-                              {wr === null ? "" : f.pct(wr, 0)}
-                            </td>
-                          );
-                        })}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+              <p className="mt-2 text-sm text-muted">{t("matchupsLead")}</p>
+              <MatchupMatrix legends={matrixLegends} cells={cells} locale={locale} defaultMin={MATRIX_MIN} />
             </section>
           )}
         </>
