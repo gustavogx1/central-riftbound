@@ -1,10 +1,13 @@
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Bracket } from "@/components/Bracket";
+import { FollowingTab, MetaTab, PlayersTab } from "@/components/event/EventTabs";
+import { FollowButton } from "@/components/event/FollowButton";
+import { LegendCell } from "@/components/event/LegendCell";
 import { EventClock } from "@/components/EventClock";
 import { CrownIcon } from "@/components/Honors";
-import { LegendAvatar } from "@/components/LegendAvatar";
 import { LiveRefresher } from "@/components/live/LiveRefresher";
 import { MyMatch } from "@/components/live/MyMatch";
 import { RoundTimer } from "@/components/live/RoundTimer";
@@ -13,21 +16,11 @@ import { StandingRow } from "@/components/StandingRow";
 import { Link } from "@/i18n/navigation";
 import { getEventDecks, getTopdeckLink, topdeckDeckUrl, topdeckEventUrl } from "@/lib/event-decks";
 import { eventStatusKey, eventTag, venueDateTime } from "@/lib/event-tag";
+import { FOLLOW_COOKIE, parseFollow } from "@/lib/follow";
 import { makeFormat } from "@/lib/format";
-import { getBracket, getEvent, getEventBestOf, getEventMeta, getLegendsBySlugs, getPairings, getRoundPlayers, getStandings, isEliminationPhase, type LegendInfo } from "@/lib/queries";
+import { getBracket, getEvent, getEventBestOf, getEventMeta, getEventPlayers, getLegendStandings, getLegendsBySlugs, getPairings, getRoundPlayers, getStandings, isEliminationPhase } from "@/lib/queries";
 
 const PAGE_SIZE = 50;
-
-function LegendCell({ slug, legends }: { slug: string | null; legends: Map<string, LegendInfo> }) {
-  const l = slug ? legends.get(slug) : undefined;
-  if (!l) return <span className="text-muted">—</span>;
-  return (
-    <Link href={`/legends/${l.slug}`} className="flex items-center gap-2 hover:text-accent">
-      <LegendAvatar cardId={l.cardId} champion={l.champion} domains={l.domains} size={24} />
-      <span className="truncate">{l.champion}</span>
-    </Link>
-  );
-}
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/events/[id]">): Promise<Metadata> {
   const { id } = await params;
@@ -53,7 +46,7 @@ export default async function EventPage({ params, searchParams }: PageProps<"/[l
   const bracketRounds = ev.rounds.filter((r) => isEliminationPhase(r.phaseType));
   // Ao vivo, com o top cut em andamento, a chave é o que todo mundo quer ver primeiro.
   const defaultView = isLive && currentRound && isEliminationPhase(currentRound.phaseType) ? "bracket" : "standings";
-  const views = ["standings", "pairings", "decks", "bracket"] as const;
+  const views = ["standings", "pairings", "following", "players", "meta", "decks", "bracket"] as const;
   const view = views.find((v) => v === sp.view && (v !== "bracket" || bracketRounds.length > 0)) ?? defaultView;
   const q = typeof sp.q === "string" && sp.q.trim() ? sp.q.trim().slice(0, 60) : undefined;
   const page = Math.max(1, Number(sp.page) || 1);
@@ -64,6 +57,9 @@ export default async function EventPage({ params, searchParams }: PageProps<"/[l
   const round = ev.rounds.find((r) => r.id === roundId);
   const seedRound = [...standingRounds].reverse().find((r) => !isEliminationPhase(r.phaseType));
   const roundLabel = (r: { phaseName: string; roundNumber: number }) => `${r.phaseName} · ${t("round")} ${r.roundNumber}`;
+  const followIds = parseFollow((await cookies()).get(FOLLOW_COOKIE)?.value);
+  const followed = new Set(followIds);
+  const playerOpts = { live: isLive, standingRoundId: lastStanding?.id ?? null };
 
   const [metaRows, standings, pairings, roundPlayers, bestOf, topdeck, decks, bracket] = await Promise.all([
     getEventMeta(ev.id),
@@ -76,6 +72,12 @@ export default async function EventPage({ params, searchParams }: PageProps<"/[l
     view === "decks" ? getEventDecks(ev.id, { q, page, pageSize: PAGE_SIZE }) : Promise.resolve({ rows: [], total: 0 }),
     view === "bracket" ? getBracket(ev.id, bracketRounds.map((r) => r.id), seedRound?.id ?? null) : Promise.resolve({ matches: [], seeds: new Map<number, number>() }),
   ]);
+  const metaLegend = view === "meta" ? (metaRows.find((m) => m.legend === sp.legend)?.legend ?? metaRows[0]?.legend ?? null) : null;
+  const [players, followingRows, legendStandings] = await Promise.all([
+    view === "players" ? getEventPlayers(ev.id, { ...playerOpts, q, page, pageSize: PAGE_SIZE, order: "name" }) : Promise.resolve([]),
+    view === "following" ? getEventPlayers(ev.id, { ...playerOpts, ids: followIds, page: 1, pageSize: 200, order: "rank" }) : Promise.resolve([]),
+    metaLegend && seedRound ? getLegendStandings(seedRound.id, metaLegend) : Promise.resolve([]),
+  ]);
   const slugs = new Set<string>(metaRows.map((m) => m.legend));
   standings.rows.forEach((r) => r.s.legend && slugs.add(r.s.legend));
   pairings.rows.forEach((r) => { if (r.l1) slugs.add(r.l1); if (r.l2) slugs.add(r.l2); });
@@ -83,10 +85,10 @@ export default async function EventPage({ params, searchParams }: PageProps<"/[l
   bestOf.forEach((legend) => slugs.add(legend));
   decks.rows.forEach((d) => d.legend && slugs.add(d.legend));
   bracket.matches.forEach((m) => { if (m.l1) slugs.add(m.l1); if (m.l2) slugs.add(m.l2); });
+  [...players, ...followingRows].forEach((r) => { if (r.legend) slugs.add(r.legend); if (r.opponentLegend) slugs.add(r.opponentLegend); });
   const legends = await getLegendsBySlugs([...slugs]);
   const legendsLite = Object.fromEntries([...legends].map(([k, l]) => [k, { champion: l.champion, cardId: l.cardId, domains: l.domains }]));
   const standingsUnofficial = round?.status !== "COMPLETE" && view === "standings";
-  const totalPlayers = metaRows.reduce((a, m) => a + m.players, 0);
 
   const name = (n: string | null, hidden: boolean | null) => (hidden ? tc("hiddenPlayer") : (n ?? "—"));
   const playerLink = (pid: number | null, n: string | null, hidden: boolean | null) =>
@@ -115,6 +117,15 @@ export default async function EventPage({ params, searchParams }: PageProps<"/[l
   if (ev.format) facts.push([t("format"), ev.format]);
   if (ev.roundMinutes) facts.push([t("roundLength"), t("minutes", { n: ev.roundMinutes })]);
   if (ev.gameWins) facts.push([t("matchFormat"), t("bestOfN", { n: ev.gameWins * 2 - 1 })]);
+  const tabs: [(typeof views)[number], string][] = [
+    ["pairings", t("pairings")],
+    ["standings", t("standings")],
+    ["following", t("following")],
+    ["players", t("players")],
+    ["meta", t("metaTab")],
+  ];
+  if (bracketRounds.length > 0) tabs.push(["bracket", t("bracket")]);
+  if (topdeck || ev.status === "complete") tabs.push(["decks", t("decks")]);
   const tab = (active: boolean) => `rounded-md px-3 py-1.5 text-sm ${active ? "bg-surface-2 text-text" : "text-muted hover:text-text"}`;
 
   return (
@@ -182,41 +193,26 @@ export default async function EventPage({ params, searchParams }: PageProps<"/[l
         </section>
       )}
 
-      {metaRows.length > 0 && (
-        <section className="mt-8" aria-labelledby="ev-meta">
-          <h2 id="ev-meta" className="font-display text-xl font-semibold">{t("meta")}</h2>
-          <ul className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-            {metaRows.slice(0, 12).map((m) => {
-              const l = legends.get(m.legend);
-              if (!l) return null;
-              return (
-                <li key={m.legend} className="flex items-center gap-3 rounded-lg border border-border bg-surface p-2.5 text-sm">
-                  <LegendAvatar cardId={l.cardId} champion={l.champion} domains={l.domains} size={32} />
-                  <span className="min-w-0 flex-1 truncate">{l.champion}</span>
-                  <span className="tabular-nums font-semibold">{f.pct(m.players / totalPlayers)}</span>
-                </li>
-              );
-            })}
-          </ul>
-        </section>
-      )}
-
       <section className="mt-10">
         <div className="flex flex-wrap items-center gap-2">
-          <Link href={{ pathname: `/events/${ev.id}`, query: { view: "standings" } }} className={tab(view === "standings")} aria-current={view === "standings" ? "page" : undefined}>{t("standings")}</Link>
-          <Link href={{ pathname: `/events/${ev.id}`, query: { view: "pairings" } }} className={tab(view === "pairings")} aria-current={view === "pairings" ? "page" : undefined}>{t("pairings")}</Link>
-          {bracketRounds.length > 0 && (
-            <Link href={{ pathname: `/events/${ev.id}`, query: { view: "bracket" } }} className={tab(view === "bracket")} aria-current={view === "bracket" ? "page" : undefined}>{t("bracket")}</Link>
-          )}
-          {(topdeck || ev.status === "complete") && (
-            <Link href={{ pathname: `/events/${ev.id}`, query: { view: "decks" } }} className={tab(view === "decks")} aria-current={view === "decks" ? "page" : undefined}>{t("decks")}</Link>
-          )}
+          {tabs.map(([v, label]) => (
+            <Link key={v} href={{ pathname: `/events/${ev.id}`, query: { view: v } }} className={tab(view === v)} aria-current={view === v ? "page" : undefined}>
+              {label}
+              {v === "following" && followIds.length > 0 && <span className="ml-1.5 text-xs text-muted">{followIds.length}</span>}
+            </Link>
+          ))}
           {ev.status === "complete" && (
             <Link href={`/events/${ev.id}/submit`} className="ml-auto rounded-md border border-border px-3 py-1.5 text-sm hover:border-accent">{t("submitDeck")}</Link>
           )}
         </div>
 
-        {view === "bracket" ? (
+        {view === "players" ? (
+          <PlayersTab eventId={ev.id} rows={players} legends={legends} followed={followed} q={q} page={page} pageSize={PAGE_SIZE} />
+        ) : view === "following" ? (
+          <FollowingTab eventId={ev.id} rows={followingRows} legends={legends} followCount={followIds.length} roundLabels={Object.fromEntries(ev.rounds.map((r) => [r.id, roundLabel(r)]))} />
+        ) : view === "meta" ? (
+          <MetaTab eventId={ev.id} metaRows={metaRows} legends={legends} selected={metaLegend} standings={legendStandings} f={f} unofficial={seedRound?.status !== "COMPLETE"} />
+        ) : view === "bracket" ? (
           <Bracket rounds={bracketRounds} matches={bracket.matches} seeds={bracket.seeds} legends={legends} />
         ) : view === "decks" ? (
           <>
@@ -327,6 +323,7 @@ export default async function EventPage({ params, searchParams }: PageProps<"/[l
                         <td className="px-3 py-2 tabular-nums text-muted">{r.s.rank}</td>
                         <td className="px-3 py-2 font-medium">
                           <span className="flex items-center gap-1.5">
+                            {!r.hidden && <FollowButton playerId={r.s.playerId} name={r.name} followed={followed.has(r.s.playerId)} />}
                             {playerLink(r.s.playerId, r.name, r.hidden)}
                             {bestOfLabel(r.s.playerId)}
                           </span>
