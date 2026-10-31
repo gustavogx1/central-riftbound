@@ -12,7 +12,8 @@ export interface MatrixLegend {
   cardId: string;
   domains: string[];
   share: number;
-  power: number;
+  /** Sem poder (ex.: matriz de um evento só), a opção de ordenar por poder some. */
+  power?: number;
   winRate: number | null;
   href: string;
 }
@@ -24,12 +25,13 @@ const MIN_OPTIONS = [0, 10, 30, 50, 100] as const;
 const TOP_PRESETS = [10, 20] as const;
 
 /** Matriz de matchups com filtros no cliente: lendas, ordem, mínimo de partidas e valor exibido. */
-export function MatchupMatrix({ legends, cells, locale, defaultMin }: {
+export function MatchupMatrix({ legends, cells, locale, defaultMin, minOptions = MIN_OPTIONS }: {
   legends: MatrixLegend[];
   /** "linha|coluna" → [vitórias, derrotas] */
   cells: Record<string, [number, number]>;
   locale: string;
   defaultMin: number;
+  minOptions?: readonly number[];
 }) {
   const t = useTranslations("Meta");
   const f = makeFormat(locale);
@@ -47,7 +49,7 @@ export function MatchupMatrix({ legends, cells, locale, defaultMin }: {
     const list = legends.filter((l) => selected.has(l.slug));
     const cmp: Record<Sort, (a: MatrixLegend, b: MatrixLegend) => number> = {
       share: (a, b) => b.share - a.share,
-      power: (a, b) => b.power - a.power,
+      power: (a, b) => (b.power ?? 0) - (a.power ?? 0),
       winRate: (a, b) => (b.winRate ?? -1) - (a.winRate ?? -1),
       name: (a, b) => a.champion.localeCompare(b.champion, locale),
     };
@@ -86,7 +88,7 @@ export function MatchupMatrix({ legends, cells, locale, defaultMin }: {
           <span className="text-muted">{t("matrixSort")}</span>
           <select value={sort} onChange={(e) => setSort(e.target.value as Sort)} className="rounded-md border border-border bg-surface px-2 py-1 text-xs">
             <option value="share">{t("matrixSortShare")}</option>
-            <option value="power">{t("matrixSortPower")}</option>
+            {legends.some((l) => l.power !== undefined) && <option value="power">{t("matrixSortPower")}</option>}
             <option value="winRate">{t("matrixSortWinRate")}</option>
             <option value="name">{t("matrixSortName")}</option>
           </select>
@@ -94,7 +96,7 @@ export function MatchupMatrix({ legends, cells, locale, defaultMin }: {
         <label className="flex items-center gap-2">
           <span className="text-muted">{t("matrixMin")}</span>
           <select value={min} onChange={(e) => setMin(Number(e.target.value))} className="rounded-md border border-border bg-surface px-2 py-1 text-xs">
-            {MIN_OPTIONS.map((n) => <option key={n} value={n}>{n}</option>)}
+            {minOptions.map((n) => <option key={n} value={n}>{n}</option>)}
           </select>
         </label>
         <label className="flex items-center gap-2 text-muted">

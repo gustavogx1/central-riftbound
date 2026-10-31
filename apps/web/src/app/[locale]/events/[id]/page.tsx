@@ -6,6 +6,7 @@ import { Bracket } from "@/components/Bracket";
 import { FollowingTab, MetaTab, PlayersTab } from "@/components/event/EventTabs";
 import { FollowButton } from "@/components/event/FollowButton";
 import { LegendCell } from "@/components/event/LegendCell";
+import { MatchupMatrix, type MatrixLegend } from "@/components/MatchupMatrix";
 import { EventClock } from "@/components/EventClock";
 import { CrownIcon } from "@/components/Honors";
 import { LiveRefresher } from "@/components/live/LiveRefresher";
@@ -13,14 +14,16 @@ import { MyMatch } from "@/components/live/MyMatch";
 import { RoundTimer } from "@/components/live/RoundTimer";
 import { Pagination } from "@/components/Pagination";
 import { StandingRow } from "@/components/StandingRow";
-import { Link } from "@/i18n/navigation";
+import { getPathname, Link } from "@/i18n/navigation";
+import type { Locale } from "@/i18n/routing";
 import { getEventDecks, getTopdeckLink, topdeckDeckUrl, topdeckEventUrl } from "@/lib/event-decks";
 import { eventStatusKey, eventTag, venueDateTime } from "@/lib/event-tag";
 import { FOLLOW_COOKIE, parseFollow } from "@/lib/follow";
 import { makeFormat } from "@/lib/format";
-import { getBracket, getEvent, getEventBestOf, getEventMeta, getEventPlayers, getLegendStandings, getLegendsBySlugs, getPairings, getRoundPlayers, getStandings, isEliminationPhase } from "@/lib/queries";
+import { getBracket, getEvent, getEventBestOf, getEventMatchups, getEventMeta, getEventPlayers, getLegendStandings, getLegendsBySlugs, getPairings, getRoundPlayers, getStandings, isEliminationPhase } from "@/lib/queries";
 
 const PAGE_SIZE = 50;
+const EVENT_MATRIX_MIN = [0, 3, 5, 10, 20] as const;
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/events/[id]">): Promise<Metadata> {
   const { id } = await params;
@@ -72,12 +75,14 @@ export default async function EventPage({ params, searchParams }: PageProps<"/[l
     view === "decks" ? getEventDecks(ev.id, { q, page, pageSize: PAGE_SIZE }) : Promise.resolve({ rows: [], total: 0 }),
     view === "bracket" ? getBracket(ev.id, bracketRounds.map((r) => r.id), seedRound?.id ?? null) : Promise.resolve({ matches: [], seeds: new Map<number, number>() }),
   ]);
-  const metaLegend = view === "meta" ? (metaRows.find((m) => m.legend === sp.legend)?.legend ?? metaRows[0]?.legend ?? null) : null;
+  const metaSub = view === "meta" && sp.sub === "matchups" ? "matchups" : "legends";
+  const metaLegend = view === "meta" && metaSub === "legends" ? (metaRows.find((m) => m.legend === sp.legend)?.legend ?? metaRows[0]?.legend ?? null) : null;
   const [players, followingRows, legendStandings] = await Promise.all([
     view === "players" ? getEventPlayers(ev.id, { ...playerOpts, q, page, pageSize: PAGE_SIZE, order: "name" }) : Promise.resolve([]),
     view === "following" ? getEventPlayers(ev.id, { ...playerOpts, ids: followIds, page: 1, pageSize: 200, order: "rank" }) : Promise.resolve([]),
     metaLegend && seedRound ? getLegendStandings(seedRound.id, metaLegend) : Promise.resolve([]),
   ]);
+  const matchups = metaSub === "matchups" ? await getEventMatchups(ev.id) : null;
   const slugs = new Set<string>(metaRows.map((m) => m.legend));
   standings.rows.forEach((r) => r.s.legend && slugs.add(r.s.legend));
   pairings.rows.forEach((r) => { if (r.l1) slugs.add(r.l1); if (r.l2) slugs.add(r.l2); });
@@ -86,6 +91,7 @@ export default async function EventPage({ params, searchParams }: PageProps<"/[l
   decks.rows.forEach((d) => d.legend && slugs.add(d.legend));
   bracket.matches.forEach((m) => { if (m.l1) slugs.add(m.l1); if (m.l2) slugs.add(m.l2); });
   [...players, ...followingRows].forEach((r) => { if (r.legend) slugs.add(r.legend); if (r.opponentLegend) slugs.add(r.opponentLegend); });
+  matchups?.totals.forEach((_, slug) => slugs.add(slug));
   const legends = await getLegendsBySlugs([...slugs]);
   const legendsLite = Object.fromEntries([...legends].map(([k, l]) => [k, { champion: l.champion, cardId: l.cardId, domains: l.domains }]));
   const standingsUnofficial = round?.status !== "COMPLETE" && view === "standings";
@@ -126,6 +132,16 @@ export default async function EventPage({ params, searchParams }: PageProps<"/[l
   ];
   if (bracketRounds.length > 0) tabs.push(["bracket", t("bracket")]);
   if (topdeck || ev.status === "complete") tabs.push(["decks", t("decks")]);
+  const fieldSize = metaRows.reduce((a, m) => a + m.players, 0);
+  const matrixLegends: MatrixLegend[] = matchups
+    ? [...matchups.totals].flatMap(([slug, tot]) => {
+        const l = legends.get(slug);
+        if (!l) return [];
+        const players = metaRows.find((m) => m.legend === slug)?.players ?? 0;
+        const games = tot.wins + tot.losses;
+        return [{ slug, champion: l.champion, title: l.title, cardId: l.cardId, domains: l.domains, share: fieldSize ? players / fieldSize : 0, winRate: games ? tot.wins / games : null, href: getPathname({ locale: locale as Locale, href: `/legends/${slug}` }) }];
+      })
+    : [];
   const tab = (active: boolean) => `rounded-md px-3 py-1.5 text-sm ${active ? "bg-surface-2 text-text" : "text-muted hover:text-text"}`;
 
   return (
@@ -211,7 +227,31 @@ export default async function EventPage({ params, searchParams }: PageProps<"/[l
         ) : view === "following" ? (
           <FollowingTab eventId={ev.id} rows={followingRows} legends={legends} followCount={followIds.length} roundLabels={Object.fromEntries(ev.rounds.map((r) => [r.id, roundLabel(r)]))} />
         ) : view === "meta" ? (
-          <MetaTab eventId={ev.id} metaRows={metaRows} legends={legends} selected={metaLegend} standings={legendStandings} f={f} unofficial={seedRound?.status !== "COMPLETE"} />
+          <>
+            <div className="mt-4 inline-flex rounded-lg border border-border p-0.5 text-sm" role="group" aria-label={t("metaTab")}>
+              {(["legends", "matchups"] as const).map((sub) => (
+                <Link
+                  key={sub}
+                  href={{ pathname: `/events/${ev.id}`, query: sub === "legends" ? { view: "meta" } : { view: "meta", sub } }}
+                  scroll={false}
+                  aria-current={metaSub === sub ? "page" : undefined}
+                  className={`rounded-md px-3 py-1 ${metaSub === sub ? "bg-surface-2 text-text" : "text-muted hover:text-text"}`}
+                >
+                  {sub === "legends" ? t("metaByLegend") : t("metaMatchups")}
+                </Link>
+              ))}
+            </div>
+            {metaSub === "legends" ? (
+              <MetaTab eventId={ev.id} metaRows={metaRows} legends={legends} selected={metaLegend} standings={legendStandings} f={f} unofficial={seedRound?.status !== "COMPLETE"} />
+            ) : matrixLegends.length < 2 ? (
+              <p className="mt-6 text-muted">{t("noMatchups")}</p>
+            ) : (
+              <>
+                <p className="mt-3 text-sm text-muted">{t("matchupsLead")}</p>
+                <MatchupMatrix legends={matrixLegends} cells={matchups?.cells ?? {}} locale={locale} defaultMin={3} minOptions={EVENT_MATRIX_MIN} />
+              </>
+            )}
+          </>
         ) : view === "bracket" ? (
           <Bracket rounds={bracketRounds} matches={bracket.matches} seeds={bracket.seeds} legends={legends} />
         ) : view === "decks" ? (

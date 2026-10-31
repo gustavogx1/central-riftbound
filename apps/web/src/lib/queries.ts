@@ -803,3 +803,34 @@ export async function getLegendStandings(roundId: number, legend: string) {
     .orderBy(asc(schema.standing.rank))
     .limit(200);
 }
+
+/**
+ * Matchups de um evento só, com a mesma regra da matriz geral: sem byes, empates nem espelhos.
+ * Conta também resultados já reportados da rodada em andamento.
+ */
+export async function getEventMatchups(eventId: number) {
+  const db = getDb();
+  if (!db) return { cells: {} as Record<string, [number, number]>, totals: new Map<string, { wins: number; losses: number }>() };
+  const rows = (await db.execute(sql`
+    with sides as (
+      select m.legend1 as legend, m.legend2 as opp, m.winner_id = m.player1_id as won from match m
+      where m.event_id = ${eventId} and not m.is_bye and not m.is_draw and m.winner_id is not null and m.player2_id is not null
+      union all
+      select m.legend2, m.legend1, m.winner_id = m.player2_id from match m
+      where m.event_id = ${eventId} and not m.is_bye and not m.is_draw and m.winner_id is not null and m.player2_id is not null
+    )
+    select legend, opp, count(*) filter (where won)::int as wins, count(*) filter (where not won)::int as losses
+    from sides where legend is not null and opp is not null and legend <> opp
+    group by legend, opp
+  `)) as unknown as { legend: string; opp: string; wins: number; losses: number }[];
+  const cells: Record<string, [number, number]> = {};
+  const totals = new Map<string, { wins: number; losses: number }>();
+  for (const r of rows) {
+    cells[`${r.legend}|${r.opp}`] = [r.wins, r.losses];
+    const t = totals.get(r.legend) ?? { wins: 0, losses: 0 };
+    t.wins += r.wins;
+    t.losses += r.losses;
+    totals.set(r.legend, t);
+  }
+  return { cells, totals };
+}
