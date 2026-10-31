@@ -296,7 +296,11 @@
     "bestFinish": "best finish #{n}",
     "ofField": "of the field",
     "metaProvisional": "Standings for the round in progress are provisional and change as results come in.",
-    "metaTab": "Meta"
+    "metaTab": "Meta",
+    "metaByLegend": "By legend",
+    "metaMatchups": "Matchups",
+    "noMatchups": "No matches between different legends recorded at this event yet.",
+    "matchupsLead": "Win rate of the row legend against the column legend, counting only this event's matches (no byes, draws or mirrors). With few matches per cell, treat the numbers as a hint, not a verdict."
   },
   "Cards": {
     "title": "Cards",

@@ -296,7 +296,11 @@
     "bestFinish": "melhor posição {n}º",
     "ofField": "do campo",
     "metaProvisional": "A classificação da rodada em andamento é provisória e muda conforme os resultados chegam.",
-    "metaTab": "Meta"
+    "metaTab": "Meta",
+    "metaByLegend": "Por lenda",
+    "metaMatchups": "Matchups",
+    "noMatchups": "Ainda não há partidas entre lendas diferentes registradas neste evento.",
+    "matchupsLead": "Win rate da lenda da linha contra a lenda da coluna, contando só as partidas deste evento (sem byes, empates nem espelhos). Com poucas partidas por célula, use os números como pista, não como veredito."
   },
   "Cards": {
     "title": "Cartas",
