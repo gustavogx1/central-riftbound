@@ -142,7 +142,15 @@
     "matrixSelectAll": "Marcar todas",
     "matrixClear": "Limpar",
     "matrixTooFew": "Escolha pelo menos duas lendas para ver a matriz.",
-    "matrixCell": "{row} x {col}: {wr} ({n, plural, one {# partida} other {# partidas}})"
+    "matrixCell": "{row} x {col}: {wr} ({n, plural, one {# partida} other {# partidas}})",
+    "h2hTitle": "Confronto direto",
+    "h2hHint": "Escolha duas lendas ou clique numa célula da matriz.",
+    "h2hLegendA": "Primeira lenda",
+    "h2hLegendB": "Segunda lenda",
+    "h2hSwap": "Trocar lados",
+    "h2hWins": "{n, plural, one {# vitória} other {# vitórias}}",
+    "h2hGames": "{n, plural, one {# partida} other {# partidas}}",
+    "h2hNone": "Ainda não há partidas entre essas duas lendas aqui."
   },
   "Methodology": {
     "title": "Como calculamos",
