@@ -95,6 +95,12 @@ export const event = pgTable(
     timerRunning: boolean("timer_running").notNull().default(false),
     plannedRounds: integer("planned_rounds"),
     topCutSize: integer("top_cut_size"),
+    /** Detalhes do cabeçalho, como a UVS mostra (migração 0008). */
+    format: text("format"),
+    roundMinutes: integer("round_minutes"),
+    /** Vitórias para levar a partida: 2 = melhor de 3. */
+    gameWins: integer("game_wins"),
+    organizer: text("organizer"),
     fetchedAt: timestamp("fetched_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [index("event_starts_idx").on(t.startsAt)],

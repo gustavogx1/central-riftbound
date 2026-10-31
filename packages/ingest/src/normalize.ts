@@ -58,6 +58,10 @@ export function eventRow(e: UvsEvent, kind: EventKind, metagame: string | null) 
     timerRunning: e.timer_is_running ?? false,
     plannedRounds: e.number_of_rounds ?? null,
     topCutSize: e.top_cut_size ?? null,
+    format: e.gameplay_format?.name ?? null,
+    roundMinutes: e.settings?.round_duration_in_minutes ?? null,
+    gameWins: e.settings?.maximum_number_of_game_wins_per_match ?? null,
+    organizer: e.store?.name ?? null,
     fetchedAt: new Date(),
   };
 }

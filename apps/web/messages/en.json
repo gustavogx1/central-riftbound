@@ -216,7 +216,10 @@
     "side": "Side event",
     "community": "Community",
     "live": "Live",
-    "showdown": "Showdown Series"
+    "showdown": "Showdown Series",
+    "statusUpcoming": "Upcoming",
+    "statusInProgress": "In progress",
+    "statusComplete": "Finished"
   },
   "Event": {
     "standings": "Standings",
@@ -261,7 +264,19 @@
     "loadingMatches": "Loading matches…",
     "matchesError": "Couldn't load the matches. Try again.",
     "noMatches": "No matches recorded.",
-    "expandHint": "Click a player to see all their matches."
+    "expandHint": "Click a player to see all their matches.",
+    "status": "Status",
+    "players": "Players",
+    "format": "Format",
+    "roundLength": "Round length",
+    "minutes": "{n} min",
+    "matchFormat": "Matches",
+    "bestOfN": "Best of {n}",
+    "organizedBy": "Organized by {name}",
+    "yourTime": "{time} your time",
+    "venueNow": "{time} at the venue now",
+    "viewOnUvs": "View on UVS event locator",
+    "info": "Event details"
   },
   "Cards": {
     "title": "Cards",

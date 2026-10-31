@@ -87,7 +87,9 @@ export async function ingestEvent(db: Db, client: UvsClient, uvsEventId: number,
       target: schema.event.id,
       set: { name: ex("name"), kind: ex("kind"), startsAt: ex("starts_at"), playerCount: ex("player_count"), status: ex("status"),
         timerEndsAt: ex("timer_ends_at"), timerPausedAt: ex("timer_paused_at"), timerRunning: ex("timer_running"),
-        plannedRounds: ex("planned_rounds"), topCutSize: ex("top_cut_size"), fetchedAt: ex("fetched_at") },
+        plannedRounds: ex("planned_rounds"), topCutSize: ex("top_cut_size"),
+        address: ex("address"), timezone: ex("timezone"), format: ex("format"), roundMinutes: ex("round_minutes"), gameWins: ex("game_wins"), organizer: ex("organizer"),
+        fetchedAt: ex("fetched_at") },
     });
 
   const existing = new Map(

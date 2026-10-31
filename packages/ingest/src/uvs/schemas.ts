@@ -23,6 +23,15 @@ export const uvsEvent = z.object({
   timer_is_running: z.boolean().nullable().optional(),
   number_of_rounds: z.number().nullable().optional(),
   top_cut_size: z.number().nullable().optional(),
+  gameplay_format: z.object({ name: z.string().nullable().optional() }).nullable().optional(),
+  settings: z
+    .object({
+      round_duration_in_minutes: z.number().nullable().optional(),
+      maximum_number_of_game_wins_per_match: z.number().nullable().optional(),
+    })
+    .nullable()
+    .optional(),
+  store: z.object({ name: z.string().nullable().optional() }).nullable().optional(),
   tournament_phases: z.array(
     z.object({
       id: z.number(),

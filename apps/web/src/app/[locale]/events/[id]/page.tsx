@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Bracket } from "@/components/Bracket";
+import { EventClock } from "@/components/EventClock";
 import { CrownIcon } from "@/components/Honors";
 import { LegendAvatar } from "@/components/LegendAvatar";
 import { LiveRefresher } from "@/components/live/LiveRefresher";
@@ -11,7 +12,7 @@ import { Pagination } from "@/components/Pagination";
 import { StandingRow } from "@/components/StandingRow";
 import { Link } from "@/i18n/navigation";
 import { getEventDecks, getTopdeckLink, topdeckDeckUrl, topdeckEventUrl } from "@/lib/event-decks";
-import { eventTag } from "@/lib/event-tag";
+import { eventStatusKey, eventTag, venueDateTime } from "@/lib/event-tag";
 import { makeFormat } from "@/lib/format";
 import { getBracket, getEvent, getEventBestOf, getEventMeta, getLegendsBySlugs, getPairings, getRoundPlayers, getStandings, isEliminationPhase, type LegendInfo } from "@/lib/queries";
 
@@ -105,6 +106,15 @@ export default async function EventPage({ params, searchParams }: PageProps<"/[l
       </span>
     );
   };
+  const venueWhen = ev.timezone ? venueDateTime(locale, ev.startsAt, ev.timezone) : null;
+  const statusKey = eventStatusKey(ev.status);
+  const facts: [string, string][] = [
+    [t("status"), statusKey ? te(statusKey) : ev.status],
+    [t("players"), ev.playerCount > 0 ? f.num(ev.playerCount) : "—"],
+  ];
+  if (ev.format) facts.push([t("format"), ev.format]);
+  if (ev.roundMinutes) facts.push([t("roundLength"), t("minutes", { n: ev.roundMinutes })]);
+  if (ev.gameWins) facts.push([t("matchFormat"), t("bestOfN", { n: ev.gameWins * 2 - 1 })]);
   const tab = (active: boolean) => `rounded-md px-3 py-1.5 text-sm ${active ? "bg-surface-2 text-text" : "text-muted hover:text-text"}`;
 
   return (
@@ -112,13 +122,46 @@ export default async function EventPage({ params, searchParams }: PageProps<"/[l
       <p className="text-sm text-muted">
         <Link href="/events" className="hover:text-text">{te("title")}</Link> / {f.date(ev.startsAt)}
       </p>
-      <h1 className="mt-2 font-display text-3xl font-bold">{ev.name}</h1>
-      <p className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted">
-        <span>{te(eventTag(ev.kind, ev.name))}</span>
-        {ev.metagame && <span>{ts(ev.metagame as "all")}</span>}
-        <span>{f.num(ev.playerCount)} {tc("players").toLowerCase()}</span>
-        {ev.address && <span>{ev.address}</span>}
-      </p>
+      <header className="mt-3 rounded-xl border border-border bg-surface" aria-label={t("info")}>
+        <div className="flex flex-col gap-x-6 gap-y-3 p-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="min-w-0 flex-1">
+            <h1 className="font-display text-2xl font-bold md:text-3xl">{ev.name}</h1>
+            {ev.address && <p className="mt-1 text-sm text-muted">{ev.address}</p>}
+            {ev.organizer && <p className="mt-0.5 text-sm text-muted">{t("organizedBy", { name: ev.organizer })}</p>}
+            <p className="mt-2 flex flex-wrap gap-2 text-xs text-muted">
+              <span className="rounded bg-surface-2 px-1.5 py-px">{te(eventTag(ev.kind, ev.name))}</span>
+              {ev.metagame && <span className="rounded bg-surface-2 px-1.5 py-px">{ts(ev.metagame as "all")}</span>}
+            </p>
+          </div>
+          <div className="shrink-0 text-sm sm:text-right">
+            <p className="font-semibold tabular-nums">{venueWhen ?? f.date(ev.startsAt)}</p>
+            {venueWhen && ev.timezone && (
+              <p className="mt-0.5 text-xs tabular-nums text-muted">
+                <EventClock startsAt={ev.startsAt.toISOString()} timezone={ev.timezone} showNow={ev.status !== "complete"} />
+              </p>
+            )}
+          </div>
+        </div>
+        <dl className="grid grid-cols-2 gap-x-6 gap-y-3 border-t border-border p-4 text-sm sm:grid-cols-3 lg:grid-cols-5">
+          {facts.map(([label, value]) => (
+            <div key={label} className="min-w-0">
+              <dt className="text-xs text-muted">{label}</dt>
+              <dd className="mt-0.5 truncate font-medium" title={value}>{value}</dd>
+            </div>
+          ))}
+        </dl>
+        {ev.id > 0 && (
+          <a
+            href={`https://locator.riftbound.uvsgames.com/events/${ev.id}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-between border-t border-border px-4 py-2.5 text-sm text-muted hover:text-text"
+          >
+            <span>{t("viewOnUvs")}</span>
+            <span aria-hidden>↗</span>
+          </a>
+        )}
+      </header>
 
       {isLive && (
         <section className="mt-6 grid gap-4" aria-label={tl("badge")}>

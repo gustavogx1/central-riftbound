@@ -1,5 +1,5 @@
 import "server-only";
-import { and, asc, desc, eq, ilike, inArray, or, sql, type SQL } from "drizzle-orm";
+import { and, asc, desc, eq, getTableColumns, ilike, inArray, or, sql, type SQL } from "drizzle-orm";
 import { bestOfByLegend, MIN_BEST_OF_PILOTS } from "@cr/core";
 import { schema } from "@cr/db";
 import type { PoolCard } from "@cr/core";
@@ -142,10 +142,41 @@ export async function getEvents() {
   }[];
 }
 
+/** Colunas da migração 0008: lidas à parte, para a página não cair antes de a migração rodar. */
+const DETAIL_COLUMNS = new Set(["format", "roundMinutes", "gameWins", "organizer"]);
+const baseEventColumns = Object.fromEntries(Object.entries(getTableColumns(schema.event)).filter(([k]) => !DETAIL_COLUMNS.has(k))) as Omit<
+  ReturnType<typeof getTableColumns<typeof schema.event>>,
+  "format" | "roundMinutes" | "gameWins" | "organizer"
+>;
+
+export interface EventDetails {
+  format: string | null;
+  roundMinutes: number | null;
+  gameWins: number | null;
+  organizer: string | null;
+}
+
+async function getEventDetails(id: number): Promise<EventDetails> {
+  const empty: EventDetails = { format: null, roundMinutes: null, gameWins: null, organizer: null };
+  const db = getDb();
+  if (!db) return empty;
+  try {
+    const [row] = await db
+      .select({ format: schema.event.format, roundMinutes: schema.event.roundMinutes, gameWins: schema.event.gameWins, organizer: schema.event.organizer })
+      .from(schema.event)
+      .where(eq(schema.event.id, id));
+    return row ?? empty;
+  } catch (err) {
+    // 42703 = coluna não existe (migração 0008 ainda não rodou em produção).
+    for (let e = err as { code?: string; cause?: unknown } | undefined; e; e = e.cause as typeof e) if (e.code === "42703") return empty;
+    throw err;
+  }
+}
+
 export async function getEvent(id: number) {
   const db = getDb();
   if (!db) return null;
-  const [ev] = await db.select().from(schema.event).where(eq(schema.event.id, id));
+  const [[ev], details] = await Promise.all([db.select(baseEventColumns).from(schema.event).where(eq(schema.event.id, id)), getEventDetails(id)]);
   if (!ev) return null;
   const rounds = await db.select().from(schema.eventRound).where(eq(schema.eventRound.eventId, id)).orderBy(asc(schema.eventRound.phaseOrder), asc(schema.eventRound.roundNumber));
   const withStandings = await db.selectDistinct({ roundId: schema.standing.roundId }).from(schema.standing).where(eq(schema.standing.eventId, id));
@@ -157,6 +188,7 @@ export async function getEvent(id: number) {
     .where(eq(schema.trackedEvent.uvsEventId, id));
   return {
     ...ev,
+    ...details,
     rounds,
     standingRounds: rounds.filter((r) => standingIds.has(r.id)),
     live: { on: live?.live ?? false, version: live?.version ?? 0, changedAt: live?.changedAt ?? null, checkedAt: live?.checkedAt ?? null },
