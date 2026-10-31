@@ -712,3 +712,94 @@ export async function getCardByCode(code: string) {
   const base = prints.find((p) => p.id === card.id) ?? prints[0]!;
   return { card, prints, base, legendSlug: legend?.slug ?? null };
 }
+
+export interface EventPlayerRow {
+  playerId: number;
+  name: string;
+  legend: string | null;
+  wins: number;
+  losses: number;
+  draws: number;
+  rank: number | null;
+  /** Mesa, adversário e resultado na rodada mais recente (para quem acompanha ao vivo). */
+  roundId: number | null;
+  table: number | null;
+  isBye: boolean;
+  result: "win" | "loss" | "draw" | null;
+  opponentId: number | null;
+  opponent: string | null;
+  opponentLegend: string | null;
+  total: number;
+}
+
+/**
+ * Todos os jogadores do evento: lenda, campanha somando todas as rodadas, posição na última
+ * classificação publicada e a partida da rodada mais recente. Filtra por nome ou por ids
+ * (aba "Seguindo"); jogadores ocultos ficam de fora.
+ */
+export async function getEventPlayers(
+  eventId: number,
+  opts: { live: boolean; standingRoundId: number | null; q?: string; ids?: number[]; page: number; pageSize: number; order: "name" | "rank" },
+): Promise<EventPlayerRow[]> {
+  const db = getDb();
+  if (!db) return [];
+  if (opts.ids && opts.ids.length === 0) return [];
+  const q = opts.q ? `%${opts.q}%` : null;
+  const filters: SQL[] = [];
+  if (q) filters.push(sql`(p.name ilike ${q} or p.nick ilike ${q})`);
+  if (opts.ids) filters.push(sql`p.id in (${sql.join(opts.ids.map((id) => sql`${id}`), sql`, `)})`);
+  const where = filters.length ? sql`and ${sql.join(filters, sql` and `)}` : sql``;
+  const order = opts.order === "rank" ? sql`st.rank nulls last, lower(coalesce(p.nick, p.name))` : sql`lower(coalesce(p.nick, p.name))`;
+  const rows = (await db.execute(sql`
+    with sides as (
+      select m.round_id, m.table_number, m.status, m.is_bye, m.is_draw, m.winner_id, m.player1_id as me, m.player2_id as opp, m.legend1 as legend, m.legend2 as opp_legend
+      from match m where m.event_id = ${eventId} and m.player1_id is not null
+      union all
+      select m.round_id, m.table_number, m.status, m.is_bye, m.is_draw, m.winner_id, m.player2_id, m.player1_id, m.legend2, m.legend1
+      from match m where m.event_id = ${eventId} and m.player2_id is not null
+    ), agg as (
+      select me,
+        count(*) filter (where (status = 'COMPLETE' or winner_id is not null) and not is_draw and winner_id = me)::int as wins,
+        count(*) filter (where (status = 'COMPLETE' or winner_id is not null) and not is_draw and not is_bye and winner_id is distinct from me)::int as losses,
+        count(*) filter (where is_draw)::int as draws,
+        mode() within group (order by legend) as legend
+      from sides group by me
+    ), cur as (
+      -- Rodada mais recente que já tem pairings (a UVS cria as rodadas seguintes vazias).
+      select s.* from sides s where ${opts.live} and s.round_id = (
+        select r.id from event_round r where r.event_id = ${eventId} and exists (select 1 from match m where m.round_id = r.id)
+        order by r.phase_order desc, r.round_number desc limit 1
+      )
+    )
+    select p.id as "playerId", coalesce(p.nick, p.name) as name, coalesce(st.legend, a.legend) as legend, a.wins, a.losses, a.draws, st.rank,
+      c.round_id as "roundId", c.table_number as "table", coalesce(c.is_bye, false) as "isBye", c.is_draw as "isDraw", c.winner_id as "winnerId", c.status,
+      c.opp as "opponentId", case when o.hidden then null else coalesce(o.nick, o.name) end as opponent, c.opp_legend as "opponentLegend",
+      count(*) over ()::int as total
+    from agg a
+    join player p on p.id = a.me and not p.hidden
+    left join standing st on st.round_id = ${opts.standingRoundId ?? -1} and st.player_id = a.me and st.event_id = ${eventId}
+    left join cur c on c.me = a.me
+    left join player o on o.id = c.opp
+    where true ${where}
+    order by ${order}
+    limit ${opts.pageSize} offset ${(opts.page - 1) * opts.pageSize}
+  `)) as unknown as (Omit<EventPlayerRow, "result"> & { isDraw: boolean | null; winnerId: number | null; status: string | null })[];
+  return rows.map(({ isDraw, winnerId, status, ...r }) => {
+    const reported = status === "COMPLETE" || winnerId !== null || Boolean(isDraw);
+    const result = r.isBye ? "win" : status === null || !reported ? null : isDraw ? "draw" : winnerId === r.playerId ? "win" : "loss";
+    return { ...r, result };
+  });
+}
+
+/** Classificação filtrada por lenda (aba Meta). */
+export async function getLegendStandings(roundId: number, legend: string) {
+  const db = getDb();
+  if (!db) return [];
+  return db
+    .select({ s: schema.standing, name: shownName, hidden: schema.player.hidden })
+    .from(schema.standing)
+    .innerJoin(schema.player, eq(schema.player.id, schema.standing.playerId))
+    .where(and(eq(schema.standing.roundId, roundId), eq(schema.standing.legend, legend)))
+    .orderBy(asc(schema.standing.rank))
+    .limit(200);
+}
