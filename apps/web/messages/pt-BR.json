@@ -216,7 +216,10 @@
     "side": "Evento paralelo",
     "community": "Comunidade",
     "live": "Ao vivo",
-    "showdown": "Showdown Series"
+    "showdown": "Showdown Series",
+    "statusUpcoming": "Em breve",
+    "statusInProgress": "Em andamento",
+    "statusComplete": "Encerrado"
   },
   "Event": {
     "standings": "Classificação",
@@ -261,7 +264,19 @@
     "loadingMatches": "Carregando partidas…",
     "matchesError": "Não deu para carregar as partidas. Tente de novo.",
     "noMatches": "Nenhuma partida registrada.",
-    "expandHint": "Clique num jogador para ver todas as partidas dele."
+    "expandHint": "Clique num jogador para ver todas as partidas dele.",
+    "status": "Status",
+    "players": "Jogadores",
+    "format": "Formato",
+    "roundLength": "Duração da rodada",
+    "minutes": "{n} min",
+    "matchFormat": "Partidas",
+    "bestOfN": "Melhor de {n}",
+    "organizedBy": "Organizado por {name}",
+    "yourTime": "{time} no seu horário",
+    "venueNow": "agora são {time} no local",
+    "viewOnUvs": "Ver no localizador de eventos da UVS",
+    "info": "Detalhes do evento"
   },
   "Cards": {
     "title": "Cartas",
