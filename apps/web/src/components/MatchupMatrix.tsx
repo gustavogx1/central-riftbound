@@ -43,6 +43,7 @@ export function MatchupMatrix({ legends, cells, locale, defaultMin, minOptions =
   const [picking, setPicking] = useState(false);
   const [query, setQuery] = useState("");
   const [hover, setHover] = useState<{ r: string; c: string } | null>(null);
+  const [duel, setDuel] = useState<[string, string] | null>(null);
 
   const byShare = useMemo(() => [...legends].sort((a, b) => b.share - a.share), [legends]);
   const rows = useMemo(() => {
@@ -66,6 +67,8 @@ export function MatchupMatrix({ legends, cells, locale, defaultMin, minOptions =
     });
   const activePreset = selected.size === legends.length ? "all" : TOP_PRESETS.find((n) => selected.size === Math.min(n, legends.length) && byShare.slice(0, n).every((l) => selected.has(l.slug)));
 
+  // Confronto direto: por padrão, as duas lendas mais jogadas.
+  const pair: [string, string] | null = duel ?? (byShare.length >= 2 ? [byShare[0]!.slug, byShare[1]!.slug] : null);
   const pill = (active: boolean) =>
     `rounded-full border px-3 py-1 text-xs transition ${active ? "border-accent bg-surface-2 text-text" : "border-border text-muted hover:bg-surface hover:text-text"}`;
   const q = query.trim().toLowerCase();
@@ -109,6 +112,8 @@ export function MatchupMatrix({ legends, cells, locale, defaultMin, minOptions =
           <button type="button" className={pill(show === "matches")} onClick={() => setShow("matches")}>{t("matrixShowMatches")}</button>
         </div>
       </div>
+
+      {pair && <HeadToHead legends={byShare} pair={pair} cells={cells} locale={locale} onChange={setDuel} />}
 
       {picking && (
         <div className="mt-3 rounded-xl border border-border bg-surface p-3">
@@ -168,7 +173,7 @@ export function MatchupMatrix({ legends, cells, locale, defaultMin, minOptions =
                   </th>
                   {rows.map((c) => {
                     const cross = hover !== null && (hover.r === r.slug || hover.c === c.slug);
-                    const base = `min-w-11 border-l border-t border-border px-2 py-1.5 text-center tabular-nums ${cross ? "outline outline-1 -outline-offset-1 outline-accent/40" : ""}`;
+                    const base = `min-w-11 cursor-pointer border-l border-t border-border px-2 py-1.5 text-center tabular-nums ${cross ? "outline outline-1 -outline-offset-1 outline-accent/40" : ""}`;
                     if (r.slug === c.slug) return <td key={c.slug} className={`${base} text-muted`}>—</td>;
                     const [w, l] = cells[`${r.slug}|${c.slug}`] ?? [0, 0];
                     const n = w + l;
@@ -185,6 +190,7 @@ export function MatchupMatrix({ legends, cells, locale, defaultMin, minOptions =
                         style={{ background: bg, opacity: low && !hidden ? 0.45 : 1 }}
                         title={t("matrixCell", { row: r.champion, col: c.champion, wr: f.pct(wr), n })}
                         onMouseEnter={() => setHover({ r: r.slug, c: c.slug })}
+                        onClick={() => setDuel([r.slug, c.slug])}
                       >
                         {text}
                       </td>
@@ -197,5 +203,73 @@ export function MatchupMatrix({ legends, cells, locale, defaultMin, minOptions =
         </div>
       )}
     </div>
+  );
+}
+
+/** Duas lendas escolhidas lado a lado: vitórias de cada uma no confronto e win rate. */
+function HeadToHead({ legends, pair, cells, locale, onChange }: {
+  legends: MatrixLegend[];
+  pair: [string, string];
+  cells: Record<string, [number, number]>;
+  locale: string;
+  onChange: (pair: [string, string]) => void;
+}) {
+  const t = useTranslations("Meta");
+  const f = makeFormat(locale);
+  const [a, b] = pair;
+  const la = legends.find((l) => l.slug === a);
+  const lb = legends.find((l) => l.slug === b);
+  const [wa, wb] = cells[`${a}|${b}`] ?? [0, 0];
+  const n = wa + wb;
+  const wr = n ? wa / n : null;
+  const select = (side: 0 | 1, value: string) => onChange(side === 0 ? [value, b] : [a, value]);
+  const picker = (side: 0 | 1, value: string) => (
+    <select
+      value={value}
+      onChange={(e) => select(side, e.target.value)}
+      aria-label={side === 0 ? t("h2hLegendA") : t("h2hLegendB")}
+      className="w-full min-w-0 rounded-md border border-border bg-bg px-2 py-1 text-sm"
+    >
+      {legends.map((l) => (
+        <option key={l.slug} value={l.slug} disabled={l.slug === (side === 0 ? b : a)}>{l.champion}, {l.title}</option>
+      ))}
+    </select>
+  );
+  const side = (l: MatrixLegend | undefined, wins: number, rate: number | null, align: "left" | "right") => (
+    <div className={`flex min-w-0 items-center gap-3 ${align === "right" ? "flex-row-reverse text-right" : ""}`}>
+      {l && <LegendAvatar cardId={l.cardId} champion={l.champion} domains={l.domains} size={44} />}
+      <div className="min-w-0">
+        {l && <a href={l.href} className="block truncate font-semibold hover:text-accent">{l.champion}</a>}
+        <span className="block font-display text-2xl font-bold tabular-nums">{rate === null ? "—" : f.pct(rate, 0)}</span>
+        <span className="block text-xs text-muted">{t("h2hWins", { n: wins })}</span>
+      </div>
+    </div>
+  );
+
+  return (
+    <section className="mt-4 rounded-xl border border-border bg-surface p-4" aria-label={t("h2hTitle")}>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h3 className="font-display text-lg font-semibold">{t("h2hTitle")}</h3>
+        <span className="text-xs text-muted">{t("h2hHint")}</span>
+      </div>
+      <div className="mt-3 grid grid-cols-[1fr_auto_1fr] items-center gap-2">
+        {picker(0, a)}
+        <button type="button" onClick={() => onChange([b, a])} className="rounded-md border border-border px-2 py-1 text-sm text-muted hover:text-text" aria-label={t("h2hSwap")} title={t("h2hSwap")}>⇄</button>
+        {picker(1, b)}
+      </div>
+      <div className="mt-4 grid grid-cols-[1fr_auto_1fr] items-center gap-3">
+        {side(la, wa, wr, "left")}
+        <span className="text-center text-xs text-muted">{t("h2hGames", { n })}</span>
+        {side(lb, wb, wr === null ? null : 1 - wr, "right")}
+      </div>
+      {n > 0 ? (
+        <div className="mt-3 flex h-2 overflow-hidden rounded-full bg-surface-2" aria-hidden>
+          <span className="bg-accent" style={{ width: `${(wa / n) * 100}%` }} />
+          <span className="bg-accent-2" style={{ width: `${(wb / n) * 100}%` }} />
+        </div>
+      ) : (
+        <p className="mt-3 text-sm text-muted">{t("h2hNone")}</p>
+      )}
+    </section>
   );
 }

@@ -142,7 +142,15 @@
     "matrixSelectAll": "Select all",
     "matrixClear": "Clear",
     "matrixTooFew": "Pick at least two legends to see the matrix.",
-    "matrixCell": "{row} vs {col}: {wr} ({n, plural, one {# match} other {# matches}})"
+    "matrixCell": "{row} vs {col}: {wr} ({n, plural, one {# match} other {# matches}})",
+    "h2hTitle": "Head to head",
+    "h2hHint": "Pick two legends, or click a cell in the matrix.",
+    "h2hLegendA": "First legend",
+    "h2hLegendB": "Second legend",
+    "h2hSwap": "Swap sides",
+    "h2hWins": "{n, plural, one {# win} other {# wins}}",
+    "h2hGames": "{n, plural, one {# match} other {# matches}}",
+    "h2hNone": "No matches between these two legends here yet."
   },
   "Methodology": {
     "title": "How we calculate",
