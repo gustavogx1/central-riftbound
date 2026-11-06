@@ -143,6 +143,7 @@
     "matrixClear": "Clear",
     "matrixTooFew": "Pick at least two legends to see the matrix.",
     "matrixCell": "{row} vs {col}: {wr} ({n, plural, one {# match} other {# matches}})",
+    "matrixRowWinRate": "Overall win rate: {wr}",
     "h2hTitle": "Head to head",
     "h2hHint": "Pick two legends, or click a cell in the matrix.",
     "h2hLegendA": "First legend",

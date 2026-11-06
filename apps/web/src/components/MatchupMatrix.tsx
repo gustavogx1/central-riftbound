@@ -169,7 +169,15 @@ export function MatchupMatrix({ legends, cells, locale, defaultMin, minOptions =
               {rows.map((r) => (
                 <tr key={r.slug}>
                   <th scope="row" className={`sticky left-0 z-10 whitespace-nowrap px-3 py-1.5 text-left font-medium ${hover?.r === r.slug ? "bg-surface-2" : "bg-surface"}`}>
-                    <a href={r.href} className="hover:text-accent">{r.champion}</a>
+                    <span className="flex items-center gap-2">
+                      <span
+                        className={`w-9 shrink-0 text-right text-[11px] font-semibold tabular-nums ${r.winRate === null ? "text-muted" : r.winRate >= 0.5 ? "text-[var(--tier-c)]" : "text-[var(--tier-s)]"}`}
+                        title={t("matrixRowWinRate", { wr: f.pct(r.winRate) })}
+                      >
+                        {r.winRate === null ? "—" : f.pct(r.winRate, 0)}
+                      </span>
+                      <a href={r.href} className="hover:text-accent">{r.champion}</a>
+                    </span>
                   </th>
                   {rows.map((c) => {
                     const cross = hover !== null && (hover.r === r.slug || hover.c === c.slug);
