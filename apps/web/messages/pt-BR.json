@@ -143,6 +143,7 @@
     "matrixClear": "Limpar",
     "matrixTooFew": "Escolha pelo menos duas lendas para ver a matriz.",
     "matrixCell": "{row} x {col}: {wr} ({n, plural, one {# partida} other {# partidas}})",
+    "matrixRowWinRate": "Win rate geral: {wr}",
     "h2hTitle": "Confronto direto",
     "h2hHint": "Escolha duas lendas ou clique numa célula da matriz.",
     "h2hLegendA": "Primeira lenda",
